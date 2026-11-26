@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Utensils } from 'lucide-react';
 import { MealSlotType } from '../types/mealPlanner';
 
@@ -23,6 +23,9 @@ export const RecipeImage: React.FC<RecipeImageProps> = ({
   className = 'w-full h-44',
 }) => {
   const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
   const primarySlot = mealTypes[0] || 'dinner';
   const palette = SLOT_BG[primarySlot];
 

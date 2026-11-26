@@ -293,32 +293,44 @@ const FlexCarousel = ({
   const [active, setActive] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
+  const [restoreTick, setRestoreTick] = useState(0);
 
   const base = BEND_PRESETS[preset] || BEND_PRESETS.liquid;
   const pick = (value, key) => (value === undefined || value === null ? base[key] : value);
 
   const list = items && items.length ? items : DEFAULT_ITEMS;
   const itemsKey = list.map(item => item.src).join('|');
+  itemsRef.current = list;
+  callbacksRef.current = { onChange, onSelect };
+
+  const resolvedLensWidth = pick(lensWidth, 'lensWidth');
+  const resolvedLensHeight = pick(lensHeight, 'lensHeight');
+  const resolvedTilt = pick(tilt, 'tilt');
+  const resolvedRoundness = pick(roundness, 'roundness');
+  const resolvedBend = pick(bend, 'bend');
+  const resolvedReach = pick(reach, 'reach');
+  const resolvedCurl = pick(curl, 'curl');
+  const resolvedDispersion = pick(dispersion, 'dispersion');
+  const resolvedLiquid = pick(liquid, 'liquid');
+  const resolvedFollowCursor = pick(followCursor, 'followCursor');
 
   useEffect(() => {
-    itemsRef.current = list;
-    callbacksRef.current = { onChange, onSelect };
     settingsRef.current = {
       intro,
       cardHeight,
       gap,
       radius,
       fit,
-      lensWidth: pick(lensWidth, 'lensWidth'),
-      lensHeight: pick(lensHeight, 'lensHeight'),
-      tilt: pick(tilt, 'tilt'),
-      roundness: pick(roundness, 'roundness'),
-      bend: pick(bend, 'bend'),
-      reach: pick(reach, 'reach'),
-      curl: pick(curl, 'curl'),
-      dispersion: pick(dispersion, 'dispersion'),
-      liquid: pick(liquid, 'liquid'),
-      followCursor: pick(followCursor, 'followCursor'),
+      lensWidth: resolvedLensWidth,
+      lensHeight: resolvedLensHeight,
+      tilt: resolvedTilt,
+      roundness: resolvedRoundness,
+      bend: resolvedBend,
+      reach: resolvedReach,
+      curl: resolvedCurl,
+      dispersion: resolvedDispersion,
+      liquid: resolvedLiquid,
+      followCursor: resolvedFollowCursor,
       squeeze,
       focusOnClick,
       autoplay,
@@ -326,7 +338,28 @@ const FlexCarousel = ({
       captureWheel
     };
     engineRef.current?.wake();
-  });
+  }, [
+    intro,
+    cardHeight,
+    gap,
+    radius,
+    fit,
+    resolvedLensWidth,
+    resolvedLensHeight,
+    resolvedTilt,
+    resolvedRoundness,
+    resolvedBend,
+    resolvedReach,
+    resolvedCurl,
+    resolvedDispersion,
+    resolvedLiquid,
+    resolvedFollowCursor,
+    squeeze,
+    focusOnClick,
+    autoplay,
+    interval,
+    captureWheel
+  ]);
 
   useEffect(() => {
     engineRef.current?.setItems(itemsRef.current);
@@ -483,7 +516,7 @@ const FlexCarousel = ({
       image.crossOrigin = 'anonymous';
       image.decoding = 'async';
       image.onload = () => {
-        if (!alive || !slots.includes(slot)) return;
+        if (!alive || gl.isContextLost() || !slots.includes(slot)) return;
         texture.image = image;
         texture.update();
         slot.image = [image.naturalWidth || 1, image.naturalHeight || 1];
@@ -693,6 +726,7 @@ const FlexCarousel = ({
 
     let resizePending = false;
     const applyResize = () => {
+      if (gl.isContextLost()) return;
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
       renderer.dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
@@ -709,6 +743,7 @@ const FlexCarousel = ({
 
     const frame = now => {
       raf = 0;
+      if (!alive || document.hidden || gl.isContextLost()) return;
       if (resizePending) {
         resizePending = false;
         applyResize();
@@ -1026,6 +1061,10 @@ const FlexCarousel = ({
     };
 
     const onPointerMove = e => {
+      if (pointer.down && !pointer.touch && (e.buttons & 1) === 0 && e.pointerId === pointer.id) {
+        onPointerUp(e);
+        return;
+      }
       const [x, y] = localPoint(e);
       pointer.x = x;
       pointer.y = y;
@@ -1205,8 +1244,34 @@ const FlexCarousel = ({
     const onBlur = () => {
       hasFocus = false;
     };
+    const onWindowBlur = () => {
+      if (pointer.down) onPointerCancel();
+    };
+    const onWindowPointerUp = e => {
+      if (!pointer.down || e.pointerId !== pointer.id) return;
+      if (!pointer.dragging && e.target instanceof Node && !container.contains(e.target)) {
+        onPointerCancel();
+        return;
+      }
+      onPointerUp(e);
+    };
+    const onWindowPointerCancel = e => {
+      if (pointer.down && e.pointerId === pointer.id) onPointerCancel();
+    };
     const onVisibility = () => {
-      if (!document.hidden) start();
+      if (document.hidden) {
+        if (pointer.down) onPointerCancel();
+      } else {
+        start();
+      }
+    };
+    const onContextLost = e => {
+      e.preventDefault();
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const onContextRestored = () => {
+      if (alive) setRestoreTick(tick => tick + 1);
     };
 
     container.addEventListener('pointerdown', onPointerDown);
@@ -1214,11 +1279,17 @@ const FlexCarousel = ({
     container.addEventListener('pointerup', onPointerUp);
     container.addEventListener('pointerleave', onPointerLeave);
     container.addEventListener('pointercancel', onPointerCancel);
+    container.addEventListener('lostpointercapture', onPointerCancel);
     container.addEventListener('wheel', onWheel, { passive: false });
     container.addEventListener('keydown', onKeyDown);
     container.addEventListener('focus', onFocus);
     container.addEventListener('blur', onBlur);
+    window.addEventListener('pointerup', onWindowPointerUp);
+    window.addEventListener('pointercancel', onWindowPointerCancel);
+    window.addEventListener('blur', onWindowBlur);
     document.addEventListener('visibilitychange', onVisibility);
+    canvas.addEventListener('webglcontextlost', onContextLost);
+    canvas.addEventListener('webglcontextrestored', onContextRestored);
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
@@ -1251,17 +1322,23 @@ const FlexCarousel = ({
       container.removeEventListener('pointerup', onPointerUp);
       container.removeEventListener('pointerleave', onPointerLeave);
       container.removeEventListener('pointercancel', onPointerCancel);
+      container.removeEventListener('lostpointercapture', onPointerCancel);
       container.removeEventListener('wheel', onWheel);
       container.removeEventListener('keydown', onKeyDown);
       container.removeEventListener('focus', onFocus);
       container.removeEventListener('blur', onBlur);
+      window.removeEventListener('pointerup', onWindowPointerUp);
+      window.removeEventListener('pointercancel', onWindowPointerCancel);
+      window.removeEventListener('blur', onWindowBlur);
       document.removeEventListener('visibilitychange', onVisibility);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       slots.forEach(slot => slot.dispose());
       slots = [];
       gl.getExtension('WEBGL_lose_context')?.loseContext();
       if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
     };
-  }, []);
+  }, [restoreTick]);
 
   const current = list[active] || list[0];
   const label = current ? current.title || current.alt || `Image ${active + 1}` : '';

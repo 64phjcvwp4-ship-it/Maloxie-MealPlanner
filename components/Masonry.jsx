@@ -138,6 +138,7 @@ const Masonry = ({
   const springs = useRef(new Map());
   const loaded = useRef(new Set());
   const waiting = useRef(new Set());
+  const waitTimersRef = useRef(new Map());
   const pending = useRef(new Set());
   const engine = useRef({ raf: 0, last: 0, flush: 0 });
   const dragRef = useRef(null);
@@ -145,6 +146,7 @@ const Masonry = ({
   const ghostsRef = useRef(new Map());
   const previousRef = useRef(new Map());
   const boxRef = useRef(null);
+  const boxHandlersRef = useRef({ closeBox: () => {}, stepBox: () => {} });
   const tokenRef = useRef(0);
   const lastShownRef = useRef(null);
   const [width, setWidth] = useState(0);
@@ -379,6 +381,17 @@ const Masonry = ({
     if (!spring || spring.shown) return;
     if (!loaded.current.has(id)) {
       waiting.current.add(id);
+      if (!waitTimersRef.current.has(id)) {
+        waitTimersRef.current.set(
+          id,
+          setTimeout(() => {
+            waitTimersRef.current.delete(id);
+            if (!waiting.current.has(id)) return;
+            loaded.current.add(id);
+            revealRef.current(id);
+          }, 2500)
+        );
+      }
       return;
     }
     waiting.current.delete(id);
@@ -391,6 +404,11 @@ const Masonry = ({
 
   const markLoaded = id => {
     loaded.current.add(id);
+    const timer = waitTimersRef.current.get(id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      waitTimersRef.current.delete(id);
+    }
     const node = nodes.current.get(id);
     node?.querySelector('img')?.setAttribute('data-loaded', '');
     if (waiting.current.has(id)) requestReveal(id);
@@ -463,7 +481,7 @@ const Masonry = ({
     });
     if (root) root.style.height = `${layout.height}px`;
     kick();
-  });
+  }, [layout]);
 
   useEffect(() => {
     if (!layout) return undefined;
@@ -490,20 +508,6 @@ const Masonry = ({
     });
     return () => observer.disconnect();
   }, [layout, revealOnScroll]);
-
-  useEffect(() => {
-    const timers = [];
-    waiting.current.forEach(id => {
-      timers.push(
-        setTimeout(() => {
-          if (!waiting.current.has(id)) return;
-          loaded.current.add(id);
-          revealRef.current(id);
-        }, 2500)
-      );
-    });
-    return () => timers.forEach(clearTimeout);
-  }, [layout]);
 
   useEffect(() => {
     ghosts.forEach(ghost => {
@@ -565,14 +569,6 @@ const Masonry = ({
     };
   }, [layout, parallax]);
 
-  useEffect(() => {
-    const state = engine.current;
-    return () => {
-      cancelAnimationFrame(state.raf);
-      cancelAnimationFrame(state.flush);
-    };
-  }, []);
-
   const setDimmed = activeId => {
     nodes.current.forEach((node, id) => {
       if (activeId && id !== activeId) node.setAttribute('data-dimmed', '');
@@ -605,6 +601,7 @@ const Masonry = ({
     window.removeEventListener('pointermove', moveDrag);
     window.removeEventListener('pointerup', finishDrag);
     window.removeEventListener('pointercancel', finishDrag);
+    window.removeEventListener('blur', finishDrag);
     dragRef.current = null;
     if (!drag?.active) return;
     const spring = springs.current.get(drag.id);
@@ -624,6 +621,10 @@ const Masonry = ({
     const drag = dragRef.current;
     const root = rootRef.current;
     if (!drag || !root || event.pointerId !== drag.pointerId) return;
+    if ((event.buttons & 1) === 0) {
+      finishDrag();
+      return;
+    }
     if (!drag.active) {
       if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 6) return;
       const spring = springs.current.get(drag.id);
@@ -689,7 +690,23 @@ const Masonry = ({
     window.addEventListener('pointermove', moveDrag);
     window.addEventListener('pointerup', finishDrag);
     window.addEventListener('pointercancel', finishDrag);
+    window.addEventListener('blur', finishDrag);
   };
+
+  const finishDragRef = useRef(finishDrag);
+  finishDragRef.current = finishDrag;
+
+  useEffect(() => {
+    const state = engine.current;
+    const waitTimers = waitTimersRef.current;
+    return () => {
+      cancelAnimationFrame(state.raf);
+      cancelAnimationFrame(state.flush);
+      waitTimers.forEach(clearTimeout);
+      waitTimers.clear();
+      finishDragRef.current();
+    };
+  }, []);
 
   const onCardClick = (event, item, index) => {
     if (suppressRef.current) {
@@ -840,16 +857,18 @@ const Masonry = ({
     };
   }, [isOpen]);
 
+  boxHandlersRef.current = { closeBox, stepBox };
+
   useEffect(() => {
-    if (!openId) return undefined;
+    if (!isOpen) return undefined;
     const onKey = event => {
-      if (event.key === 'Escape') closeBox();
-      else if (event.key === 'ArrowRight') stepBox(1);
-      else if (event.key === 'ArrowLeft') stepBox(-1);
+      if (event.key === 'Escape') boxHandlersRef.current.closeBox();
+      else if (event.key === 'ArrowRight') boxHandlersRef.current.stepBox(1);
+      else if (event.key === 'ArrowLeft') boxHandlersRef.current.stepBox(-1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  });
+  }, [isOpen]);
 
   const captionMode = CAPTION_MODES.includes(captions) ? captions : 'hover';
   const mode = settings.hoverEffect;

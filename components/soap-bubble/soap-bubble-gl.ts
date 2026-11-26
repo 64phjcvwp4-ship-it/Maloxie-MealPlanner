@@ -275,6 +275,8 @@ export type SoapBubbleContext = {
   ready: () => boolean;
   /** Frames handed over that the GPU has not finished drawing yet. */
   inFlight: (now: number) => number;
+  /** Register a listener invoked when the underlying WebGL context is restored. */
+  onRestore?: (listener: () => void) => () => void;
 };
 
 let shared: SoapBubbleContext | null | undefined;
@@ -302,10 +304,9 @@ const ownContexts =
   (/iP(hone|ad|od)/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 // WebKit keeps 16 WebGL contexts on a page and fails past that, counting a
-// released context until it is collected. Surfaces take at most 12 of those
-// still alive, leaving the page room for its own; any more share the one
-// context as everywhere else.
-const ownContextLimit = 12;
+// released context until it is collected. Keep own-context use conservative so
+// other WebGL canvases on the page never hit the browser context limit.
+const ownContextLimit = 4;
 const ownContextsInUse = new Map<HTMLCanvasElement, SoapBubbleContext>();
 let ownContextsAlive = 0;
 const ownContextCollected =
@@ -384,126 +385,161 @@ export function createSoapBubbleContext(
   // are built here; nothing asks for the result until both are done. Paced,
   // the surfaces then ask each frame whether it is done rather than wait.
   const parallel = paced || surface ? gl.getExtension('KHR_parallel_shader_compile') : null;
-  const compile = (type: number, source: string) => {
-    const shader = gl.createShader(type)!;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    return shader;
-  };
-  const program = gl.createProgram()!;
-  const vertex = compile(gl.VERTEX_SHADER, soapBubbleVertex);
-  const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.linkProgram(program);
-  // The film table lives on unit 1 for good; backdrops take unit 0.
-  const film = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D, film);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texImage2D(
-    gl.TEXTURE_2D,
-    0,
-    gl.RGBA16F,
-    soapBubbleFilmSize[0],
-    soapBubbleFilmSize[1],
-    0,
-    gl.RGBA,
-    gl.FLOAT,
-    soapBubbleFilmTable(),
-  );
-  // Noise on unit 2.
-  const noise = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE2);
-  gl.bindTexture(gl.TEXTURE_3D, noise);
-  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  for (const wrap of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R])
-    gl.texParameteri(gl.TEXTURE_3D, wrap, gl.REPEAT);
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage3D(
-    gl.TEXTURE_3D,
-    0,
-    gl.R8,
-    soapBubbleNoiseSize,
-    soapBubbleNoiseSize,
-    soapBubbleNoiseSize,
-    0,
-    gl.RED,
-    gl.UNSIGNED_BYTE,
-    noiseVolume(),
-  );
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
-  gl.activeTexture(gl.TEXTURE0);
-
+  const restoreListeners = new Set<() => void>();
+  const fences: { sync: WebGLSync; at: number }[] = [];
   const u = {} as SoapBubbleContext['u'];
+  let program: WebGLProgram | null = null;
   let linked = false;
   let failed = false;
-  const link = () => {
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      const message =
-        [vertex, fragment]
-          .map((shader) =>
-            gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? '' : gl.getShaderInfoLog(shader),
-          )
-          .find(Boolean) || gl.getProgramInfoLog(program);
+  let pendingRestoreSetup = false;
+
+  const noiseData = noiseVolume();
+  const filmData = soapBubbleFilmTable();
+
+  const initResources = () => {
+    linked = false;
+    failed = false;
+    for (const key of uniformNames) u[key] = null;
+    const compile = (type: number, source: string) => {
+      const shader = gl.createShader(type);
+      if (!shader) return null;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      return shader;
+    };
+    const nextProgram = gl.createProgram();
+    const vertex = compile(gl.VERTEX_SHADER, soapBubbleVertex);
+    const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
+    if (!nextProgram || !vertex || !fragment) {
+      failed = true;
+      return;
+    }
+    program = nextProgram;
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+
+    // The film table lives on unit 1 for good; backdrops take unit 0.
+    const film = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, film);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA16F,
+      soapBubbleFilmSize[0],
+      soapBubbleFilmSize[1],
+      0,
+      gl.RGBA,
+      gl.FLOAT,
+      filmData,
+    );
+    // Noise on unit 2.
+    const noise = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_3D, noise);
+    gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    for (const wrap of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R])
+      gl.texParameteri(gl.TEXTURE_3D, wrap, gl.REPEAT);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage3D(
+      gl.TEXTURE_3D,
+      0,
+      gl.R8,
+      soapBubbleNoiseSize,
+      soapBubbleNoiseSize,
+      soapBubbleNoiseSize,
+      0,
+      gl.RED,
+      gl.UNSIGNED_BYTE,
+      noiseData,
+    );
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+    gl.activeTexture(gl.TEXTURE0);
+
+    const link = () => {
+      if (!program || gl.isContextLost()) return;
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        const message =
+          [vertex, fragment]
+            .map((shader) =>
+              gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? '' : gl.getShaderInfoLog(shader),
+            )
+            .find(Boolean) || gl.getProgramInfoLog(program);
+        gl.deleteShader(vertex);
+        gl.deleteShader(fragment);
+        gl.deleteProgram(program);
+        program = null;
+        throw new Error(message || 'Soap Bubble program failed to link.');
+      }
       gl.deleteShader(vertex);
       gl.deleteShader(fragment);
-      gl.deleteProgram(program);
-      throw new Error(message || 'Soap Bubble program failed to link.');
-    }
-    gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
-    gl.useProgram(program);
-    for (const name of uniformNames) u[name] = gl.getUniformLocation(program, name);
-    gl.uniform1i(u.uBackdrop, 0);
-    gl.uniform1i(gl.getUniformLocation(program, 'uFilmTable'), 1);
-    gl.uniform1i(gl.getUniformLocation(program, 'uNoise'), 2);
-    gl.uniform1i(gl.getUniformLocation(program, 'uCovered'), 3);
-    linked = true;
+      gl.useProgram(program);
+      for (const name of uniformNames) u[name] = gl.getUniformLocation(program, name);
+      gl.uniform1i(u.uBackdrop, 0);
+      gl.uniform1i(gl.getUniformLocation(program, 'uFilmTable'), 1);
+      gl.uniform1i(gl.getUniformLocation(program, 'uNoise'), 2);
+      gl.uniform1i(gl.getUniformLocation(program, 'uCovered'), 3);
+      linked = true;
+    };
+
+    linkRef = link;
+    if (!parallel) link();
+
+    const quad = gl.createVertexArray();
+    gl.bindVertexArray(quad);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+    const emptyTex = createBackdropTexture(gl);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gl.generateMipmap(gl.TEXTURE_2D);
+    context.emptyTexture = emptyTex;
+    context.set = uniformSetters(gl);
   };
-  if (!parallel) link();
 
-  const quad = gl.createVertexArray();
-  gl.bindVertexArray(quad);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-
-  const emptyTexture = createBackdropTexture(gl);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
-  gl.generateMipmap(gl.TEXTURE_2D);
+  let linkRef = () => {};
 
   const context: SoapBubbleContext = {
     gl,
     canvas,
     u,
     set: uniformSetters(gl),
-    emptyTexture,
+    emptyTexture: null as unknown as WebGLTexture,
     flush: () => flush(),
+    onRestore(listener) {
+      restoreListeners.add(listener);
+      return () => restoreListeners.delete(listener);
+    },
     ready() {
+      if (gl.isContextLost()) return false;
       if (linked) return true;
-      if (failed || !gl.getProgramParameter(program, parallel!.COMPLETION_STATUS_KHR)) return false;
+      if (failed || !program) return false;
+      if (parallel && !gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) return false;
       try {
-        link();
+        linkRef();
       } catch {
         failed = true;
       }
       return linked;
     },
     inFlight(now) {
+      const lost = gl.isContextLost();
       while (fences.length) {
-        const status = gl.isContextLost()
-          ? gl.SIGNALED
-          : gl.getSyncParameter(fences[0].sync, gl.SYNC_STATUS);
+        const stale = now - fences[0].at > 400;
+        const status =
+          lost || stale ? gl.SIGNALED : gl.getSyncParameter(fences[0].sync, gl.SYNC_STATUS);
         if (status !== gl.SIGNALED) break;
         const done = fences.shift()!;
-        gl.deleteSync(done.sync);
-        gpuDone(now - done.at);
+        if (!lost) gl.deleteSync(done.sync);
+        gpuDone(Math.max(0, now - done.at));
       }
       return fences.length;
     },
@@ -540,6 +576,38 @@ export function createSoapBubbleContext(
     },
   };
 
+  initResources();
+
+  if (typeof (canvas as EventTarget).addEventListener === 'function') {
+    (canvas as EventTarget).addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      linked = false;
+      pendingRestoreSetup = true;
+      fences.length = 0;
+      pending.length = 0;
+      flushQueued = false;
+    });
+    (canvas as EventTarget).addEventListener('webglcontextrestored', () => {
+      if (!pendingRestoreSetup) return;
+      pendingRestoreSetup = false;
+      for (const entry of backdrops.values()) {
+        entry.uploads.delete(gl);
+        for (const view of entry.covered.values()) view.uploads.delete(gl);
+      }
+      fences.length = 0;
+      pending.length = 0;
+      flushQueued = false;
+      initResources();
+      restoreListeners.forEach((listener) => {
+        try {
+          listener();
+        } catch {
+          // Ignore individual restore handler errors
+        }
+      });
+    });
+  }
+
   // The frame's draws are packed side by side into the shared buffer, in
   // shelves from the bottom, and handed to their canvases together: one GPU
   // read-back a frame instead of one per surface.
@@ -559,9 +627,6 @@ export function createSoapBubbleContext(
   };
   let queued: Region = { x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 };
   let flushQueued = false;
-  // A paced context marks the end of each frame's draws, to learn when the
-  // GPU is through with them.
-  const fences: { sync: WebGLSync; at: number }[] = [];
   const reserve = (width: number, height: number): [number, number] => {
     if (atlas.x + width > canvas.width) {
       atlas.x = 0;
@@ -590,36 +655,41 @@ export function createSoapBubbleContext(
     atlas.shelf = 0;
     atlas.right = 0;
     if (!pending.length) return;
-    if (paced && fences.length < 4) {
-      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-      if (sync) fences.push({ sync, at: performance.now() });
+    try {
+      if (gl.isContextLost() || canvas.width < 1 || canvas.height < 1) return;
+      if (paced && fences.length < 4) {
+        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (sync) {
+          fences.push({ sync, at: performance.now() });
+          gl.flush();
+        }
+      }
+      // Copied straight from the buffer. Through transferToImageBitmap, Safari
+      // reads every copy back from the GPU while painting, and the page falls
+      // to a few frames a second.
+      for (const { target, x, y, width, height, left, top } of pending) {
+        const sy = canvas.height - y - height;
+        if (width < 1 || height < 1 || x < 0 || sy < 0 || x + width > canvas.width || sy + height > canvas.height) {
+          continue;
+        }
+        try {
+          target.clearRect(left, top, width, height);
+          // WebGL rows start at the bottom of the buffer.
+          target.drawImage(canvas, x, sy, width, height, left, top, width, height);
+        } catch {
+          // Skip invalid or detached 2D targets without halting remaining surfaces
+        }
+      }
+      used.width = Math.max(used.width, usedWidth);
+      used.height = Math.max(used.height, usedHeight);
+      if (++used.frames < 60) return;
+      if (used.width * used.height * 2 < canvas.width * canvas.height) fit(used.width, used.height);
+      used.width = 0;
+      used.height = 0;
+      used.frames = 0;
+    } finally {
+      pending.length = 0;
     }
-    // Copied straight from the buffer. Through transferToImageBitmap, Safari
-    // reads every copy back from the GPU while painting, and the page falls
-    // to a few frames a second.
-    for (const { target, x, y, width, height, left, top } of pending) {
-      target.clearRect(left, top, width, height);
-      // WebGL rows start at the bottom of the buffer.
-      target.drawImage(
-        canvas,
-        x,
-        canvas.height - y - height,
-        width,
-        height,
-        left,
-        top,
-        width,
-        height,
-      );
-    }
-    pending.length = 0;
-    used.width = Math.max(used.width, usedWidth);
-    used.height = Math.max(used.height, usedHeight);
-    if (++used.frames < 60) return;
-    if (used.width * used.height * 2 < canvas.width * canvas.height) fit(used.width, used.height);
-    used.width = 0;
-    used.height = 0;
-    used.frames = 0;
   };
   return context;
 }
@@ -1131,6 +1201,15 @@ function runFrame(now: number) {
   const tasks = frameTasks;
   frameTasks = runningTasks;
   runningTasks = tasks;
-  for (const task of tasks) task(now);
-  tasks.clear();
+  try {
+    for (const task of tasks) {
+      try {
+        task(now);
+      } catch {
+        // Isolate per-surface frame errors so one surface cannot halt all controls
+      }
+    }
+  } finally {
+    tasks.clear();
+  }
 }

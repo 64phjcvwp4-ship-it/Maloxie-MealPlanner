@@ -755,26 +755,29 @@ export default function App() {
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-4 inset-y-2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(46,45,36,0.52)_0%,transparent_72%)]"
             />
-            <GlassSlabLogo
-              logo={MALOXIE_LOGO}
-              colorPreset="oil"
-              colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#B86B4B', '#908B6F']}
-              lightColor="#FFFFFF"
-              exposure={1.7}
-              ambient={0.42}
-              reflectivity={1.9}
-              ior={1.68}
-              thickness={0.013}
-              depth={0.85}
-              density={0.85}
-              logoScale={0.86}
-              backgroundColor="transparent"
-              paused={introStage === 'visible'}
-              maxDpr={2}
-              samples={48}
-              style={{ height: 248 }}
-              aria-label="Maloxie glass slab logo"
-            />
+            {introStage !== 'visible' ? (
+              <GlassSlabLogo
+                logo={MALOXIE_LOGO}
+                colorPreset="oil"
+                colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#B86B4B', '#908B6F']}
+                lightColor="#FFFFFF"
+                exposure={1.7}
+                ambient={0.42}
+                reflectivity={1.9}
+                ior={1.68}
+                thickness={0.013}
+                depth={0.85}
+                density={0.85}
+                logoScale={0.86}
+                backgroundColor="transparent"
+                maxDpr={2}
+                samples={48}
+                style={{ height: 248 }}
+                aria-label="Maloxie glass slab logo"
+              />
+            ) : (
+              <div style={{ height: 248 }} aria-hidden="true" />
+            )}
           </div>
 
           <AnimatedContent

@@ -96,6 +96,7 @@ export const GlassSlabLogo = forwardRef<GlassSlabLogoHandle, GlassSlabLogoProps>
     const logoReadyCallback = useRef(onLogoReady);
     logoReadyCallback.current = onLogoReady;
     const [fallback, setFallback] = useState(false);
+    const [restoreTick, setRestoreTick] = useState(0);
     const tuning = normalizeGlassSlabLogo({
       ...glassSlabLogoDefaults,
       ...glassSlabLogoColorPresets[colorPreset],
@@ -147,8 +148,9 @@ export const GlassSlabLogo = forwardRef<GlassSlabLogoHandle, GlassSlabLogoProps>
       [],
     );
     useEffect(() => {
-      if (!canvas.current) return;
-      const renderer = createGlassSlabLogoRenderer(canvas.current, latest.current, {
+      const targetCanvas = canvas.current;
+      if (!targetCanvas) return;
+      const renderer = createGlassSlabLogoRenderer(targetCanvas, latest.current, {
         paused,
         onReady: () => {
           setReady(true);
@@ -159,12 +161,18 @@ export const GlassSlabLogo = forwardRef<GlassSlabLogoHandle, GlassSlabLogoProps>
         onFallback: () => setFallback(true),
       });
       engine.current = renderer;
+      const onContextRestored = () => {
+        setFallback(false);
+        setRestoreTick((tick) => tick + 1);
+      };
+      targetCanvas.addEventListener('webglcontextrestored', onContextRestored);
       return () => {
+        targetCanvas.removeEventListener('webglcontextrestored', onContextRestored);
         renderer?.dispose();
         engine.current = null;
       };
-    }, []);
-    useEffect(() => engine.current?.update(latest.current), [key]);
+    }, [restoreTick]);
+    useEffect(() => engine.current?.update(latest.current), [key, restoreTick]);
     useEffect(() => {
       if (paused) stop();
       else start();
@@ -272,6 +280,7 @@ export const GlassSlabLogo = forwardRef<GlassSlabLogoHandle, GlassSlabLogoProps>
       backgroundTint,
       backgroundTintOpacity,
       photoColorOpacity,
+      restoreTick,
     ]);
     const transparent = tuning.backgroundColor === 'transparent';
     const transform = `translate(${Math.max(-100, Math.min(100, backgroundX))}%, ${Math.max(-100, Math.min(100, backgroundY))}%) scale(${Math.max(1, Math.min(3, backgroundScale))})`;

@@ -62,6 +62,10 @@ const AnimatedContent = ({
 
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
+    let safetyTimer = 0;
+    let observer = null;
+    let refreshRaf = 0;
+
     const ctx = gsap.context(() => {
       const targets = stagger > 0 && el.children.length ? Array.from(el.children) : [el];
       const horizontal = direction === 'horizontal';
@@ -145,6 +149,13 @@ const AnimatedContent = ({
 
       if (trigger === 'mount') {
         tl.play();
+        safetyTimer = window.setTimeout(() => {
+          el.style.visibility = 'visible';
+          if (tl.progress() < 1) {
+            tl.progress(1);
+            settle();
+          }
+        }, Math.round((Math.max(0, delay) + duration) * 1000 + 400));
         return;
       }
 
@@ -159,15 +170,21 @@ const AnimatedContent = ({
           scrub: scrub === true ? true : Math.max(Number(scrub) || 0, 0.01),
           animation: tl
         });
+        refreshRaf = requestAnimationFrame(() => ScrollTrigger.refresh());
         return;
       }
+
+      const reveal = () => {
+        el.style.visibility = 'visible';
+        if (tl.progress() === 0 && !tl.isActive()) tl.play();
+      };
 
       ScrollTrigger.create({
         trigger: el,
         scroller,
         start,
         once,
-        onEnter: () => tl.play(),
+        onEnter: reveal,
         onLeaveBack: once
           ? undefined
           : () => {
@@ -175,9 +192,28 @@ const AnimatedContent = ({
               tl.reverse();
             }
       });
+
+      if (typeof IntersectionObserver !== 'undefined') {
+        observer = new IntersectionObserver(
+          entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+              reveal();
+              if (once) observer?.disconnect();
+            }
+          },
+          { rootMargin: '0px 0px -5% 0px' }
+        );
+        observer.observe(el);
+      }
+      refreshRaf = requestAnimationFrame(() => ScrollTrigger.refresh());
     }, el);
 
-    return () => ctx.revert();
+    return () => {
+      cancelAnimationFrame(refreshRaf);
+      window.clearTimeout(safetyTimer);
+      observer?.disconnect();
+      ctx.revert();
+    };
   }, [
     container,
     distance,
@@ -205,7 +241,12 @@ const AnimatedContent = ({
   ]);
 
   return (
-    <div ref={ref} className={className} style={{ visibility: 'hidden', ...style }} {...props}>
+    <div
+      ref={ref}
+      className={className}
+      style={{ visibility: trigger === 'mount' ? 'visible' : 'hidden', ...style }}
+      {...props}
+    >
       {children}
     </div>
   );

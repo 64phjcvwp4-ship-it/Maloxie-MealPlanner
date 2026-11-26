@@ -459,7 +459,7 @@ export function createSoapBubbleRenderer(
   // Drawing in its own canvas, the surface has nothing handed to it.
   const target = own ? null : canvas.getContext('2d');
   if (!context || (!own && !target)) return null;
-  const { gl, u, set } = context;
+  const { gl, u } = context;
 
   let tuning = initial;
   // The tint fills the body; Opacity, when set, is its strength. The film's
@@ -625,23 +625,26 @@ export function createSoapBubbleRenderer(
    * just the bubble's box is shaded again.
    */
   const draw = (filmOnly = false): boolean => {
-    if (disposed) return false;
+    if (disposed || gl.isContextLost() || boxWidth <= 0 || boxHeight <= 0 || canvas.width <= 0 || canvas.height <= 0)
+      return false;
     if (!context.ready()) {
       // Asked again each frame until the driver has linked the program.
       request();
       return false;
     }
+    const set = context.set;
     const [ex, ey] = extent();
     const cssRadius = Math.min(hostWidth, hostHeight) / 2;
+    if (cssRadius <= 0) return false;
     const radius = cssRadius * dpr;
     // The bubble may move inside its canvas (a sliding thumb), so its centre
     // is measured every frame.
     const area = canvas.getBoundingClientRect();
     const box = host.getBoundingClientRect();
-    const scale = area.width ? width / area.width : 1;
+    const scale = area.width > 0 ? width / area.width : 1;
     // Screen pixels per layout pixel, should the host be transformed.
-    const zoomX = box.width / boxWidth;
-    const zoomY = box.height / boxHeight;
+    const zoomX = box.width > 0 ? box.width / boxWidth : 1;
+    const zoomY = box.height > 0 ? box.height / boxHeight : 1;
     const middleX = shape ? shape.x + shape.width / 2 : boxWidth / 2;
     const middleY = shape ? shape.y + shape.height / 2 : boxHeight / 2;
     const centerX = (box.left + middleX * zoomX - area.left) * scale;
@@ -982,6 +985,14 @@ export function createSoapBubbleRenderer(
   });
   visibility.observe(canvas);
   const releaseResolution = onSoapBubbleResolution(resize);
+  const releaseRestore =
+    context.onRestore?.(() => {
+      if (disposed) return;
+      dirtyFrame = true;
+      painted = false;
+      last = 0;
+      request();
+    }) ?? (() => {});
   const onMotion = () => {
     still = reduced?.matches ?? false;
     showCovered();
@@ -1158,6 +1169,7 @@ export function createSoapBubbleRenderer(
       resizeObserver.disconnect();
       visibility.disconnect();
       releaseResolution();
+      releaseRestore();
       reduced?.removeEventListener?.('change', onMotion);
       document.removeEventListener('visibilitychange', onMotion);
       window.removeEventListener('scroll', onScroll, { capture: true });

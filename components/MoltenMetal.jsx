@@ -303,24 +303,10 @@ export default function MoltenMetal({
       return undefined;
     }
 
-    const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
-    const fragment = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
-    const program = gl.createProgram();
-    if (!vertex || !fragment || !program) {
-      canvas.remove();
-      return undefined;
-    }
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.bindAttribLocation(program, 0, 'aPosition');
-    gl.linkProgram(program);
-    gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      gl.deleteProgram(program);
-      canvas.remove();
-      return undefined;
-    }
+    let program = null;
+    let vao = null;
+    let buffer = null;
+    let u = {};
     const names = [
       'uResolution',
       'uTime',
@@ -352,19 +338,42 @@ export default function MoltenMetal({
       'uFlareCount',
       'uHeat'
     ];
-    const u = {};
-    names.forEach(name => {
-      u[name] = gl.getUniformLocation(program, name);
-    });
 
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    gl.useProgram(program);
+    const initGL = () => {
+      const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
+      const fragment = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
+      const nextProgram = gl.createProgram();
+      if (!vertex || !fragment || !nextProgram) return false;
+      gl.attachShader(nextProgram, vertex);
+      gl.attachShader(nextProgram, fragment);
+      gl.bindAttribLocation(nextProgram, 0, 'aPosition');
+      gl.linkProgram(nextProgram);
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+      if (!gl.getProgramParameter(nextProgram, gl.LINK_STATUS)) {
+        gl.deleteProgram(nextProgram);
+        return false;
+      }
+      program = nextProgram;
+      u = {};
+      names.forEach(name => {
+        u[name] = gl.getUniformLocation(program, name);
+      });
+      vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.useProgram(program);
+      return true;
+    };
+
+    if (!initGL()) {
+      canvas.remove();
+      return undefined;
+    }
 
     const colorData = new Float32Array(MAX_COLORS * 3);
     const trailData = new Float32Array(TRAIL * 4);
@@ -400,9 +409,12 @@ export default function MoltenMetal({
     let boxWidth = container.clientWidth;
     let boxHeight = container.clientHeight;
 
+    const MAX_PIXELS = 2_000_000;
     const resize = () => {
       const s = settingsRef.current;
-      const ratio = Math.min(window.devicePixelRatio || 1, s.dpr);
+      const rawRatio = Math.min(window.devicePixelRatio || 1, s.dpr);
+      const area = Math.max(1, boxWidth * boxHeight);
+      const ratio = Math.max(0.75, Math.min(rawRatio, Math.sqrt(MAX_PIXELS / area)));
       const width = Math.max(1, Math.round(boxWidth * ratio));
       const height = Math.max(1, Math.round(boxHeight * ratio));
       if (width === state.width && height === state.height) return;
@@ -421,6 +433,7 @@ export default function MoltenMetal({
     };
 
     const render = reduced => {
+      if (gl.isContextLost() || !program || state.width < 1 || state.height < 1) return;
       const s = settingsRef.current;
       const progress = introProgress(s, reduced);
       const aspect = state.width / Math.max(state.height, 1);
@@ -619,6 +632,24 @@ export default function MoltenMetal({
     const onVisibilityChange = () => {
       if (!document.hidden && state.visible) startRaf();
     };
+    const onContextLost = event => {
+      event.preventDefault();
+      cancelAnimationFrame(state.raf);
+      state.raf = 0;
+      program = null;
+      vao = null;
+      buffer = null;
+    };
+    const onContextRestored = () => {
+      if (!initGL()) return;
+      state.width = 0;
+      state.height = 0;
+      state.quiet = 0;
+      resize();
+      startRaf();
+    };
+    canvas.addEventListener('webglcontextlost', onContextLost);
+    canvas.addEventListener('webglcontextrestored', onContextRestored);
     document.addEventListener('visibilitychange', onVisibilityChange);
     resize();
     window.addEventListener('pointermove', onMove, { passive: true });
@@ -631,13 +662,15 @@ export default function MoltenMetal({
       visibility.disconnect();
       sizes.disconnect();
       reducedQuery?.removeEventListener?.('change', onReducedChange);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerdown', onDown);
       document.documentElement.removeEventListener('pointerleave', onLeave);
-      gl.deleteProgram(program);
-      gl.deleteBuffer(buffer);
-      gl.deleteVertexArray(vao);
+      if (program) gl.deleteProgram(program);
+      if (buffer) gl.deleteBuffer(buffer);
+      if (vao) gl.deleteVertexArray(vao);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
       canvas.remove();
     };

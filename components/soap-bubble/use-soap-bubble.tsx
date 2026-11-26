@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -121,9 +122,18 @@ export function SoapBubbleMaterial({
 }: SoapBubbleMaterialProps & { children?: ReactNode }) {
   const outer = useContext(MaterialContext);
   const [own] = splitMaterial(material);
-  return (
-    <MaterialContext.Provider value={{ ...outer, ...own }}>{children}</MaterialContext.Provider>
+  const ownKey = JSON.stringify(
+    Object.entries(own)
+      .filter(([key]) => key !== 'backdrop')
+      .sort(([a], [b]) => a.localeCompare(b)),
   );
+  const backdrop = own.backdrop;
+  const value = useMemo(
+    () => ({ ...outer, ...own }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [outer, ownKey, backdrop],
+  );
+  return <MaterialContext.Provider value={value}>{children}</MaterialContext.Provider>;
 }
 
 /**

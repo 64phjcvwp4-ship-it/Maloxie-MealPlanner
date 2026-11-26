@@ -1346,7 +1346,7 @@ export function createGlassSlabLogoRenderer(
 
   const tick = (now: number) => {
     frame = 0;
-    if (disposed || !visible || !layout || !width || !height) return;
+    if (disposed || gl.isContextLost() || !visible || !layout || !width || !height) return;
     if (lastFrameAt) {
       const between = now - lastFrameAt;
       displayInterval = Math.min(displayInterval * 1.01, Math.max(between, 4));
@@ -1415,7 +1415,7 @@ export function createGlassSlabLogoRenderer(
       accumulated = 0;
       holdPartial = false;
     }
-    if (!exportSize && !frame && !disposed) frame = win.requestAnimationFrame(tick);
+    if (!exportSize && !frame && !disposed && !gl.isContextLost()) frame = win.requestAnimationFrame(tick);
   };
 
   const loadLogo = () => {
@@ -1629,6 +1629,11 @@ export function createGlassSlabLogoRenderer(
       clearPlateTextures();
       gl.deleteFramebuffer(framebuffer);
       gl.deleteVertexArray(vao);
+      win.setTimeout(() => {
+        if (!canvas.isConnected && !gl.isContextLost()) {
+          gl.getExtension('WEBGL_lose_context')?.loseContext();
+        }
+      }, 0);
     },
   };
 }
