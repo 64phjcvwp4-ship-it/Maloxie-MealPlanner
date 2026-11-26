@@ -1,0 +1,6 @@
+{
+  "name": "Mise — Enhanced Meal Planner",
+  "description": "Multi-week meal planner, recipe library, smart grocery list, nutrition macro tracker, and Sunday meal prep studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
