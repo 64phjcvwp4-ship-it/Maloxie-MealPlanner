@@ -125,7 +125,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Search & Primary Filter Bar */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 space-y-4">
+      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 space-y-4 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex-1 max-w-md text-xs">
             <SoapBubbleSearch
@@ -138,7 +138,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
+            <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
               {(
                 [
                   { id: 'all', label: 'All' },
@@ -172,9 +172,9 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
         </div>
 
         {/* Dietary, Cook Time & Difficulty Filters */}
-        <div className="pt-3 border-t border-[#E5E7EB] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="pt-3 border-t border-[#D9D0CB] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#6B7280] mr-1 shrink-0" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#6A6754] mr-1 shrink-0" />
             {DIETARY_FILTERS.map((tag) => (
               <BubbleButton
                 key={tag}
@@ -192,7 +192,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
               aria-label="Filter by cooking time"
               value={timeFilter}
               onChange={(e) => setTimeFilter(e.target.value as 'all' | '20' | '35')}
-              className="px-2.5 py-1.5 border border-[#E5E7EB] rounded-lg bg-white text-[#374151]"
+              className="px-2.5 py-1.5 border border-[#D9D0CB] rounded-lg bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             >
               <option value="all">Any Cook Time</option>
               <option value="20">20 min or less</option>
@@ -205,7 +205,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
               onChange={(e) =>
                 setDifficultyFilter(e.target.value as 'All' | DifficultyLevel)
               }
-              className="px-2.5 py-1.5 border border-[#E5E7EB] rounded-lg bg-white text-[#374151]"
+              className="px-2.5 py-1.5 border border-[#D9D0CB] rounded-lg bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             >
               <option value="All">All Difficulties</option>
               <option value="Easy">Easy</option>
@@ -220,11 +220,11 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
       {slotTab === 'all' && dietFilter === 'All' && !query && favoriteRecipes.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#111827]">Favorite Meals</h2>
+            <h2 className="text-sm font-semibold text-[#FAF8F6] drop-shadow-[0_1px_6px_rgba(46,45,36,0.5)]">Favorite Meals</h2>
             <button
               type="button"
               onClick={() => setSlotTab('favorites')}
-              className="text-xs font-medium text-[#15803D] hover:underline"
+              className="text-xs font-medium text-[#E5DFDA] hover:text-[#FAF8F6] hover:underline"
             >
               View all {favoriteRecipes.length}
             </button>
@@ -233,17 +233,17 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             {favoriteRecipes.slice(0, 4).map((recipe) => (
               <div
                 key={`fav-${recipe.id}`}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-3.5 flex items-center justify-between gap-3 hover:border-[#D1D5DB] transition-colors"
+                className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-3.5 flex items-center justify-between gap-3 hover:border-[#908B6F] transition-colors shadow-sm"
               >
                 <button
                   type="button"
                   onClick={() => onSelectRecipe(recipe)}
                   className="min-w-0 text-left flex-1"
                 >
-                  <div className="text-sm font-medium text-[#111827] truncate">
+                  <div className="text-sm font-medium text-[#2E2D24] truncate">
                     {recipe.title}
                   </div>
-                  <div className="text-xs text-[#6B7280] mt-0.5 font-mono tabular-nums">
+                  <div className="text-xs text-[#6A6754] mt-0.5 font-mono tabular-nums">
                     {recipe.macrosPerServing.calories} kcal · {recipe.macrosPerServing.protein}g P ·{' '}
                     {recipe.prepTimeMinutes + recipe.cookTimeMinutes}m
                   </div>
@@ -252,9 +252,9 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                   type="button"
                   onClick={() => onToggleFavorite(recipe.id)}
                   aria-label="Remove from favorites"
-                  className="p-1.5 text-[#DC2626] hover:bg-[#FEF2F2] rounded-full shrink-0"
+                  className="p-1.5 text-[#B43C2E] hover:bg-[#FBEAE7] rounded-full shrink-0"
                 >
-                  <Heart className="w-4 h-4 fill-[#DC2626]" />
+                  <Heart className="w-4 h-4 fill-[#B43C2E]" />
                 </button>
               </div>
             ))}
@@ -264,8 +264,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
 
       {/* Recipe Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-12 text-center space-y-3">
-          <p className="text-sm text-[#4B5563]">
+        <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-12 text-center space-y-3 shadow-sm">
+          <p className="text-sm text-[#4A483A]">
             No recipes match your active search or dietary filters.
           </p>
           <BubbleButton
@@ -285,13 +285,13 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
       ) : (
         <>
           {/* Liquid FlexCarousel Showcase */}
-          <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Recipe Showcase ({filtered.length})
                 </h2>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6A6754]">
                   Drag, scroll, or click a card to zoom into focus
                 </p>
               </div>
@@ -310,8 +310,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                     <Heart
                       className={`w-3.5 h-3.5 ${
                         favoriteIds.has(activeCarouselRecipe.id)
-                          ? 'fill-[#DC2626] text-[#DC2626]'
-                          : 'text-[#4B5563]'
+                          ? 'fill-[#B43C2E] text-[#B43C2E]'
+                          : 'text-[#4A483A]'
                       }`}
                     />
                   </BubbleIconButton>
@@ -328,7 +328,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
 
             <div
               style={{ width: '100%', height: '560px', position: 'relative' }}
-              className="bg-gradient-to-b from-[#FAFAFA] via-[#FFFFFF] to-[#F3F4F6] text-[#111827]"
+              className="bg-gradient-to-b from-[#FAF8F6]/55 via-[#F4F1EE]/45 to-[#EAE4E0]/60 text-[#2E2D24]"
             >
               <FlexCarousel
                 items={carouselItems}
@@ -359,17 +359,17 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             </div>
 
             {activeCarouselRecipe && (
-              <div className="px-5 py-3 border-t border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex flex-wrap items-center gap-2 text-[#4B5563] min-w-0">
-                  <span className="font-semibold text-[#111827]">
+              <div className="px-5 py-3 border-t border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-[#4A483A] min-w-0">
+                  <span className="font-semibold text-[#2E2D24]">
                     {activeCarouselRecipe.title}
                   </span>
                   <span aria-hidden="true">·</span>
                   <span>{activeCarouselRecipe.dietaryTags.slice(0, 3).join(' · ')}</span>
                 </div>
-                <div className="font-mono tabular-nums text-[#374151] shrink-0">
+                <div className="font-mono tabular-nums text-[#4A483A] shrink-0">
                   {activeCarouselRecipe.macrosPerServing.calories} kcal ·{' '}
-                  <span className="text-[#15803D] font-medium">
+                  <span className="text-[#6A6754] font-semibold">
                     {activeCarouselRecipe.macrosPerServing.protein}g P
                   </span>{' '}
                   · {activeCarouselRecipe.macrosPerServing.carbs}g C ·{' '}
@@ -383,16 +383,16 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
           <section className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <h2 className="text-sm font-semibold text-[#FAF8F6] drop-shadow-[0_1px_6px_rgba(46,45,36,0.5)]">
                   Recipe Collection ({filtered.length})
                 </h2>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#E5DFDA]">
                   {browseLayout === 'masonry'
                     ? 'Drag tiles to arrange your board or click any dish for full instructions'
                     : 'Compare cooking times, macros, and dietary tags side by side'}
                 </p>
               </div>
-              <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full">
+              <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/85 rounded-full">
                 <BubbleButton
                   variant={browseLayout === 'masonry' ? 'dark' : 'default'}
                   size="sm"
@@ -413,7 +413,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             </div>
 
             {browseLayout === 'masonry' ? (
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 sm:p-5">
+              <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 sm:p-5 shadow-sm">
                 <Masonry
                   items={masonryItems}
                   columns="auto"
@@ -421,7 +421,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                   gap={14}
                   radius={12}
                   animateFrom="bottom"
-                  stagger={0.04}
+                  stagger={0.03}
+                  blurToFocus={false}
                   hoverEffect="zoom"
                   focusOnHover
                   captions="always"
@@ -435,13 +436,13 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
               </div>
             ) : (
               <AnimatedContent
-                distance={100}
+                distance={20}
                 direction="vertical"
-                duration={0.8}
+                duration={0.35}
                 ease="power3.out"
                 blur={0}
-                stagger={0.08}
-                threshold={0.1}
+                stagger={0.025}
+                trigger="mount"
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
               >
           {filtered.map((recipe) => {
@@ -451,10 +452,10 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             return (
               <article
                 key={recipe.id}
-                className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden flex flex-col justify-between hover:border-[#D1D5DB] transition-colors"
+                className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden flex flex-col justify-between hover:border-[#908B6F] transition-colors shadow-sm"
               >
                 <div>
-                  <div className="relative h-44 bg-[#F3F4F6] overflow-hidden">
+                  <div className="relative h-44 bg-[#EAE4E0] overflow-hidden">
                     <button
                       type="button"
                       onClick={() => onSelectRecipe(recipe)}
@@ -476,14 +477,14 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                     >
                       <Heart
                         className={`w-4 h-4 ${
-                          isFav ? 'fill-[#DC2626] text-[#DC2626]' : 'text-[#4B5563]'
+                          isFav ? 'fill-[#B43C2E] text-[#B43C2E]' : 'text-[#4A483A]'
                         }`}
                       />
                     </BubbleIconButton>
                   </div>
 
                   <div className="p-4 space-y-2">
-                    <div className="text-xs text-[#6B7280] flex items-center gap-1.5">
+                    <div className="text-xs text-[#6A6754] flex items-center gap-1.5">
                       <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
                       <span aria-hidden="true">·</span>
                       <span className="inline-flex items-center gap-1">
@@ -495,7 +496,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                       {recipe.isCustom && (
                         <>
                           <span aria-hidden="true">·</span>
-                          <span className="text-[#15803D] font-medium">Custom</span>
+                          <span className="text-[#6A6754] font-semibold">Custom</span>
                         </>
                       )}
                     </div>
@@ -505,24 +506,24 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                       onClick={() => onSelectRecipe(recipe)}
                       className="text-left block w-full"
                     >
-                      <h3 className="font-display text-base font-semibold text-[#111827] hover:text-[#15803D] transition-colors leading-snug">
+                      <h3 className="font-display text-base font-semibold text-[#2E2D24] hover:text-[#6A6754] transition-colors leading-snug">
                         {recipe.title}
                       </h3>
                     </button>
 
-                    <p className="text-xs text-[#6B7280] line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#6A6754] line-clamp-2 leading-relaxed">
                       {recipe.subtitle}
                     </p>
                   </div>
                 </div>
 
-                <div className="px-4 py-3 border-t border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-3">
-                  <div className="text-xs font-mono tabular-nums text-[#374151]">
-                    <span className="font-semibold text-[#111827]">
+                <div className="px-4 py-3 border-t border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
+                  <div className="text-xs font-mono tabular-nums text-[#4A483A]">
+                    <span className="font-semibold text-[#2E2D24]">
                       {recipe.macrosPerServing.calories}
                     </span>{' '}
                     kcal ·{' '}
-                    <span className="text-[#15803D] font-medium">
+                    <span className="text-[#6A6754] font-semibold">
                       {recipe.macrosPerServing.protein}g P
                     </span>
                   </div>

@@ -128,8 +128,8 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Week Header */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
+      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
           {weeksDates.map((dates, idx) => (
             <BubbleButton
               key={idx}
@@ -142,13 +142,13 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           ))}
         </div>
 
-        <div className="text-xs font-mono tabular-nums text-[#4B5563] flex items-center gap-4">
+        <div className="text-xs font-mono tabular-nums text-[#4A483A] flex items-center gap-4">
           <span>
-            Sunday Prep: <strong className="text-[#111827]">{totalPrepMins} min</strong>
+            Sunday Prep: <strong className="text-[#2E2D24]">{totalPrepMins} min</strong>
           </span>
           <span>
             Est. Cost/Meal:{' '}
-            <strong className="text-[#111827]">
+            <strong className="text-[#2E2D24]">
               ${totalMealsPlanned > 0 ? (totalWeekSpend / totalMealsPlanned).toFixed(2) : '0.00'}
             </strong>
           </span>
@@ -157,47 +157,47 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
 
       {/* Main Two-Column Studio */}
       <AnimatedContent
-        distance={100}
+        distance={20}
         direction="vertical"
-        duration={0.8}
+        duration={0.35}
         ease="power3.out"
         blur={0}
-        stagger={0.08}
-        threshold={0.1}
+        stagger={0.03}
+        trigger="mount"
         className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
       >
         {/* 1. Sunday Meal Prep Guide */}
-        <section className="lg:col-span-7 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-3">
+        <section className="lg:col-span-7 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <ChefHat className="w-4 h-4 text-[#15803D]" />
+              <ChefHat className="w-4 h-4 text-[#6A6754]" />
               <div>
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Sunday Meal Prep Guide
                 </h2>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6A6754]">
                   Actionable prep checklist built from Week {activeWeekIndex + 1} meals
                 </p>
               </div>
             </div>
-            <span className="font-mono text-xs tabular-nums text-[#15803D] font-medium">
+            <span className="font-mono text-xs tabular-nums text-[#6A6754] font-semibold">
               {completedCount}/{prepTasks.length} done
             </span>
           </div>
 
           {prepTasks.length === 0 ? (
-            <div className="p-10 text-center text-xs text-[#6B7280]">
+            <div className="p-10 text-center text-xs text-[#6A6754]">
               Add meals to Week {activeWeekIndex + 1} on the calendar to generate your Sunday prep timeline.
             </div>
           ) : (
-            <div className="divide-y divide-[#E5E7EB]">
+            <div className="divide-y divide-[#D9D0CB]">
               {prepTasks.map((task) => {
                 const done = completedPrepTaskIds.has(task.id);
                 return (
                   <div
                     key={task.id}
                     className={`px-5 py-4 flex items-start gap-3.5 transition-colors ${
-                      done ? 'bg-[#F9FAFB]' : 'hover:bg-[#FAFAFA]'
+                      done ? 'bg-[#F3EFEC]/70' : 'hover:bg-[#F3EFEC]'
                     }`}
                   >
                     <button
@@ -206,8 +206,8 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                       aria-label={`Toggle prep task ${task.title}`}
                       className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                         done
-                          ? 'bg-[#15803D] border-[#15803D] text-white'
-                          : 'bg-white border-[#D1D5DB] hover:border-[#15803D]'
+                          ? 'bg-[#6A6754] border-[#6A6754] text-[#FAF8F6]'
+                          : 'bg-[#FAF8F6] border-[#908B6F] hover:border-[#6A6754]'
                       }`}
                     >
                       {done && <Check className="w-3.5 h-3.5" />}
@@ -217,18 +217,18 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                       <div className="flex items-center justify-between gap-2">
                         <span
                           className={`text-sm font-medium ${
-                            done ? 'line-through text-[#9CA3AF]' : 'text-[#111827]'
+                            done ? 'line-through text-[#908B6F]' : 'text-[#2E2D24]'
                           }`}
                         >
                           {task.title}
                         </span>
-                        <span className="font-mono text-xs tabular-nums text-[#6B7280] flex items-center gap-1 shrink-0">
+                        <span className="font-mono text-xs tabular-nums text-[#6A6754] flex items-center gap-1 shrink-0">
                           <Clock className="w-3 h-3" />
                           {task.estimatedMinutes}m
                         </span>
                       </div>
-                      <p className="text-xs text-[#4B5563] leading-relaxed">{task.detail}</p>
-                      <div className="text-[11px] text-[#6B7280]">
+                      <p className="text-xs text-[#4A483A] leading-relaxed">{task.detail}</p>
+                      <div className="text-[11px] text-[#6A6754]">
                         Phase: {task.phase}
                       </div>
                     </div>
@@ -242,17 +242,17 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
         {/* Right Column: Budget Breakdown + Waste Reduction */}
         <div className="lg:col-span-5 space-y-6">
           {/* Shopping Budget Tracker */}
-          <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between">
+          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-[#15803D]" />
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <DollarSign className="w-4 h-4 text-[#6A6754]" />
+                <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Weekly Budget Breakdown
                 </h2>
               </div>
               <span
                 className={`font-mono text-xs font-semibold tabular-nums ${
-                  totalWeekSpend > weeklyBudget ? 'text-[#DC2626]' : 'text-[#15803D]'
+                  totalWeekSpend > weeklyBudget ? 'text-[#B43C2E]' : 'text-[#6A6754]'
                 }`}
               >
                 ${totalWeekSpend.toFixed(2)} / ${weeklyBudget}
@@ -261,21 +261,21 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
 
             <div className="p-5 space-y-3">
               {categorySpend.length === 0 ? (
-                <p className="text-xs text-[#6B7280]">No grocery spend estimated yet.</p>
+                <p className="text-xs text-[#6A6754]">No grocery spend estimated yet.</p>
               ) : (
                 categorySpend.map(([cat, amount]) => {
                   const pct = Math.round((amount / Math.max(1, totalWeekSpend)) * 100);
                   return (
                     <div key={cat} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-[#374151] font-medium">{cat}</span>
-                        <span className="font-mono tabular-nums text-[#111827]">
+                        <span className="text-[#4A483A] font-medium">{cat}</span>
+                        <span className="font-mono tabular-nums text-[#2E2D24]">
                           ${amount.toFixed(2)} ({pct}%)
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#EAE4E0] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#15803D]"
+                          className="h-full bg-[#6A6754]"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -287,34 +287,34 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           </section>
 
           {/* Waste Reduction Tips */}
-          <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center gap-2">
-              <Leaf className="w-4 h-4 text-[#15803D]" />
+          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center gap-2">
+              <Leaf className="w-4 h-4 text-[#6A6754]" />
               <div>
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Smart Waste Reduction Tips
                 </h2>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6A6754]">
                   Storage & cross-use advice for your week&apos;s fresh produce
                 </p>
               </div>
             </div>
 
-            <div className="divide-y divide-[#E5E7EB]">
+            <div className="divide-y divide-[#D9D0CB]">
               {wasteTips.length === 0 ? (
-                <div className="p-6 text-xs text-[#6B7280]">
+                <div className="p-6 text-xs text-[#6A6754]">
                   Add meals to see personalized ingredient storage and zero-waste tips.
                 </div>
               ) : (
                 wasteTips.map((tip) => (
                   <div key={tip.id} className="px-5 py-3.5 space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[#111827]">{tip.ingredient}</span>
-                      <span className="text-[#15803D] font-mono tabular-nums">
+                      <span className="font-semibold text-[#2E2D24]">{tip.ingredient}</span>
+                      <span className="text-[#6A6754] font-mono tabular-nums font-medium">
                         Used in {tip.usedInCount} meal{tip.usedInCount > 1 ? 's' : ''}
                       </span>
                     </div>
-                    <p className="text-xs text-[#4B5563] leading-relaxed">{tip.tip}</p>
+                    <p className="text-xs text-[#4A483A] leading-relaxed">{tip.tip}</p>
                   </div>
                 ))
               )}
@@ -324,15 +324,15 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
       </AnimatedContent>
 
       {/* Batch Cooking Suggestions */}
-      <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between">
+      <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+        <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#15803D]" />
+            <Layers className="w-4 h-4 text-[#6A6754]" />
             <div>
-              <h2 className="text-sm font-semibold text-[#111827]">
+              <h2 className="text-sm font-semibold text-[#2E2D24]">
                 Batch Cooking Suggestions
               </h2>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-[#6A6754]">
                 Cook once and auto-assign next-day leftovers to cut weeknight prep in half.
               </p>
             </div>
@@ -340,38 +340,38 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
         </div>
 
         <AnimatedContent
-          distance={100}
+          distance={20}
           direction="vertical"
-          duration={0.8}
+          duration={0.35}
           ease="power3.out"
           blur={0}
-          stagger={0.08}
-          threshold={0.1}
-          className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#E5E7EB]"
+          stagger={0.03}
+          trigger="mount"
+          className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#D9D0CB]"
         >
           {batchSuggestions.map((recipe, idx) => {
             const cookDay = weekDates[idx % Math.max(1, weekDates.length - 1)] || weekDates[0];
             const leftoverDay = addDaysISO(cookDay, 1);
 
             return (
-              <div key={recipe.id} className="p-5 flex flex-col justify-between gap-4 border-b border-[#E5E7EB] md:border-b-0">
+              <div key={recipe.id} className="p-5 flex flex-col justify-between gap-4 border-b border-[#D9D0CB] md:border-b-0">
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2 text-xs text-[#6B7280]">
+                  <div className="flex items-center justify-between gap-2 text-xs text-[#6A6754]">
                     <span>Yields {recipe.servings} servings</span>
                     <span className="font-mono tabular-nums">
                       Keeps {recipe.storageDays || 4} days
                     </span>
                   </div>
-                  <h3 className="font-display text-base font-semibold text-[#111827]">
+                  <h3 className="font-display text-base font-semibold text-[#2E2D24]">
                     {recipe.title}
                   </h3>
-                  <p className="text-xs text-[#4B5563] leading-relaxed">
+                  <p className="text-xs text-[#4A483A] leading-relaxed">
                     {recipe.batchTip || recipe.subtitle}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-2 border-t border-[#E5E7EB]">
-                  <span className="text-xs font-mono tabular-nums text-[#6B7280]">
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-[#D9D0CB]">
+                  <span className="text-xs font-mono tabular-nums text-[#6A6754]">
                     {recipe.macrosPerServing.calories} kcal · {recipe.macrosPerServing.protein}g P
                   </span>
                   <BubbleButton
@@ -393,15 +393,15 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
 
       {/* Visual Batch & Sunday Prep Dish Board */}
       {prepMasonryItems.length > 0 && (
-        <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-3">
+        <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ChefHat className="w-4 h-4 text-[#15803D]" />
+              <ChefHat className="w-4 h-4 text-[#6A6754]" />
               <div>
-                <h2 className="text-sm font-semibold text-[#111827]">
+                <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Batch & Prep Visual Board
                 </h2>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6A6754]">
                   Drag to prioritize your prep order or click any dish to inspect in lightbox
                 </p>
               </div>
@@ -415,6 +415,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
               gap={12}
               radius={12}
               animateFrom="bottom"
+              blurToFocus={false}
               hoverEffect="lift"
               captions="always"
               draggable

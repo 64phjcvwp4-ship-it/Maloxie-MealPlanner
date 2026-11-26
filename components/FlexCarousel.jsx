@@ -695,7 +695,7 @@ const FlexCarousel = ({
     const applyResize = () => {
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(PIXEL_BUDGET / (width * height)));
+      renderer.dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
       renderer.setSize(width, height);
       target.setSize(Math.max(2, Math.round(width * renderer.dpr)), Math.max(2, Math.round(height * renderer.dpr)));
       lensUniforms.tScene.value = target.texture;
@@ -1061,8 +1061,21 @@ const FlexCarousel = ({
           while (pointer.samples.length > 2 && now - pointer.samples[0].t > 100) pointer.samples.shift();
         }
       }
-      dirty = true;
-      start();
+      const s = settingsRef.current;
+      if (pointer.dragging || s?.followCursor) {
+        dirty = true;
+        start();
+      } else if (!pointer.dragging && introState.done && s?.focusOnClick) {
+        const hit = instances.find(
+          inst => x >= inst.x0 && x <= inst.x1 && y >= inst.y0 && y <= inst.y1
+        );
+        const nextHover = focus.target > 0 ? 'close' : hit ? 'open' : '';
+        if (nextHover !== hover) {
+          hover = nextHover;
+          if (hover) container.setAttribute('data-hover', hover);
+          else container.removeAttribute('data-hover');
+        }
+      }
     };
 
     const onPointerUp = e => {
@@ -1108,8 +1121,14 @@ const FlexCarousel = ({
 
     const onPointerLeave = () => {
       pointer.over = false;
-      dirty = true;
-      start();
+      if (hover) {
+        hover = '';
+        container.removeAttribute('data-hover');
+      }
+      if (settingsRef.current?.followCursor) {
+        dirty = true;
+        start();
+      }
     };
 
     const onPointerCancel = () => {

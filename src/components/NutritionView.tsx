@@ -95,8 +95,8 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Week Switcher & Target Controls */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
+      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
           {weeksDates.map((dates, idx) => (
             <BubbleButton
               key={idx}
@@ -121,13 +121,13 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
       {/* Custom Targets Editor */}
       {editingTargets && (
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-4">
+        <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-5 space-y-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-[#111827]">
+              <h3 className="text-sm font-semibold text-[#2E2D24]">
                 Daily Calorie & Macro Targets
               </h3>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-[#6A6754]">
                 Pick a preset or enter custom daily targets.
               </p>
             </div>
@@ -163,7 +163,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               ] as const
             ).map((field) => (
               <div key={field.key}>
-                <label className="block text-xs font-medium text-[#374151] mb-1">
+                <label className="block text-xs font-medium text-[#4A483A] mb-1">
                   {field.label}
                 </label>
                 <input
@@ -177,7 +177,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                       [field.key]: Math.max(0, Number(e.target.value)),
                     })
                   }
-                  className="w-full px-3 py-2 text-sm font-mono tabular-nums border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+                  className="w-full px-3 py-2 text-sm font-mono tabular-nums bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
             ))}
@@ -187,13 +187,13 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
       {/* 4-Column KPI Summary vs Goal */}
       <AnimatedContent
-        distance={100}
+        distance={20}
         direction="vertical"
-        duration={0.8}
+        duration={0.35}
         ease="power3.out"
         blur={0}
-        stagger={0.08}
-        threshold={0.1}
+        stagger={0.03}
+        trigger="mount"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
         {(
@@ -203,28 +203,28 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               value: avgDaily.calories,
               target: targets.calories,
               unit: 'kcal',
-              accent: 'bg-[#15803D]',
+              accent: 'bg-[#6A6754]',
             },
             {
               label: 'Avg Daily Protein',
               value: avgDaily.protein,
               target: targets.protein,
               unit: 'g',
-              accent: 'bg-[#0F766E]',
+              accent: 'bg-[#4A483A]',
             },
             {
               label: 'Avg Daily Carbs',
               value: avgDaily.carbs,
               target: targets.carbs,
               unit: 'g',
-              accent: 'bg-[#3B82F6]',
+              accent: 'bg-[#908B6F]',
             },
             {
               label: 'Avg Daily Fat',
               value: avgDaily.fat,
               target: targets.fat,
               unit: 'g',
-              accent: 'bg-[#D97706]',
+              accent: 'bg-[#C4B9B1]',
             },
           ] as const
         ).map((metric) => {
@@ -235,29 +235,29 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
           return (
             <div
               key={metric.label}
-              className="bg-white border border-[#E5E7EB] rounded-xl p-4 space-y-2.5"
+              className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 space-y-2.5 shadow-sm"
             >
-              <div className="text-xs font-medium text-[#6B7280]">{metric.label}</div>
+              <div className="text-xs font-medium text-[#6A6754]">{metric.label}</div>
               <div className="flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-semibold tabular-nums text-[#111827]">
+                <span className="font-mono text-2xl font-semibold tabular-nums text-[#2E2D24]">
                   {metric.value.toLocaleString()}
-                  <span className="text-xs font-normal text-[#6B7280] ml-1">
+                  <span className="text-xs font-normal text-[#6A6754] ml-1">
                     {metric.unit}
                   </span>
                 </span>
-                <span className="font-mono text-xs tabular-nums text-[#6B7280]">
+                <span className="font-mono text-xs tabular-nums text-[#6A6754]">
                   / {metric.target.toLocaleString()}
                 </span>
               </div>
-              <div className="w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-[#EAE4E0] rounded-full overflow-hidden">
                 <div
-                  className={`h-full ${isOver ? 'bg-[#DC2626]' : metric.accent}`}
+                  className={`h-full ${isOver ? 'bg-[#B43C2E]' : metric.accent}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
               <div
                 className={`text-xs font-medium ${
-                  isOver ? 'text-[#DC2626]' : 'text-[#4B5563]'
+                  isOver ? 'text-[#B43C2E]' : 'text-[#4A483A]'
                 }`}
               >
                 {diff === 0
@@ -273,26 +273,26 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
       {/* Calorie Overview Chart + Caloric Macro Split */}
       <AnimatedContent
-        distance={100}
+        distance={20}
         direction="vertical"
-        duration={0.8}
+        duration={0.35}
         ease="power3.out"
         blur={0}
-        stagger={0.08}
-        threshold={0.1}
+        stagger={0.03}
+        trigger="mount"
         className="grid grid-cols-1 lg:grid-cols-12 gap-5"
       >
-        <div className="lg:col-span-8 bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-4">
+        <div className="lg:col-span-8 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-5 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-[#111827]">
+              <h3 className="text-sm font-semibold text-[#2E2D24]">
                 Daily Calorie Intake vs Goal
               </h3>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-[#6A6754]">
                 Weekly total: {weeklyTotals.calories.toLocaleString()} kcal across {activeDaysCount} planned days
               </p>
             </div>
-            <span className="font-mono text-xs tabular-nums text-[#6B7280]">
+            <span className="font-mono text-xs tabular-nums text-[#6A6754]">
               Target: {targets.calories.toLocaleString()} kcal
             </span>
           </div>
@@ -300,12 +300,12 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
           <div className="relative h-56 pt-4 pb-2">
             {/* Target reference line */}
             <div
-              className="absolute left-0 right-0 border-t border-dashed border-[#15803D]/60 pointer-events-none z-10"
+              className="absolute left-0 right-0 border-t border-dashed border-[#6A6754]/70 pointer-events-none z-10"
               style={{
                 bottom: `${Math.min(95, (targets.calories / maxChartCal) * 100)}%`,
               }}
             >
-              <span className="text-[10px] font-mono text-[#15803D] bg-white px-1 -mt-2.5 inline-block">
+              <span className="text-[10px] font-mono text-[#6A6754] bg-[#FAF8F6] px-1 -mt-2.5 inline-block">
                 Goal {targets.calories}
               </span>
             </div>
@@ -320,22 +320,22 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
 
                 return (
                   <div key={d.date} className="h-full flex flex-col justify-end items-center gap-1.5">
-                    <span className="font-mono text-[11px] tabular-nums text-[#4B5563]">
+                    <span className="font-mono text-[11px] tabular-nums text-[#4A483A]">
                       {d.macros.calories > 0 ? d.macros.calories : '—'}
                     </span>
-                    <div className="w-full max-w-[44px] flex-1 flex items-end bg-[#F3F4F6] rounded-md overflow-hidden">
+                    <div className="w-full max-w-[44px] flex-1 flex items-end bg-[#EAE4E0] rounded-md overflow-hidden">
                       <div
                         className={`w-full rounded-t-md transition-all ${
                           d.macros.calories === 0
                             ? 'bg-transparent'
                             : over
-                            ? 'bg-[#DC2626]'
-                            : 'bg-[#15803D]'
+                            ? 'bg-[#B43C2E]'
+                            : 'bg-[#6A6754]'
                         }`}
                         style={{ height: `${d.macros.calories === 0 ? 0 : heightPct}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-[#374151]">
+                    <span className="text-xs font-medium text-[#4A483A]">
                       {d.header.weekday}
                     </span>
                   </div>
@@ -346,68 +346,68 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
         </div>
 
         {/* Caloric Split */}
-        <div className="lg:col-span-4 bg-white border border-[#E5E7EB] rounded-xl p-5 flex flex-col justify-between space-y-5">
+        <div className="lg:col-span-4 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-5 flex flex-col justify-between space-y-5 shadow-sm">
           <div>
-            <h3 className="text-sm font-semibold text-[#111827]">Macro Caloric Split</h3>
-            <p className="text-xs text-[#6B7280] mt-0.5">
+            <h3 className="text-sm font-semibold text-[#2E2D24]">Macro Caloric Split</h3>
+            <p className="text-xs text-[#6A6754] mt-0.5">
               Energy share from Protein, Carbs, and Fat
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="w-full h-4 rounded-full overflow-hidden flex bg-[#F3F4F6]">
-              <div style={{ width: `${pctP}%` }} className="bg-[#0F766E]" />
-              <div style={{ width: `${pctC}%` }} className="bg-[#3B82F6]" />
-              <div style={{ width: `${pctF}%` }} className="bg-[#D97706]" />
+            <div className="w-full h-4 rounded-full overflow-hidden flex bg-[#EAE4E0]">
+              <div style={{ width: `${pctP}%` }} className="bg-[#4A483A]" />
+              <div style={{ width: `${pctC}%` }} className="bg-[#908B6F]" />
+              <div style={{ width: `${pctF}%` }} className="bg-[#C4B9B1]" />
             </div>
 
             <div className="space-y-2.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#374151]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#0F766E]" />
+                <span className="flex items-center gap-2 text-[#4A483A]">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#4A483A]" />
                   Protein (4 kcal/g)
                 </span>
-                <span className="font-mono font-medium tabular-nums text-[#111827]">
+                <span className="font-mono font-medium tabular-nums text-[#2E2D24]">
                   {pctP}% · {avgDaily.protein}g
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#374151]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#3B82F6]" />
+                <span className="flex items-center gap-2 text-[#4A483A]">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#908B6F]" />
                   Carbs (4 kcal/g)
                 </span>
-                <span className="font-mono font-medium tabular-nums text-[#111827]">
+                <span className="font-mono font-medium tabular-nums text-[#2E2D24]">
                   {pctC}% · {avgDaily.carbs}g
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#374151]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#D97706]" />
+                <span className="flex items-center gap-2 text-[#4A483A]">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#C4B9B1]" />
                   Fat (9 kcal/g)
                 </span>
-                <span className="font-mono font-medium tabular-nums text-[#111827]">
+                <span className="font-mono font-medium tabular-nums text-[#2E2D24]">
                   {pctF}% · {avgDaily.fat}g
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E5E7EB] text-xs text-[#6B7280] flex items-center justify-between font-mono tabular-nums">
+          <div className="pt-3 border-t border-[#D9D0CB] text-xs text-[#6A6754] flex items-center justify-between font-mono tabular-nums">
             <span>Weekly Protein Total</span>
-            <span className="font-semibold text-[#111827]">{weeklyTotals.protein}g</span>
+            <span className="font-semibold text-[#2E2D24]">{weeklyTotals.protein}g</span>
           </div>
         </div>
       </AnimatedContent>
 
       {/* 7-Day Tabular Breakdown */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA]">
-          <h3 className="text-sm font-semibold text-[#111827]">Daily Nutrition Breakdown</h3>
+      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+        <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70">
+          <h3 className="text-sm font-semibold text-[#2E2D24]">Daily Nutrition Breakdown</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#E5E7EB] text-xs font-medium text-[#6B7280]">
+              <tr className="border-b border-[#D9D0CB] text-xs font-medium text-[#6A6754]">
                 <th className="py-3 px-5">Day</th>
                 <th className="py-3 px-4 text-right">Meals</th>
                 <th className="py-3 px-4 text-right">Calories</th>
@@ -417,7 +417,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 <th className="py-3 px-5 text-right">Target Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E7EB] text-xs">
+            <tbody className="divide-y divide-[#D9D0CB] text-xs">
               {dailyStats.map((d) => {
                 const diff = d.macros.calories - targets.calories;
                 const onTrack =
@@ -426,40 +426,40 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
                 const over = d.macros.calories > targets.calories * 1.12;
 
                 return (
-                  <tr key={d.date} className="hover:bg-[#F9FAFB]">
-                    <td className="py-3 px-5 font-medium text-[#111827]">
+                  <tr key={d.date} className="hover:bg-[#F3EFEC]">
+                    <td className="py-3 px-5 font-medium text-[#2E2D24]">
                       {d.header.weekday}, {d.header.monthShort} {d.header.dayNum}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#4B5563]">
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#4A483A]">
                       {d.mealCount}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-medium tabular-nums text-[#111827]">
+                    <td className="py-3 px-4 text-right font-mono font-medium tabular-nums text-[#2E2D24]">
                       {d.macros.calories.toLocaleString()} kcal
                     </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#0F766E]">
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#6A6754] font-medium">
                       {d.macros.protein}g
                     </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#374151]">
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#4A483A]">
                       {d.macros.carbs}g
                     </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#374151]">
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-[#4A483A]">
                       {d.macros.fat}g
                     </td>
                     <td className="py-3 px-5 text-right">
                       {d.macros.calories === 0 ? (
-                        <span className="text-[#9CA3AF]">No meals planned</span>
+                        <span className="text-[#908B6F]">No meals planned</span>
                       ) : over ? (
-                        <span className="inline-flex items-center gap-1 text-[#DC2626] font-medium">
+                        <span className="inline-flex items-center gap-1 text-[#B43C2E] font-medium">
                           <AlertTriangle className="w-3.5 h-3.5" />
                           +{diff} kcal over
                         </span>
                       ) : onTrack ? (
-                        <span className="inline-flex items-center gap-1 text-[#15803D] font-medium">
+                        <span className="inline-flex items-center gap-1 text-[#6A6754] font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           On target
                         </span>
                       ) : (
-                        <span className="text-[#4B5563]">
+                        <span className="text-[#4A483A]">
                           {diff > 0 ? `+${diff}` : diff} kcal
                         </span>
                       )}

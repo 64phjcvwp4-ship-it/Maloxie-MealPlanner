@@ -134,17 +134,24 @@ function useColorScheme(host: RefObject<HTMLElement | null>) {
   const [scheme, setScheme] = useState<'light' | 'dark'>('light');
   useEffect(() => {
     const query = matchMedia('(prefers-color-scheme: dark)');
+    const themeRoot = host.current?.closest('[data-theme]') ?? null;
     const read = () => {
-      const theme = host.current?.closest('[data-theme]')?.getAttribute('data-theme');
+      const theme = (themeRoot ?? host.current?.closest('[data-theme]'))?.getAttribute('data-theme');
       setScheme(theme === 'dark' || (theme !== 'light' && query.matches) ? 'dark' : 'light');
     };
     read();
     const observer = new MutationObserver(read);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      subtree: true,
-      attributeFilter: ['data-theme'],
-    });
+    if (themeRoot) {
+      observer.observe(themeRoot, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+    } else {
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+    }
     query.addEventListener('change', read);
     return () => {
       observer.disconnect();
@@ -274,7 +281,7 @@ export function useSoapBubble({
   const backdropElement = backdrop && 'current' in backdrop ? backdrop.current : (backdrop ?? null);
   useEffect(() => {
     engine.current?.setBackdrop(backdropElement);
-  });
+  }, [backdropElement]);
 
   useEffect(() => {
     if (!interactive) return;

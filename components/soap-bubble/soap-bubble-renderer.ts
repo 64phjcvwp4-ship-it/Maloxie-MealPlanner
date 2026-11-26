@@ -966,7 +966,7 @@ export function createSoapBubbleRenderer(
     if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
     showCovered();
     draw();
-    request();
+    if (!painted || moving() || jiggling()) request();
   };
 
   const resizeObserver = new ResizeObserver(resize);
@@ -994,7 +994,7 @@ export function createSoapBubbleRenderer(
   };
   // Backdrop pixels are matched to its box; moving either needs a redraw.
   const onScroll = () => {
-    if (backdrop?.size || layer) request();
+    if (visible && (backdrop?.size || layer)) request();
   };
   reduced?.addEventListener?.('change', onMotion);
   document.addEventListener('visibilitychange', onMotion);

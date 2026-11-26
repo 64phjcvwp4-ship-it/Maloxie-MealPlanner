@@ -187,10 +187,38 @@ export default function App() {
   const [customMealOpen, setCustomMealOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [introStage, setIntroStage] = useState<'visible' | 'fading' | 'done'>('visible');
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
   };
+
+  useEffect(() => {
+    if (introStage === 'done') return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (introStage === 'visible') {
+      const holdMs = prefersReducedMotion ? 250 : 2300;
+      const timer = window.setTimeout(() => setIntroStage('fading'), holdMs);
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setIntroStage('fading');
+        }
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => {
+        window.clearTimeout(timer);
+        window.removeEventListener('keydown', onKeyDown);
+      };
+    }
+
+    const fadeMs = prefersReducedMotion ? 150 : 1250;
+    const timer = window.setTimeout(() => setIntroStage('done'), fadeMs);
+    return () => window.clearTimeout(timer);
+  }, [introStage]);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -199,25 +227,35 @@ export default function App() {
   }, [toastMessage]);
 
   useEffect(() => {
-    try {
-      const payload: PersistedState = {
-        planningHorizonWeeks,
-        daysMap,
-        customRecipes,
-        customTemplates,
-        favoriteIds: favoriteIdsArr,
-        targets,
-        householdMultiplier,
-        checkedKeys: checkedKeysArr,
-        alreadyHaveKeys: alreadyHaveKeysArr,
-        clearedKeys: clearedKeysArr,
-        manualItems,
-        completedPrepTaskIds: completedPrepIdsArr,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      // Ignore storage quota errors
-    }
+    const payload: PersistedState = {
+      planningHorizonWeeks,
+      daysMap,
+      customRecipes,
+      customTemplates,
+      favoriteIds: favoriteIdsArr,
+      targets,
+      householdMultiplier,
+      checkedKeys: checkedKeysArr,
+      alreadyHaveKeys: alreadyHaveKeysArr,
+      clearedKeys: clearedKeysArr,
+      manualItems,
+      completedPrepTaskIds: completedPrepIdsArr,
+    };
+
+    const persist = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        // Ignore storage quota errors
+      }
+    };
+
+    const timer = window.setTimeout(persist, 350);
+    window.addEventListener('beforeunload', persist);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('beforeunload', persist);
+    };
   }, [
     planningHorizonWeeks,
     daysMap,
@@ -588,10 +626,58 @@ export default function App() {
   const allPlannedDatesFlat = useMemo(() => weeksDates.flat(), [weeksDates]);
 
   return (
-    <div ref={pageRef} data-theme="light" className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#111827]">
+    <div ref={pageRef} data-theme="light" className="relative min-h-screen flex flex-col text-[#2E2D24]">
+      {/* Global Full-Viewport MoltenMetal Background Visible Across Entire Site */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#6A6754] transform-gpu">
+        <MoltenMetal
+          colors={['#D9D0CB', '#908B6F']}
+          coreColor="#F4F0ED"
+          speed={0.35}
+          scale={7.6}
+          detail={3}
+          glow={2.0}
+          thickness={1.31}
+          haze={0.75}
+          mouseInteraction
+          flareOnClick
+          lightMode
+          swirl={1.25}
+          turbulence={0.2}
+          brightness={0.85}
+          colorMode="molten"
+          rotation={0}
+          offsetX={0}
+          offsetY={0}
+          grain={0.015}
+          opacity={1}
+          drift={0.3}
+          intro
+          mouseStrength={0.5}
+          paused={false}
+          dpr={2}
+          style={{ width: '100%', height: '100%' }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-b from-[#2E2D24]/52 via-[#4A483A]/40 to-[#2E2D24]/55"
+        />
+      </div>
+
       <SoapBubbleMaterial
-        backdrop={pageRef}
-        iridescence={0.5}
+        paused
+        seeThrough={0}
+        maxDpr={1.5}
+        iridescence={0.42}
+        soapPalette="custom"
+        soapPaletteRed="#D9D0CB"
+        soapPaletteGold="#C7BEB5"
+        soapPaletteGreen="#908B6F"
+        soapPaletteCyan="#A8A186"
+        soapPaletteBlue="#7C7861"
+        soapPaletteViolet="#6A6754"
+        soapColor="#908B6F"
+        soapShadeColor="#6A6754"
+        soapHighlightColor="#FAF8F6"
         oilCoverage={0.73}
         oilEdgeFade={2.33}
         clearCenter={0.57}
@@ -609,30 +695,31 @@ export default function App() {
         glintHeight={0.65}
         windowIntensity={0.85}
         windowTwin={false}
-        bottomShadeColor="#ffffff"
+        bottomShadeColor="#D9D0CB"
       >
+      <div className="relative z-10 flex flex-col flex-1">
       {/* Top Navigation Bar: Transparent Flat Logo (Without Glass Slab) + Maloxie + Nav + Action */}
-      <header data-theme="dark" className="h-16 bg-[#0F1117] border-b border-white/10 px-4 sm:px-8 flex items-center justify-between gap-8 sticky top-0 z-40">
+      <header data-theme="dark" className="h-16 bg-[#3B392D]/90 border-b border-[#D9D0CB]/25 px-4 sm:px-8 flex items-center justify-between gap-8 sticky top-0 z-40">
         <a
           href="#top"
           onClick={(e) => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="inline-flex items-center gap-3 font-display text-xl font-bold tracking-tight text-white whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded"
+          className="inline-flex items-center gap-3 font-display text-xl font-bold tracking-tight text-[#FAF8F6] whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9D0CB]/70 rounded"
         >
           <MaloxieMark className="h-9 w-auto" />
           <span>Maloxie</span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-white/75">
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#E5DFDA]">
           {WORKSPACE_TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => navigateAndScroll(t.id)}
-              className={`hover:text-white transition-colors whitespace-nowrap shrink-0 ${
-                activeTab === t.id ? 'text-white underline underline-offset-8 decoration-[#4ADE80]' : ''
+              className={`hover:text-[#FAF8F6] transition-colors whitespace-nowrap shrink-0 ${
+                activeTab === t.id ? 'text-[#FAF8F6] underline underline-offset-8 decoration-[#D9D0CB]' : ''
               }`}
             >
               {t.navLabel}
@@ -652,15 +739,15 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section: MoltenMetal Background + Crosshair + Centered GlassSlabLogo */}
+      {/* Hero Section: Crosshair + Centered GlassSlabLogo over Global MoltenMetal Background */}
       <section
         id="top"
         ref={heroRef}
-        className="relative overflow-hidden bg-[#0F1117] pt-10 pb-14 px-4 sm:px-8"
+        className="relative overflow-hidden pt-10 pb-12 px-4 sm:px-8"
       >
         <Crosshair
           containerRef={heroRef}
-          color="#ffffff"
+          color="#D9D0CB"
           targetEffect="lock"
           thickness={1}
           opacity={0.85}
@@ -673,48 +760,31 @@ export default function App() {
           clickPulse
           hideCursor={false}
         />
-        <div className="absolute inset-0 w-full h-full">
-          <MoltenMetal
-            colors={['#ffffff', '#ffffff']}
-            coreColor="#FFFFFF"
-            speed={0.35}
-            scale={7.6}
-            detail={3}
-            glow={2.7}
-            thickness={1.31}
-            haze={0.75}
-            mouseInteraction
-            flareOnClick
-            lightMode
-            swirl={1.25}
-            turbulence={0.2}
-            brightness={1.2}
-            colorMode="molten"
-            rotation={0}
-            offsetX={0}
-            offsetY={0}
-            grain={0.05}
-            opacity={1}
-            drift={0.3}
-            intro
-            mouseStrength={0.5}
-            paused={false}
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
-
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0F1117]/30 via-[#0F1117]/55 to-[#F8F9FA]"
-        />
 
         <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
-          <div className="w-full max-w-[300px] sm:max-w-[340px]">
+          <div className="relative w-full max-w-[340px] sm:max-w-[400px] drop-shadow-[0_18px_36px_rgba(46,45,36,0.48)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-4 inset-y-2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(46,45,36,0.52)_0%,transparent_72%)]"
+            />
             <GlassSlabLogo
               logo={MALOXIE_LOGO}
-              colorPreset="oilDark"
+              colorPreset="oil"
+              colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#C2BBA4', '#908B6F']}
+              lightColor="#FFFFFF"
+              exposure={1.7}
+              ambient={0.42}
+              reflectivity={1.9}
+              ior={1.68}
+              thickness={0.013}
+              depth={0.85}
+              density={0.85}
+              logoScale={0.86}
               backgroundColor="transparent"
-              style={{ height: 220 }}
+              paused={introStage === 'visible'}
+              maxDpr={2}
+              samples={48}
+              style={{ height: 248 }}
               aria-label="Maloxie glass slab logo"
             />
           </div>
@@ -730,48 +800,48 @@ export default function App() {
             trigger="mount"
             className="w-full flex flex-col items-center"
           >
-            <h1 className="mt-4 font-display text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.12]">
+            <h1 className="mt-4 font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#FAF8F6] leading-[1.12]">
               Plan meals that{' '}
-              <span className="text-[#86EFAC]">actually stick</span>
+              <span className="text-[#D9D0CB]">actually stick</span>
             </h1>
 
-            <p className="mt-3.5 text-sm sm:text-base text-white/80 max-w-xl leading-relaxed">
+            <p className="mt-3.5 text-sm sm:text-base text-[#F0EAE6] max-w-xl leading-relaxed">
               Maloxie turns weekly meal planning into a calm daily ritual. Schedule
               multi-week menus, auto-build smart grocery lists, and track macros in
               one place.
             </p>
 
             {/* Compact Weekly Snapshot Strip */}
-            <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-2xl bg-white/85 backdrop-blur-md border border-[#E5E7EB]">
+            <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-2xl bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 shadow-sm">
               <button
                 type="button"
                 onClick={() => navigateAndScroll('calendar')}
-                className="text-center rounded-xl py-1 hover:bg-black/5 transition-colors"
+                className="text-center rounded-xl py-1 hover:bg-[#D9D0CB]/30 transition-colors"
               >
-                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#2E2D24]">
                   {activeWeekSummary.plannedMeals}
                 </div>
-                <div className="text-xs text-[#6B7280]">meals planned</div>
+                <div className="text-xs text-[#6A6754]">meals planned</div>
               </button>
               <button
                 type="button"
                 onClick={() => navigateAndScroll('nutrition')}
-                className="text-center border-x border-[#E5E7EB] py-1 hover:bg-black/5 transition-colors"
+                className="text-center border-x border-[#D9D0CB] py-1 hover:bg-[#D9D0CB]/30 transition-colors"
               >
-                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#2E2D24]">
                   {activeWeekSummary.avgDailyCalories.toLocaleString()}
                 </div>
-                <div className="text-xs text-[#6B7280]">avg kcal / day</div>
+                <div className="text-xs text-[#6A6754]">avg kcal / day</div>
               </button>
               <button
                 type="button"
                 onClick={() => navigateAndScroll('grocery')}
-                className="text-center rounded-xl py-1 hover:bg-black/5 transition-colors"
+                className="text-center rounded-xl py-1 hover:bg-[#D9D0CB]/30 transition-colors"
               >
-                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#15803D]">
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#6A6754]">
                   ${activeWeekSummary.estCost.toFixed(0)} / ${targets.weeklyBudget}
                 </div>
-                <div className="text-xs text-[#6B7280]">weekly budget</div>
+                <div className="text-xs text-[#6A6754]">weekly budget</div>
               </button>
             </div>
           </AnimatedContent>
@@ -784,8 +854,8 @@ export default function App() {
         className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 pb-12 space-y-5"
       >
         {/* Workspace Navigation Tabs & Contextual Summary */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
+        <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
             {WORKSPACE_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -798,7 +868,7 @@ export default function App() {
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isActive ? 'text-[#86EFAC]' : 'text-[#6B7280]'
+                      isActive ? 'text-[#D9D0CB]' : 'text-[#6A6754]'
                     }`}
                   />
                   <span>{tab.label}</span>
@@ -813,7 +883,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center justify-between lg:justify-end gap-3 px-1">
-            <span className="text-xs text-[#6B7280] font-mono tabular-nums">
+            <span className="text-xs text-[#6A6754] font-mono tabular-nums">
               Week {activeWeekIndex + 1} of {planningHorizonWeeks} ·{' '}
               {formatWeekRangeLabel(activeWeekDates)}
             </span>
@@ -977,12 +1047,58 @@ export default function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 right-5 z-50 px-4 py-2.5 bg-[#111827] text-white text-xs font-medium rounded-lg shadow-lg flex items-center gap-2"
+          className="fixed bottom-5 right-5 z-50 px-4 py-2.5 bg-[#3B392D] text-[#FAF8F6] border border-[#908B6F]/40 text-xs font-medium rounded-lg shadow-lg flex items-center gap-2"
         >
-          <Check className="w-3.5 h-3.5 text-[#4ADE80]" />
+          <Check className="w-3.5 h-3.5 text-[#D9D0CB]" />
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {introStage !== 'done' && (
+        <div
+          aria-hidden={introStage === 'fading'}
+          onClick={() => setIntroStage((s) => (s === 'visible' ? 'fading' : s))}
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#2E2D24]/38 px-6 transition-opacity duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            introStage === 'fading' ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'
+          }`}
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#2E2D24]/55 via-[#4A483A]/40 to-[#2E2D24]/65"
+          />
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="relative w-[300px] sm:w-[390px] drop-shadow-[0_18px_36px_rgba(46,45,36,0.55)]">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-4 inset-y-2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(46,45,36,0.55)_0%,transparent_72%)]"
+              />
+              <GlassSlabLogo
+                logo={MALOXIE_LOGO}
+                colorPreset="oil"
+                colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#C2BBA4', '#908B6F']}
+                lightColor="#FFFFFF"
+                exposure={1.7}
+                ambient={0.42}
+                reflectivity={1.9}
+                ior={1.68}
+                thickness={0.013}
+                depth={0.85}
+                density={0.85}
+                logoScale={0.86}
+                backgroundColor="transparent"
+                maxDpr={2}
+                samples={48}
+                style={{ height: 260 }}
+                aria-label="Maloxie glass slab logo"
+              />
+            </div>
+            <p className="mt-2 font-display text-4xl sm:text-5xl font-bold tracking-[0.06em] text-[#FAF8F6] drop-shadow-[0_4px_18px_rgba(46,45,36,0.5)]">
+              Maloxie
+            </p>
+          </div>
+        </div>
+      )}
+      </div>
       </SoapBubbleMaterial>
     </div>
   );

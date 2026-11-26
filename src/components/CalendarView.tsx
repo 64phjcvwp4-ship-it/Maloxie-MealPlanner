@@ -189,9 +189,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Toolbar: Horizon, Week Tabs, View Switcher, Templates */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-2xl flex-wrap">
+          <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-2xl flex-wrap">
             {weeksDates.map((dates, idx) => (
               <BubbleButton
                 key={idx}
@@ -207,13 +207,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-[#4B5563]">
+          <div className="flex items-center gap-1.5 text-xs text-[#4A483A]">
             <span>Plan ahead:</span>
             <select
               aria-label="Planning horizon weeks"
               value={planningHorizonWeeks}
               onChange={(e) => onChangeHorizon(Number(e.target.value))}
-              className="px-2.5 py-1.5 text-xs font-medium text-[#111827] bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+              className="px-2.5 py-1.5 text-xs font-medium text-[#2E2D24] bg-[#FAF8F6] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             >
               <option value={1}>1 Week</option>
               <option value={2}>2 Weeks</option>
@@ -224,7 +224,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full">
+          <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full">
             <BubbleButton
               variant={viewMode === 'week' ? 'dark' : 'default'}
               size="sm"
@@ -273,21 +273,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       {/* Main Content: Either Single-Week Detail Grid (+ Drag Tray) OR Multi-Week Matrix */}
       {viewMode === 'multi' ? (
         <AnimatedContent
-          distance={100}
+          distance={20}
           direction="vertical"
-          duration={0.8}
+          duration={0.35}
           ease="power3.out"
           blur={0}
-          stagger={0.08}
-          threshold={0.1}
+          stagger={0.03}
           trigger="mount"
           className="space-y-6"
         >
           {weeksDates.map((weekDates, wIdx) => (
-            <div key={wIdx} className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-4">
+            <div key={wIdx} className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+              <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-sm font-semibold text-[#111827]">
+                  <h2 className="text-sm font-semibold text-[#2E2D24]">
                     Week {wIdx + 1} · {formatWeekRangeLabel(weekDates)}
                   </h2>
                 </div>
@@ -312,7 +311,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 divide-y lg:divide-y-0 lg:divide-x divide-[#E5E7EB]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 divide-y lg:divide-y-0 lg:divide-x divide-[#D9D0CB]">
                 {weekDates.map((date) => {
                   const { weekday, dayNum, monthShort } = formatShortDayHeader(date);
                   const day = daysMap[date];
@@ -320,11 +319,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   return (
                     <div key={date} className="p-3 space-y-2.5 flex flex-col justify-between min-h-[190px]">
                       <div>
-                        <div className="flex items-baseline justify-between border-b border-[#E5E7EB] pb-1.5 mb-2">
-                          <span className="text-xs font-semibold text-[#111827]">
+                        <div className="flex items-baseline justify-between border-b border-[#D9D0CB] pb-1.5 mb-2">
+                          <span className="text-xs font-semibold text-[#2E2D24]">
                             {weekday} {monthShort} {dayNum}
                           </span>
-                          <span className="font-mono text-[11px] tabular-nums text-[#6B7280]">
+                          <span className="font-mono text-[11px] tabular-nums text-[#6A6754]">
                             {macros.calories} kcal
                           </span>
                         </div>
@@ -337,7 +336,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                   key={slot}
                                   type="button"
                                   onClick={() => onOpenAssignModal(date, slot)}
-                                  className="w-full text-left text-[11px] text-[#9CA3AF] hover:text-[#15803D] py-0.5 truncate"
+                                  className="w-full text-left text-[11px] text-[#908B6F] hover:text-[#6A6754] py-0.5 truncate"
                                 >
                                   + {MEAL_SLOT_LABELS[slot]}
                                 </button>
@@ -349,18 +348,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                               return (
                                 <div
                                   key={entry.instanceId}
-                                  className="text-[11px] leading-snug text-[#374151] flex items-start justify-between gap-1 group"
+                                  className="text-[11px] leading-snug text-[#4A483A] flex items-start justify-between gap-1 group"
                                 >
                                   <button
                                     type="button"
                                     onClick={() => onOpenRecipeDetail(rec)}
-                                    className="text-left hover:text-[#15803D] truncate flex-1"
+                                    className="text-left hover:text-[#6A6754] truncate flex-1"
                                   >
-                                    <span className="text-[#9CA3AF] mr-1">
+                                    <span className="text-[#908B6F] mr-1">
                                       {MEAL_SLOT_LABELS[slot][0]}:
                                     </span>
                                     {entry.isLeftover && (
-                                      <span className="text-[#B45309] font-medium mr-1">
+                                      <span className="text-[#6A6754] font-semibold mr-1">
                                         [Leftover]
                                       </span>
                                     )}
@@ -373,7 +372,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         </div>
                       </div>
                       {day?.note && (
-                        <div className="text-[11px] text-[#6B7280] pt-1.5 border-t border-dashed border-[#E5E7EB] truncate">
+                        <div className="text-[11px] text-[#6A6754] pt-1.5 border-t border-dashed border-[#D9D0CB] truncate">
                           {day.note}
                         </div>
                       )}
@@ -389,13 +388,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           {/* 7-Day Detailed Grid */}
           <div className="flex-1 w-full overflow-x-auto">
             <AnimatedContent
-              distance={100}
+              distance={20}
               direction="vertical"
-              duration={0.8}
+              duration={0.35}
               ease="power3.out"
               blur={0}
-              stagger={0.08}
-              threshold={0.1}
+              stagger={0.025}
+              trigger="mount"
               className="min-w-[1060px] grid grid-cols-7 gap-3"
             >
               {currentWeekDates.map((date) => {
@@ -408,36 +407,36 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 return (
                   <div
                     key={date}
-                    className="bg-white border border-[#E5E7EB] rounded-xl flex flex-col overflow-hidden"
+                    className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl flex flex-col overflow-hidden shadow-sm"
                   >
                     {/* Day Header & Mini Nutrition Bar */}
-                    <div className="p-3 border-b border-[#E5E7EB] bg-[#FAFAFA] space-y-2">
+                    <div className="p-3 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 space-y-2">
                       <div className="flex items-baseline justify-between">
                         <div>
-                          <span className="text-xs font-semibold text-[#111827]">{weekday}</span>
-                          <span className="text-xs text-[#6B7280] ml-1.5">
+                          <span className="text-xs font-semibold text-[#2E2D24]">{weekday}</span>
+                          <span className="text-xs text-[#6A6754] ml-1.5">
                             {monthShort} {dayNum}
                           </span>
                         </div>
                         <span
                           className={`font-mono text-[11px] font-medium tabular-nums ${
-                            overCal ? 'text-[#DC2626]' : 'text-[#374151]'
+                            overCal ? 'text-[#B43C2E]' : 'text-[#4A483A]'
                           }`}
                         >
                           {macros.calories} kcal
                         </span>
                       </div>
 
-                      <div className="w-full h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#EAE4E0] rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all ${
-                            overCal ? 'bg-[#DC2626]' : 'bg-[#15803D]'
+                            overCal ? 'bg-[#B43C2E]' : 'bg-[#6A6754]'
                           }`}
                           style={{ width: `${calPct}%` }}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between text-[10px] font-mono tabular-nums text-[#6B7280]">
+                      <div className="flex items-center justify-between text-[10px] font-mono tabular-nums text-[#6A6754]">
                         <span>P {macros.protein}g</span>
                         <span>C {macros.carbs}g</span>
                         <span>F {macros.fat}g</span>
@@ -445,7 +444,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </div>
 
                     {/* 4 Meal Slots */}
-                    <div className="flex-1 divide-y divide-[#E5E7EB]">
+                    <div className="flex-1 divide-y divide-[#D9D0CB]">
                       {SLOTS.map((slot) => {
                         const entries = day?.slots[slot] || [];
                         const cellKey = `${date}::${slot}`;
@@ -463,19 +462,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             }}
                             onDrop={(e) => handleDropOnCell(e, date, slot)}
                             className={`p-2.5 min-h-[104px] transition-colors flex flex-col justify-between ${
-                              isDragOver ? 'bg-[#F0FDF4]' : 'bg-white'
+                              isDragOver ? 'bg-[#EAE4DE]/85' : 'bg-transparent'
                             }`}
                           >
                             <div>
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[11px] font-medium text-[#6B7280]">
+                                <span className="text-[11px] font-medium text-[#6A6754]">
                                   {MEAL_SLOT_LABELS[slot]}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => onOpenAssignModal(date, slot)}
                                   aria-label={`Add ${MEAL_SLOT_LABELS[slot]} on ${date}`}
-                                  className="p-0.5 text-[#9CA3AF] hover:text-[#15803D] rounded"
+                                  className="p-0.5 text-[#908B6F] hover:text-[#6A6754] rounded"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
                                 </button>
@@ -485,7 +484,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => onOpenAssignModal(date, slot)}
-                                  className="w-full py-2.5 border border-dashed border-[#E5E7EB] hover:border-[#15803D]/50 rounded-full text-[11px] text-[#9CA3AF] hover:text-[#15803D] transition-colors"
+                                  className="w-full py-2.5 border border-dashed border-[#D9D0CB] hover:border-[#6A6754]/60 rounded-full text-[11px] text-[#908B6F] hover:text-[#6A6754] transition-colors"
                                 >
                                   + Assign meal
                                 </button>
@@ -507,29 +506,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                         }
                                         className={`p-2 rounded-lg border text-xs group transition-colors ${
                                           entry.isLeftover
-                                            ? 'bg-[#FFFBEB] border-[#FDE68A]'
-                                            : 'bg-[#F9FAFB] border-[#E5E7EB] hover:border-[#D1D5DB]'
+                                            ? 'bg-[#F0ECE4] border-[#908B6F]/55'
+                                            : 'bg-[#F3EFEC] border-[#D9D0CB] hover:border-[#908B6F]'
                                         }`}
                                       >
                                         <div className="flex items-start gap-1">
-                                          <GripVertical className="w-3 h-3 text-[#9CA3AF] mt-0.5 shrink-0 cursor-grab" />
+                                          <GripVertical className="w-3 h-3 text-[#908B6F] mt-0.5 shrink-0 cursor-grab" />
                                           <button
                                             type="button"
                                             onClick={() => onOpenRecipeDetail(recipe)}
-                                            className="text-left font-medium text-[#111827] hover:text-[#15803D] leading-snug flex-1 line-clamp-2"
+                                            className="text-left font-medium text-[#2E2D24] hover:text-[#6A6754] leading-snug flex-1 line-clamp-2"
                                           >
                                             {recipe.title}
                                           </button>
                                         </div>
 
                                         {entry.isLeftover && (
-                                          <div className="mt-1 text-[10px] font-medium text-[#B45309] flex items-center gap-1">
+                                          <div className="mt-1 text-[10px] font-medium text-[#6A6754] flex items-center gap-1">
                                             <RefreshCw className="w-2.5 h-2.5" />
                                             <span>Leftover · No cook</span>
                                           </div>
                                         )}
 
-                                        <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#6B7280] font-mono tabular-nums">
+                                        <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#6A6754] font-mono tabular-nums">
                                           <span>
                                             {slotCals} kcal · {entry.servings}x
                                           </span>
@@ -541,7 +540,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                                 onUpdateServings(date, slot, entry.instanceId, -1)
                                               }
                                               title="Decrease servings"
-                                              className="p-0.5 hover:text-[#111827]"
+                                              className="p-0.5 hover:text-[#2E2D24]"
                                             >
                                               <Minus className="w-2.5 h-2.5" />
                                             </button>
@@ -551,20 +550,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                                 onUpdateServings(date, slot, entry.instanceId, 1)
                                               }
                                               title="Increase servings"
-                                              className="p-0.5 hover:text-[#111827]"
+                                              className="p-0.5 hover:text-[#2E2D24]"
                                             >
                                               <Plus className="w-2.5 h-2.5" />
                                             </button>
                                           </div>
                                         </div>
 
-                                        <div className="mt-1.5 pt-1.5 border-t border-black/5 flex items-center justify-between gap-1 text-[10px]">
+                                        <div className="mt-1.5 pt-1.5 border-t border-[#D9D0CB]/60 flex items-center justify-between gap-1 text-[10px]">
                                           <button
                                             type="button"
                                             onClick={() =>
                                               onToggleLeftover(date, slot, entry.instanceId)
                                             }
-                                            className="text-[#4B5563] hover:text-[#111827] truncate"
+                                            className="text-[#4A483A] hover:text-[#2E2D24] truncate"
                                           >
                                             {entry.isLeftover ? 'Mark fresh' : 'Mark leftover'}
                                           </button>
@@ -576,7 +575,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                                 sendLeftoverToTomorrow(date, slot, entry)
                                               }
                                               title="Send leftover to tomorrow"
-                                              className="p-0.5 text-[#6B7280] hover:text-[#15803D]"
+                                              className="p-0.5 text-[#6A6754] hover:text-[#2E2D24]"
                                             >
                                               <CornerDownRight className="w-3 h-3" />
                                             </button>
@@ -586,7 +585,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                                 onRemoveMeal(date, slot, entry.instanceId)
                                               }
                                               title="Remove meal"
-                                              className="p-0.5 text-[#6B7280] hover:text-[#DC2626]"
+                                              className="p-0.5 text-[#6A6754] hover:text-[#B43C2E]"
                                             >
                                               <Trash2 className="w-3 h-3" />
                                             </button>
@@ -604,15 +603,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </div>
 
                     {/* Daily Note Input */}
-                    <div className="p-2.5 border-t border-[#E5E7EB] bg-[#FAFAFA]">
+                    <div className="p-2.5 border-t border-[#D9D0CB]/80 bg-[#F3EFEC]/70">
                       <div className="flex items-start gap-1.5">
-                        <StickyNote className="w-3.5 h-3.5 text-[#9CA3AF] mt-1 shrink-0" />
+                        <StickyNote className="w-3.5 h-3.5 text-[#908B6F] mt-1 shrink-0" />
                         <textarea
                           rows={2}
                           value={day?.note || ''}
                           onChange={(e) => onUpdateNote(date, e.target.value)}
                           placeholder="Day note..."
-                          className="w-full text-[11px] text-[#374151] placeholder:text-[#9CA3AF] bg-transparent resize-none focus:outline-none"
+                          className="w-full text-[11px] text-[#4A483A] placeholder:text-[#908B6F] bg-transparent resize-none focus:outline-none"
                         />
                       </div>
                     </div>
@@ -624,16 +623,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Quick-Assign Drag Tray */}
           {drawerOpen && (
-            <aside className="w-full 2xl:w-[270px] shrink-0 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-              <div className="p-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] space-y-2.5">
+            <aside className="w-full 2xl:w-[270px] shrink-0 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold text-[#111827]">
+                  <h3 className="text-xs font-semibold text-[#2E2D24]">
                     Quick-Assign Meal Tray
                   </h3>
-                  <span className="text-[11px] text-[#6B7280]">Drag to calendar</span>
+                  <span className="text-[11px] text-[#6A6754]">Drag to calendar</span>
                 </div>
 
-                <div className="flex items-center gap-1 p-1 bg-[#E5E7EB]/60 rounded-full">
+                <div className="flex items-center gap-1 p-1 bg-[#EAE4E0]/75 rounded-full">
                   {(['all', 'favorites', 'quick'] as const).map((f) => (
                     <BubbleButton
                       key={f}
@@ -648,29 +647,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </div>
               </div>
 
-              <div className="max-h-[620px] overflow-y-auto divide-y divide-[#E5E7EB]">
+              <div className="max-h-[620px] overflow-y-auto divide-y divide-[#D9D0CB]">
                 {drawerRecipes.map((recipe) => (
                   <div
                     key={recipe.id}
                     draggable
                     onDragStart={(e) => handleDragStartRecipe(e, recipe.id)}
-                    className="p-3 hover:bg-[#F9FAFB] cursor-grab active:cursor-grabbing flex items-start gap-2 transition-colors"
+                    className="p-3 hover:bg-[#F3EFEC] cursor-grab active:cursor-grabbing flex items-start gap-2 transition-colors"
                   >
-                    <GripVertical className="w-3.5 h-3.5 text-[#9CA3AF] mt-0.5 shrink-0" />
+                    <GripVertical className="w-3.5 h-3.5 text-[#908B6F] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1">
                         <button
                           type="button"
                           onClick={() => onOpenRecipeDetail(recipe)}
-                          className="text-xs font-medium text-[#111827] hover:text-[#15803D] truncate text-left"
+                          className="text-xs font-medium text-[#2E2D24] hover:text-[#6A6754] truncate text-left"
                         >
                           {recipe.title}
                         </button>
                         {favoriteIds.has(recipe.id) && (
-                          <Heart className="w-3 h-3 text-[#DC2626] fill-[#DC2626] shrink-0" />
+                          <Heart className="w-3 h-3 text-[#B43C2E] fill-[#B43C2E] shrink-0" />
                         )}
                       </div>
-                      <div className="text-[11px] text-[#6B7280] mt-0.5 font-mono tabular-nums">
+                      <div className="text-[11px] text-[#6A6754] mt-0.5 font-mono tabular-nums">
                         {recipe.macrosPerServing.calories} kcal · {recipe.macrosPerServing.protein}g P ·{' '}
                         {recipe.prepTimeMinutes + recipe.cookTimeMinutes}m
                       </div>
@@ -685,13 +684,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* Active Week Visual Menu Moodboard */}
       {weekMasonryItems.length > 0 && (
-        <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+        <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-[#111827]">
+              <h2 className="text-sm font-semibold text-[#2E2D24]">
                 Week {activeWeekIndex + 1} Menu Moodboard ({weekMasonryItems.length} dishes)
               </h2>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-[#6A6754]">
                 Visual overview of every dish scheduled this week — click any tile to open the recipe
               </p>
             </div>
@@ -704,6 +703,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               gap={12}
               radius={12}
               animateFrom="bottom"
+              blurToFocus={false}
               hoverEffect="zoom"
               focusOnHover
               captions="always"

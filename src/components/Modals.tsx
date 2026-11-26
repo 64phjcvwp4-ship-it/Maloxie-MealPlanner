@@ -78,19 +78,19 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="assign-modal-title"
-        className="w-full max-w-2xl bg-white border border-[#E5E7EB] rounded-xl shadow-lg flex flex-col max-h-[86vh]"
+        className="w-full max-w-2xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg flex flex-col max-h-[86vh]"
       >
-        <div className="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-[#D9D0CB] flex items-center justify-between gap-4">
           <div>
-            <h2 id="assign-modal-title" className="text-lg font-semibold text-[#111827]">
+            <h2 id="assign-modal-title" className="text-lg font-semibold text-[#2E2D24]">
               Add to {MEAL_SLOT_LABELS[slot]}
             </h2>
-            <p className="text-xs text-[#6B7280] mt-0.5">{formatFullDayLabel(date)}</p>
+            <p className="text-xs text-[#6A6754] mt-0.5">{formatFullDayLabel(date)}</p>
           </div>
           <BubbleIconButton
             variant="default"
@@ -102,8 +102,8 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
           </BubbleIconButton>
         </div>
 
-        <div className="px-6 py-3 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#E5E7EB]/60 rounded-full">
+        <div className="px-6 py-3 border-b border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0] rounded-full">
             {(['recommended', 'favorites', 'all'] as const).map((mode) => (
               <BubbleButton
                 key={mode}
@@ -122,23 +122,23 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
 
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-[#4B5563]">Servings:</span>
-              <div className="inline-flex items-center border border-[#E5E7EB] rounded-full bg-white px-0.5">
+              <span className="text-[#4A483A]">Servings:</span>
+              <div className="inline-flex items-center border border-[#D9D0CB] rounded-full bg-[#FAF8F6] px-0.5">
                 <button
                   type="button"
                   onClick={() => setServings((s) => Math.max(1, s - 1))}
-                  className="px-2 py-1 text-[#4B5563] hover:text-[#111827]"
+                  className="px-2 py-1 text-[#4A483A] hover:text-[#2E2D24]"
                   aria-label="Decrease servings"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="px-2 font-mono font-medium tabular-nums text-[#111827]">
+                <span className="px-2 font-mono font-medium tabular-nums text-[#2E2D24]">
                   {servings}
                 </span>
                 <button
                   type="button"
                   onClick={() => setServings((s) => Math.min(8, s + 1))}
-                  className="px-2 py-1 text-[#4B5563] hover:text-[#111827]"
+                  className="px-2 py-1 text-[#4A483A] hover:text-[#2E2D24]"
                   aria-label="Increase servings"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -146,19 +146,19 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
               </div>
             </div>
 
-            <label className="inline-flex items-center gap-2 cursor-pointer text-[#4B5563]">
+            <label className="inline-flex items-center gap-2 cursor-pointer text-[#4A483A]">
               <input
                 type="checkbox"
                 checked={isLeftover}
                 onChange={(e) => setIsLeftover(e.target.checked)}
-                className="rounded border-[#D1D5DB] text-[#15803D] focus:ring-[#15803D]"
+                className="rounded border-[#908B6F] accent-[#6A6754] focus:ring-[#6A6754]"
               />
               <span>Mark as leftover</span>
             </label>
           </div>
         </div>
 
-        <div className="px-6 py-3 border-b border-[#E5E7EB]">
+        <div className="px-6 py-3 border-b border-[#D9D0CB]">
           <div className="text-xs">
             <SoapBubbleSearch
               value={query}
@@ -170,9 +170,9 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E5E7EB]">
+        <div className="flex-1 overflow-y-auto divide-y divide-[#D9D0CB]">
           {filtered.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[#6B7280]">
+            <div className="py-12 text-center text-sm text-[#6A6754]">
               No matching recipes found. Try switching to All Recipes.
             </div>
           ) : (
@@ -181,19 +181,19 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
               return (
                 <div
                   key={recipe.id}
-                  className="px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-[#F9FAFB] transition-colors"
+                  className="px-6 py-3.5 flex items-center justify-between gap-4 hover:bg-[#F3EFEC] transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#111827] truncate">
+                      <span className="text-sm font-medium text-[#2E2D24] truncate">
                         {recipe.title}
                       </span>
                       {favoriteIds.has(recipe.id) && (
-                        <Heart className="w-3.5 h-3.5 text-[#DC2626] fill-[#DC2626] shrink-0" />
+                        <Heart className="w-3.5 h-3.5 text-[#B43C2E] fill-[#B43C2E] shrink-0" />
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#6B7280] mt-1">
-                      <span className="font-mono tabular-nums text-[#111827]">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#6A6754] mt-1">
+                      <span className="font-mono tabular-nums text-[#2E2D24]">
                         {recipe.macrosPerServing.calories} kcal
                       </span>
                       <span aria-hidden="true">·</span>
@@ -267,21 +267,21 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-detail-title"
-        className="w-full max-w-3xl bg-white border border-[#E5E7EB] rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-3xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="relative h-56 shrink-0 bg-[#F3F4F6]">
+        <div className="relative h-56 shrink-0 bg-[#EAE4E0]">
           <RecipeImage
             src={recipe.imageUrl}
             alt={recipe.title}
             mealTypes={recipe.mealTypes}
             className="w-full h-full"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2E2D24]/80 via-[#2E2D24]/25 to-transparent" />
           <BubbleIconButton
             variant="default"
             iconSize="md"
@@ -291,8 +291,8 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           >
             <X className="w-4 h-4" />
           </BubbleIconButton>
-          <div className="absolute bottom-4 left-6 right-6 text-white">
-            <div className="text-xs text-white/85 flex items-center gap-2 mb-1">
+          <div className="absolute bottom-4 left-6 right-6 text-[#FAF8F6]">
+            <div className="text-xs text-[#E5DFDA] flex items-center gap-2 mb-1">
               <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
               <span aria-hidden="true">·</span>
               <span>{totalTime} min total</span>
@@ -305,30 +305,30 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <div>
-              <span className="text-[#6B7280] block">Calories</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#111827]">
+              <span className="text-[#6A6754] block">Calories</span>
+              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
                 {recipe.macrosPerServing.calories} kcal
               </span>
             </div>
-            <div className="h-6 w-px bg-[#E5E7EB]" />
+            <div className="h-6 w-px bg-[#D9D0CB]" />
             <div>
-              <span className="text-[#6B7280] block">Protein</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#15803D]">
+              <span className="text-[#6A6754] block">Protein</span>
+              <span className="font-mono font-semibold text-sm tabular-nums text-[#6A6754]">
                 {recipe.macrosPerServing.protein}g
               </span>
             </div>
             <div>
-              <span className="text-[#6B7280] block">Carbs</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#111827]">
+              <span className="text-[#6A6754] block">Carbs</span>
+              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
                 {recipe.macrosPerServing.carbs}g
               </span>
             </div>
             <div>
-              <span className="text-[#6B7280] block">Fat</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#111827]">
+              <span className="text-[#6A6754] block">Fat</span>
+              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
                 {recipe.macrosPerServing.fat}g
               </span>
             </div>
@@ -340,19 +340,19 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               size="sm"
               onClick={() => onToggleFavorite(recipe.id)}
             >
-              <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-[#DC2626] text-[#DC2626]' : ''}`} />
+              <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-[#B43C2E] text-[#B43C2E]' : ''}`} />
               <span>{isFavorite ? 'Favorited' : 'Save Favorite'}</span>
             </BubbleButton>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#4B5563]">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#4A483A]">
             <span>{recipe.subtitle}</span>
             {recipe.dietaryTags.length > 0 && (
               <>
                 <span aria-hidden="true">·</span>
-                <span className="text-[#15803D] font-medium">
+                <span className="text-[#6A6754] font-semibold">
                   {recipe.dietaryTags.join(' · ')}
                 </span>
               </>
@@ -362,23 +362,23 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-5 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#111827]">Ingredients</h3>
-                <div className="inline-flex items-center gap-1 border border-[#E5E7EB] rounded-full px-2 py-0.5 text-xs">
+                <h3 className="text-sm font-semibold text-[#2E2D24]">Ingredients</h3>
+                <div className="inline-flex items-center gap-1 border border-[#D9D0CB] rounded-full px-2 py-0.5 text-xs">
                   <button
                     type="button"
                     onClick={() => setServings((s) => Math.max(1, s - 1))}
-                    className="p-0.5 text-[#6B7280] hover:text-[#111827]"
+                    className="p-0.5 text-[#6A6754] hover:text-[#2E2D24]"
                     aria-label="Decrease recipe servings"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="font-mono tabular-nums px-1 text-[#111827]">
+                  <span className="font-mono tabular-nums px-1 text-[#2E2D24]">
                     {servings} srv
                   </span>
                   <button
                     type="button"
                     onClick={() => setServings((s) => Math.min(12, s + 1))}
-                    className="p-0.5 text-[#6B7280] hover:text-[#111827]"
+                    className="p-0.5 text-[#6A6754] hover:text-[#2E2D24]"
                     aria-label="Increase recipe servings"
                   >
                     <Plus className="w-3 h-3" />
@@ -386,11 +386,11 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
                 </div>
               </div>
 
-              <ul className="divide-y divide-[#E5E7EB] border-t border-b border-[#E5E7EB]">
+              <ul className="divide-y divide-[#D9D0CB] border-t border-b border-[#D9D0CB]">
                 {recipe.ingredients.map((ing) => (
                   <li key={ing.id} className="py-2 flex items-center justify-between gap-2 text-xs">
-                    <span className="text-[#374151]">{ing.name}</span>
-                    <span className="font-mono tabular-nums text-[#111827] whitespace-nowrap">
+                    <span className="text-[#4A483A]">{ing.name}</span>
+                    <span className="font-mono tabular-nums text-[#2E2D24] whitespace-nowrap">
                       {formatQuantity(ing.quantity * scale)} {ing.unit}
                     </span>
                   </li>
@@ -399,11 +399,11 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             </div>
 
             <div className="md:col-span-7 space-y-4">
-              <h3 className="text-sm font-semibold text-[#111827]">Instructions</h3>
+              <h3 className="text-sm font-semibold text-[#2E2D24]">Instructions</h3>
               <ol className="space-y-3">
                 {recipe.instructions.map((step, i) => (
-                  <li key={i} className="flex gap-3 text-sm text-[#374151] leading-relaxed">
-                    <span className="font-mono text-xs font-semibold text-[#15803D] pt-0.5 shrink-0">
+                  <li key={i} className="flex gap-3 text-sm text-[#4A483A] leading-relaxed">
+                    <span className="font-mono text-xs font-semibold text-[#6A6754] pt-0.5 shrink-0">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <span>{step}</span>
@@ -412,8 +412,8 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </ol>
 
               {(recipe.batchTip || recipe.storageDays) && (
-                <div className="p-3.5 bg-[#F8FAFC] border border-[#E5E7EB] rounded-lg text-xs text-[#4B5563] space-y-1">
-                  <div className="font-medium text-[#111827]">
+                <div className="p-3.5 bg-[#F3EFEC] border border-[#D9D0CB] rounded-lg text-xs text-[#4A483A] space-y-1">
+                  <div className="font-medium text-[#2E2D24]">
                     Batch & Storage{recipe.storageDays ? ` · Keeps ${recipe.storageDays} days chilled` : ''}
                   </div>
                   {recipe.batchTip && <p>{recipe.batchTip}</p>}
@@ -423,13 +423,13 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           </div>
         </div>
 
-        <div className="px-6 py-3.5 border-t border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-3.5 border-t border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-medium text-[#374151]">Schedule meal:</span>
+            <span className="font-medium text-[#4A483A]">Schedule meal:</span>
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-2.5 py-1.5 border border-[#E5E7EB] rounded-md bg-white text-[#111827]"
+              className="px-2.5 py-1.5 border border-[#D9D0CB] rounded-md bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             >
               {availableDates.map((d) => (
                 <option key={d} value={d}>
@@ -440,7 +440,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             <select
               value={selectedSlot}
               onChange={(e) => setSelectedSlot(e.target.value as MealSlotType)}
-              className="px-2.5 py-1.5 border border-[#E5E7EB] rounded-md bg-white text-[#111827]"
+              className="px-2.5 py-1.5 border border-[#D9D0CB] rounded-md bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             >
               {(['breakfast', 'lunch', 'dinner', 'snacks'] as MealSlotType[]).map((s) => (
                 <option key={s} value={s}>
@@ -594,15 +594,15 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="custom-recipe-title"
-        className="w-full max-w-2xl bg-white border border-[#E5E7EB] rounded-xl shadow-lg flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg flex flex-col max-h-[90vh]"
       >
-        <div className="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
-          <h2 id="custom-recipe-title" className="text-lg font-semibold text-[#111827]">
+        <div className="px-6 py-4 border-b border-[#D9D0CB] flex items-center justify-between">
+          <h2 id="custom-recipe-title" className="text-lg font-semibold text-[#2E2D24]">
             Quick-Add Custom Meal
           </h2>
           <BubbleIconButton
@@ -618,7 +618,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-[#374151] mb-1">
+              <label className="block text-xs font-medium text-[#4A483A] mb-1">
                 Meal Title
               </label>
               <input
@@ -627,12 +627,12 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Seared Teriyaki Tofu Rice Bowl"
-                className="w-full px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+                className="w-full px-3 py-2 text-sm bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-[#374151] mb-1">
+              <label className="block text-xs font-medium text-[#4A483A] mb-1">
                 Short Description
               </label>
               <input
@@ -640,12 +640,12 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 placeholder="Crisp pan-fried tofu with steamed broccoli and sesame glaze"
-                className="w-full px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+                className="w-full px-3 py-2 text-sm bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#374151] mb-1">
+              <label className="block text-xs font-medium text-[#4A483A] mb-1">
                 Meal Slots
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -664,31 +664,31 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-xs font-medium text-[#374151] mb-1">Prep (m)</label>
+                <label className="block text-xs font-medium text-[#4A483A] mb-1">Prep (m)</label>
                 <input
                   type="number"
                   min={0}
                   value={prepTime}
                   onChange={(e) => setPrepTime(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[#374151] mb-1">Cook (m)</label>
+                <label className="block text-xs font-medium text-[#4A483A] mb-1">Cook (m)</label>
                 <input
                   type="number"
                   min={0}
                   value={cookTime}
                   onChange={(e) => setCookTime(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[#374151] mb-1">Difficulty</label>
+                <label className="block text-xs font-medium text-[#4A483A] mb-1">Difficulty</label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
-                  className="w-full px-2 py-1.5 text-sm border border-[#E5E7EB] rounded-lg bg-white"
+                  className="w-full px-2 py-1.5 text-sm border border-[#D9D0CB] rounded-lg bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 >
                   <option value="Easy">Easy</option>
                   <option value="Medium">Medium</option>
@@ -699,7 +699,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#374151] mb-1.5">
+            <label className="block text-xs font-medium text-[#4A483A] mb-1.5">
               Dietary Tags
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -718,60 +718,60 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-medium text-[#374151]">
+              <span className="text-xs font-medium text-[#4A483A]">
                 Nutrition Per Serving
               </span>
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-[#6B7280]">Base Servings:</span>
+                <span className="text-[#6A6754]">Base Servings:</span>
                 <input
                   type="number"
                   min={1}
                   max={12}
                   value={servings}
                   onChange={(e) => setServings(Number(e.target.value))}
-                  className="w-14 px-2 py-1 text-xs font-mono border border-[#E5E7EB] rounded-md"
+                  className="w-14 px-2 py-1 text-xs font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
             </div>
             <div className="grid grid-cols-4 gap-3">
               <div>
-                <label className="block text-[11px] text-[#6B7280] mb-1">Calories</label>
+                <label className="block text-[11px] text-[#6A6754] mb-1">Calories</label>
                 <input
                   type="number"
                   min={0}
                   value={calories}
                   onChange={(e) => setCalories(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-[#6B7280] mb-1">Protein (g)</label>
+                <label className="block text-[11px] text-[#6A6754] mb-1">Protein (g)</label>
                 <input
                   type="number"
                   min={0}
                   value={protein}
                   onChange={(e) => setProtein(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-[#6B7280] mb-1">Carbs (g)</label>
+                <label className="block text-[11px] text-[#6A6754] mb-1">Carbs (g)</label>
                 <input
                   type="number"
                   min={0}
                   value={carbs}
                   onChange={(e) => setCarbs(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-[#6B7280] mb-1">Fat (g)</label>
+                <label className="block text-[11px] text-[#6A6754] mb-1">Fat (g)</label>
                 <input
                   type="number"
                   min={0}
                   value={fat}
                   onChange={(e) => setFat(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 text-sm font-mono border border-[#E5E7EB] rounded-lg"
+                  className="w-full px-2.5 py-1.5 text-sm font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                 />
               </div>
             </div>
@@ -779,7 +779,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-[#374151]">
+              <span className="text-xs font-medium text-[#4A483A]">
                 Ingredients (for {servings} servings)
               </span>
               <BubbleButton
@@ -798,7 +798,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                     placeholder="Ingredient"
                     value={ing.name}
                     onChange={(e) => updateIngredient(idx, { name: e.target.value })}
-                    className="col-span-4 px-2.5 py-1.5 text-xs border border-[#E5E7EB] rounded-md"
+                    className="col-span-4 px-2.5 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                   />
                   <input
                     type="number"
@@ -806,21 +806,21 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                     min="0"
                     value={ing.quantity}
                     onChange={(e) => updateIngredient(idx, { quantity: Number(e.target.value) })}
-                    className="col-span-2 px-2 py-1.5 text-xs font-mono border border-[#E5E7EB] rounded-md"
+                    className="col-span-2 px-2 py-1.5 text-xs font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                   />
                   <input
                     type="text"
                     placeholder="unit"
                     value={ing.unit}
                     onChange={(e) => updateIngredient(idx, { unit: e.target.value })}
-                    className="col-span-2 px-2 py-1.5 text-xs border border-[#E5E7EB] rounded-md"
+                    className="col-span-2 px-2 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                   />
                   <select
                     value={ing.category}
                     onChange={(e) =>
                       updateIngredient(idx, { category: e.target.value as GroceryCategory })
                     }
-                    className="col-span-3 px-2 py-1.5 text-xs border border-[#E5E7EB] rounded-md bg-white"
+                    className="col-span-3 px-2 py-1.5 text-xs border border-[#D9D0CB] rounded-md bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
                   >
                     {GROCERY_CATEGORY_ORDER.map((cat) => (
                       <option key={cat} value={cat}>
@@ -834,7 +834,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                       setIngredients((prev) => prev.filter((_, i) => i !== idx))
                     }
                     aria-label="Remove ingredient"
-                    className="col-span-1 p-1 text-[#9CA3AF] hover:text-[#DC2626] flex justify-center"
+                    className="col-span-1 p-1 text-[#908B6F] hover:text-[#B43C2E] flex justify-center"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -844,18 +844,18 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#374151] mb-1">
+            <label className="block text-xs font-medium text-[#4A483A] mb-1">
               Instructions (one step per line)
             </label>
             <textarea
               rows={3}
               value={instructionsText}
               onChange={(e) => setInstructionsText(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+              className="w-full px-3 py-2 text-xs bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-3 border-t border-[#E5E7EB]">
+          <div className="pt-2 flex items-center justify-end gap-3 border-t border-[#D9D0CB]">
             <BubbleButton
               variant="default"
               size="md"
@@ -906,19 +906,19 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="template-modal-title"
-        className="w-full max-w-2xl bg-white border border-[#E5E7EB] rounded-xl shadow-lg flex flex-col max-h-[88vh]"
+        className="w-full max-w-2xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg flex flex-col max-h-[88vh]"
       >
-        <div className="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#D9D0CB] flex items-center justify-between">
           <div>
-            <h2 id="template-modal-title" className="text-lg font-semibold text-[#111827]">
+            <h2 id="template-modal-title" className="text-lg font-semibold text-[#2E2D24]">
               Meal Plan Templates
             </h2>
-            <p className="text-xs text-[#6B7280] mt-0.5">
+            <p className="text-xs text-[#6A6754] mt-0.5">
               Populate a full 7-day plan with built-in leftovers, or save your current week.
             </p>
           </div>
@@ -932,9 +932,9 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
           </BubbleIconButton>
         </div>
 
-        <div className="px-6 py-3 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs font-medium text-[#374151]">Apply template to:</span>
-          <div className="flex items-center gap-1.5 p-1 bg-[#E5E7EB]/60 rounded-xl">
+        <div className="px-6 py-3 border-b border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs font-medium text-[#4A483A]">Apply template to:</span>
+          <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0] rounded-xl">
             <BubbleButton
               variant={applyScope === 'current' ? 'dark' : 'default'}
               size="sm"
@@ -952,19 +952,19 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E5E7EB]">
+        <div className="flex-1 overflow-y-auto divide-y divide-[#D9D0CB]">
           {templates.map((tmpl) => (
             <div
               key={tmpl.id}
-              className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F9FAFB]"
+              className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F3EFEC]"
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-[#111827]">{tmpl.name}</h3>
-                  <span className="text-xs text-[#15803D] font-medium">· {tmpl.focusTag}</span>
+                  <h3 className="text-sm font-semibold text-[#2E2D24]">{tmpl.name}</h3>
+                  <span className="text-xs text-[#6A6754] font-semibold">· {tmpl.focusTag}</span>
                 </div>
-                <p className="text-xs text-[#6B7280]">{tmpl.tagline}</p>
-                <div className="flex items-center gap-2 text-xs text-[#4B5563] pt-0.5 font-mono tabular-nums">
+                <p className="text-xs text-[#6A6754]">{tmpl.tagline}</p>
+                <div className="flex items-center gap-2 text-xs text-[#4A483A] pt-0.5 font-mono tabular-nums">
                   <span>~{tmpl.avgDailyCalories} kcal/day</span>
                   <span aria-hidden="true">·</span>
                   <span>~{tmpl.avgDailyProtein}g protein</span>
@@ -987,14 +987,14 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
           ))}
         </div>
 
-        <div className="px-6 py-4 border-t border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-1 min-w-[220px]">
             <input
               type="text"
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               placeholder={`Save Week ${activeWeekIndex + 1} as template name...`}
-              className="flex-1 px-3 py-1.5 text-xs bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+              className="flex-1 px-3 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
             />
             <BubbleButton
               variant="default"
@@ -1010,7 +1010,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
               Save Current Week
             </BubbleButton>
           </div>
-          <span className="text-[11px] text-[#6B7280] flex items-center gap-1">
+          <span className="text-[11px] text-[#6A6754] flex items-center gap-1">
             <RotateCcw className="w-3 h-3" /> Replaces target week slots
           </span>
         </div>

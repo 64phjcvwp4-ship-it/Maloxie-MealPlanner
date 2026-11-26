@@ -389,11 +389,22 @@ export default function MoltenMetal({
       seen: null
     };
 
+    const reducedQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    let isReduced = reducedQuery?.matches ?? false;
+    const onReducedChange = () => {
+      isReduced = reducedQuery?.matches ?? false;
+      state.quiet = 0;
+    };
+    reducedQuery?.addEventListener?.('change', onReducedChange);
+
+    let boxWidth = container.clientWidth;
+    let boxHeight = container.clientHeight;
+
     const resize = () => {
       const s = settingsRef.current;
       const ratio = Math.min(window.devicePixelRatio || 1, s.dpr);
-      const width = Math.max(1, Math.round(container.clientWidth * ratio));
-      const height = Math.max(1, Math.round(container.clientHeight * ratio));
+      const width = Math.max(1, Math.round(boxWidth * ratio));
+      const height = Math.max(1, Math.round(boxHeight * ratio));
       if (width === state.width && height === state.height) return;
       state.quiet = 0;
       state.width = width;
@@ -501,7 +512,7 @@ export default function MoltenMetal({
     };
 
     const tick = now => {
-      state.raf = requestAnimationFrame(tick);
+      state.raf = 0;
       if (!state.visible || document.hidden) {
         state.last = now;
         return;
@@ -509,7 +520,7 @@ export default function MoltenMetal({
       const s = settingsRef.current;
       const dt = state.last ? Math.min((now - state.last) / 1000, 0.1) : 0;
       state.last = now;
-      const reduced = prefersReduced();
+      const reduced = isReduced;
       state.clock += dt;
       if (state.introAt < 0) state.introAt = state.clock;
       if (!s.paused && !reduced) state.time += dt * s.speed;
@@ -534,6 +545,14 @@ export default function MoltenMetal({
 
       resize();
       render(reduced);
+      state.raf = requestAnimationFrame(tick);
+    };
+
+    const startRaf = () => {
+      if (!state.raf && state.visible && !document.hidden) {
+        state.last = performance.now();
+        state.raf = requestAnimationFrame(tick);
+      }
     };
 
     const local = event => {
@@ -550,6 +569,10 @@ export default function MoltenMetal({
     };
 
     const onMove = event => {
+      if (!state.visible) {
+        state.inside = false;
+        return;
+      }
       const point = local(event);
       state.inside = point.inside;
       if (point.inside) state.pointer = [point.x, point.y];
@@ -560,8 +583,9 @@ export default function MoltenMetal({
     };
 
     const onDown = event => {
+      if (!state.visible) return;
       const s = settingsRef.current;
-      if (!s.flareOnClick || event.button !== 0 || prefersReduced()) return;
+      if (!s.flareOnClick || event.button !== 0 || isReduced) return;
       if (
         event.target instanceof Element &&
         event.target.closest('a, button, input, textarea, select, label, [role="button"]')
@@ -574,13 +598,28 @@ export default function MoltenMetal({
     };
 
     const visibility = new IntersectionObserver(entries => {
-      state.visible = entries.some(entry => entry.isIntersecting);
+      const next = entries.some(entry => entry.isIntersecting);
+      state.visible = next;
+      if (next) startRaf();
     });
     visibility.observe(container);
-    const sizes = new ResizeObserver(() => {
+    const sizes = new ResizeObserver(entries => {
+      const entry = entries[0];
+      if (entry) {
+        boxWidth = entry.contentRect.width;
+        boxHeight = entry.contentRect.height;
+      } else {
+        boxWidth = container.clientWidth;
+        boxHeight = container.clientHeight;
+      }
       state.quiet = 0;
+      startRaf();
     });
     sizes.observe(container);
+    const onVisibilityChange = () => {
+      if (!document.hidden && state.visible) startRaf();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
     resize();
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('pointerdown', onDown);
@@ -591,6 +630,8 @@ export default function MoltenMetal({
       cancelAnimationFrame(state.raf);
       visibility.disconnect();
       sizes.disconnect();
+      reducedQuery?.removeEventListener?.('change', onReducedChange);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerdown', onDown);
       document.documentElement.removeEventListener('pointerleave', onLeave);

@@ -10,10 +10,10 @@ interface RecipeImageProps {
 }
 
 const SLOT_BG: Record<MealSlotType, string> = {
-  breakfast: 'from-[#F1F5F9] to-[#E2E8F0] text-[#475569]',
-  lunch: 'from-[#F0FDF4] to-[#DCFCE7] text-[#166534]',
-  dinner: 'from-[#F8FAFC] to-[#E5E7EB] text-[#374151]',
-  snacks: 'from-[#FEFCE8] to-[#FEF3C7] text-[#92400E]',
+  breakfast: 'from-[#F6F3F0] to-[#D9D0CB] text-[#3B392D]',
+  lunch: 'from-[#EEECE5] to-[#D4CFB9] text-[#3B392D]',
+  dinner: 'from-[#ECE8E4] to-[#C8C2B2] text-[#2E2D24]',
+  snacks: 'from-[#F4EFE9] to-[#E2D9D2] text-[#4A483A]',
 };
 
 export const RecipeImage: React.FC<RecipeImageProps> = ({

@@ -191,7 +191,7 @@ const Crosshair = ({
       ctx.stroke();
     };
 
-    const draw = () => {
+    const draw = (targetBox = null) => {
       const s = settingsRef.current;
       ctx.setTransform(size.dpr, 0, 0, size.dpr, 0, 0);
       ctx.clearRect(0, 0, size.w, size.h);
@@ -225,7 +225,7 @@ const Crosshair = ({
         ctx.globalAlpha = alpha * s.opacity;
         brackets(x, y, w, h, 1);
         if (s.showCoordinates && state.target) {
-          const box = state.target.getBoundingClientRect();
+          const box = targetBox ?? state.target.getBoundingClientRect();
           tag(`${Math.round(box.width)} × ${Math.round(box.height)}`, x + w / 2, y + h + 8, 'center');
         }
       }
@@ -274,9 +274,10 @@ const Crosshair = ({
       const lock = state.lock;
       const locked = s.targetEffect === 'lock' && state.inside ? state.target : null;
       let goal;
+      let targetBox = null;
       if (locked) {
-        const box = locked.getBoundingClientRect();
-        goal = { x: box.left - rect.left - 6, y: box.top - rect.top - 6, w: box.width + 12, h: box.height + 12 };
+        targetBox = locked.getBoundingClientRect();
+        goal = { x: targetBox.left - rect.left - 6, y: targetBox.top - rect.top - 6, w: targetBox.width + 12, h: targetBox.height + 12 };
       } else {
         goal = { x: state.x - 10, y: state.y - 10, w: 20, h: 20 };
       }
@@ -290,7 +291,7 @@ const Crosshair = ({
       if (Math.abs(shown - lock.alpha) < 0.002) lock.alpha = shown;
       state.glitch = reduce ? 0 : Math.max(0, state.glitch - dt / 0.5);
       state.pulses = state.pulses.filter(pulse => (pulse.age += dt) < 0.55);
-      draw();
+      draw(targetBox);
       const settling =
         Math.abs(state.tx - state.x) > 0.05 ||
         Math.abs(state.ty - state.y) > 0.05 ||
@@ -384,8 +385,18 @@ const Crosshair = ({
       if (!event.relatedTarget) leave();
     };
 
-    const onScroll = () => {
+    const onScroll = event => {
       if (!state.inside) return;
+      if (
+        host &&
+        event.target instanceof Node &&
+        event.target !== document &&
+        event.target !== document.documentElement &&
+        event.target !== document.body &&
+        !event.target.contains(host)
+      ) {
+        return;
+      }
       retarget(document.elementFromPoint(state.clientX, state.clientY));
       wake();
     };
