@@ -8,13 +8,14 @@ import {
   CornerDownRight,
   Clock,
 } from 'lucide-react';
-import { DayPlan, MealSlotType, Recipe } from '../types/mealPlanner';
+import { DayPlan, MealSlotType, PricingConfig, Recipe } from '../types/mealPlanner';
 import {
   generateGroceryList,
   generateSundayPrepTasks,
   generateWasteReductionTips,
   GROCERY_CATEGORY_ORDER,
 } from '../utils/groceryUtils';
+import { formatCurrency } from '../utils/currencyUtils';
 import { addDaysISO, formatWeekRangeLabel } from '../utils/dateUtils';
 import { getRecipeCarouselSrc } from '../utils/recipeCardDataUri';
 import { BubbleButton } from './BubbleControls';
@@ -30,6 +31,7 @@ interface PrepGuideViewProps {
   recipesMap: Record<string, Recipe>;
   householdMultiplier: number;
   weeklyBudget: number;
+  pricing: PricingConfig;
   completedPrepTaskIds: Set<string>;
   onTogglePrepTask: (id: string) => void;
   onAssignBatchWithLeftover: (
@@ -49,6 +51,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
   recipesMap,
   householdMultiplier,
   weeklyBudget,
+  pricing,
   completedPrepTaskIds,
   onTogglePrepTask,
   onAssignBatchWithLeftover,
@@ -66,8 +69,9 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
   );
 
   const groceryItems = useMemo(
-    () => generateGroceryList(weekDates, daysMap, recipesMap, householdMultiplier, []),
-    [weekDates, daysMap, recipesMap, householdMultiplier]
+    () =>
+      generateGroceryList(weekDates, daysMap, recipesMap, householdMultiplier, [], pricing),
+    [weekDates, daysMap, recipesMap, householdMultiplier, pricing]
   );
 
   const categorySpend = useMemo(() => {
@@ -128,7 +132,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Week Header */}
-      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+      <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
           {weeksDates.map((dates, idx) => (
             <BubbleButton
@@ -149,7 +153,10 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           <span>
             Est. Cost/Meal:{' '}
             <strong className="text-[#14532D]">
-              ${totalMealsPlanned > 0 ? (totalWeekSpend / totalMealsPlanned).toFixed(2) : '0.00'}
+              {formatCurrency(
+                totalMealsPlanned > 0 ? totalWeekSpend / totalMealsPlanned : 0,
+                pricing.currencyCode
+              )}
             </strong>
           </span>
         </div>
@@ -167,7 +174,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
         className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
       >
         {/* 1. Sunday Meal Prep Guide */}
-        <section className="lg:col-span-7 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+        <section className="lg:col-span-7 bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <ChefHat className="w-4 h-4 text-[#B86B4B]" />
@@ -242,7 +249,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
         {/* Right Column: Budget Breakdown + Waste Reduction */}
         <div className="lg:col-span-5 space-y-6">
           {/* Shopping Budget Tracker */}
-          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-[#6A6754]" />
@@ -251,7 +258,8 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                 </h2>
               </div>
               <span className="font-mono text-xs font-semibold tabular-nums text-[#14532D]">
-                ${totalWeekSpend.toFixed(2)} / ${weeklyBudget}
+                {formatCurrency(totalWeekSpend, pricing.currencyCode)} /{' '}
+                {formatCurrency(weeklyBudget, pricing.currencyCode, { compact: true })}
               </span>
             </div>
 
@@ -267,7 +275,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                         <span className="text-[#4A483A] font-medium">{cat}</span>
                         <span className="font-mono tabular-nums text-[#6A6754]">
                           <span className="font-semibold text-[#14532D]">
-                            ${amount.toFixed(2)}
+                            {formatCurrency(amount, pricing.currencyCode)}
                           </span>{' '}
                           ({pct}%)
                         </span>
@@ -286,7 +294,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           </section>
 
           {/* Waste Reduction Tips */}
-          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center gap-2">
               <Leaf className="w-4 h-4 text-[#6A6754]" />
               <div>
@@ -323,7 +331,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
       </AnimatedContent>
 
       {/* Batch Cooking Suggestions */}
-      <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+      <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-[#B86B4B]" />
@@ -392,7 +400,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
 
       {/* Visual Batch & Sunday Prep Dish Board */}
       {prepMasonryItems.length > 0 && (
-        <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+        <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <ChefHat className="w-4 h-4 text-[#6A6754]" />

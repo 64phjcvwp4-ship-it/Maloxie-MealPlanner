@@ -30,6 +30,9 @@ export interface PersistedState {
   clearedKeys: string[];
   manualItems: ManualGroceryItem[];
   completedPrepTaskIds: string[];
+  currencyCode: string;
+  regionalPriceFactor: number;
+  priceOverrides: Record<string, number>;
 }
 
 export const CLIENT_INSTANCE_ID = `maloxie-${Math.random().toString(36).slice(2, 10)}`;
@@ -104,7 +107,7 @@ export function sanitizePlannerStateForCloud(state: PersistedState): PersistedSt
       protein: clampNumber(state.targets?.protein, 0, 1000, 150),
       carbs: clampNumber(state.targets?.carbs, 0, 1500, 200),
       fat: clampNumber(state.targets?.fat, 0, 500, 65),
-      weeklyBudget: clampNumber(state.targets?.weeklyBudget, 0, 10000, 120),
+      weeklyBudget: clampNumber(state.targets?.weeklyBudget, 0, 10000000, 120),
     },
     householdMultiplier: multiplier,
     checkedKeys: (state.checkedKeys || [])
@@ -124,7 +127,27 @@ export function sanitizePlannerStateForCloud(state: PersistedState): PersistedSt
       .filter((id): id is string => typeof id === 'string')
       .slice(0, 200)
       .map((id) => id.slice(0, 160)),
+    currencyCode:
+      typeof state.currencyCode === 'string' && state.currencyCode.trim().length >= 3
+        ? state.currencyCode.trim().toUpperCase().slice(0, 8)
+        : 'USD',
+    regionalPriceFactor: clampNumber(state.regionalPriceFactor, 0.1, 5, 1),
+    priceOverrides: sanitizePriceOverrides(state.priceOverrides),
   };
+}
+
+function sanitizePriceOverrides(raw: Record<string, number> | undefined): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  let count = 0;
+  for (const [k, v] of Object.entries(raw)) {
+    if (count >= 400) break;
+    if (typeof k === 'string' && k.length > 0 && typeof v === 'number' && Number.isFinite(v) && v >= 0) {
+      out[k.slice(0, 180)] = v;
+      count += 1;
+    }
+  }
+  return out;
 }
 
 export async function upsertUserProfile(user: User): Promise<void> {
@@ -234,6 +257,16 @@ function extractPersistedState(raw: Record<string, unknown>): PersistedState | n
     completedPrepTaskIds: Array.isArray(raw.completedPrepTaskIds)
       ? (raw.completedPrepTaskIds as string[])
       : [],
+    currencyCode:
+      typeof raw.currencyCode === 'string' && raw.currencyCode.length >= 3
+        ? raw.currencyCode
+        : 'USD',
+    regionalPriceFactor:
+      typeof raw.regionalPriceFactor === 'number' ? raw.regionalPriceFactor : 1,
+    priceOverrides:
+      raw.priceOverrides && typeof raw.priceOverrides === 'object'
+        ? (raw.priceOverrides as Record<string, number>)
+        : {},
   };
 }
 

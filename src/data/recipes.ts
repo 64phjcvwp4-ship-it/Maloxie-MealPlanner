@@ -4,7 +4,10 @@ export const INITIAL_RECIPES: Recipe[] = [
   {
     id: 'miso-salmon-bowl',
     title: 'Miso-Glazed Salmon Rice Bowl',
-    subtitle: 'Seared Atlantic salmon over steamed jasmine rice with edamame, avocado, and crisp cucumber',
+    subtitle:
+      'Caramelized white miso-seared Atlantic salmon over steamed jasmine rice with edamame, ripe avocado, crisp Persian cucumber, and toasted sesame',
+    cuisine: 'Japanese-Inspired',
+    flavorProfile: 'Savory-Sweet · Umami · Crisp & Creamy',
     mealTypes: ['dinner', 'lunch'],
     prepTimeMinutes: 10,
     cookTimeMinutes: 15,
@@ -13,7 +16,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Gluten-Free', 'Dairy-Free'],
     macrosPerServing: { calories: 610, protein: 42, carbs: 48, fat: 26 },
     imageUrl: '/src/assets/images/recipe_salmon_bowl_1795692436896.jpg',
-    batchTip: 'Cook double rice on Sunday and whisk extra miso glaze to keep chilled up to 5 days.',
+    equipment: ['Medium lidded saucepan', 'Nonstick or cast-iron skillet', 'Small whisk bowl'],
+    nutritionHighlights: [
+      'Rich in EPA/DHA omega-3 fatty acids',
+      '42g complete protein per bowl',
+      'Balanced complex carbs & monounsaturated fats',
+    ],
+    chefTip:
+      'Pat the salmon fillets completely dry with paper towels before brushing on the miso glaze—surface moisture creates steam instead of a caramelized crust. Keep heat at medium so the miso sugars glaze without scorching.',
+    batchTip:
+      'Cook double jasmine rice on Sunday and whisk extra miso glaze to keep chilled in a jar for up to 5 days.',
+    reheatTip:
+      'Flake leftover salmon gently and enjoy chilled over warm rice, or warm for 45 seconds at 60% power so the fish stays tender.',
+    swaps: [
+      'Swap jasmine rice for steamed quinoa, brown rice, or cauliflower rice for lower carbs.',
+      'Use tamari + honey or maple syrup if out of white miso paste.',
+    ],
     storageDays: 3,
     ingredients: [
       { id: 'ing-1', name: 'Salmon fillets', quantity: 300, unit: 'g', category: 'Meat & Fish', estimatedPrice: 8.50 },
@@ -25,17 +43,21 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-7', name: 'Sesame oil & seeds', quantity: 1, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.45 },
     ],
     instructions: [
-      'Rinse jasmine rice and simmer with 1.5x water and a pinch of salt for 14 minutes until fluffy.',
-      'Whisk white miso paste, 1 tsp sesame oil, and 1 tbsp warm water into a smooth glaze.',
-      'Pat salmon fillets dry, brush with miso glaze, and sear skin-side down in a hot skillet for 4 minutes, then flip for 2–3 minutes.',
-      'Steam shelled edamame for 3 minutes and thinly slice cucumbers and avocado.',
-      'Assemble warm rice bowls topped with salmon, edamame, avocado, cucumber, and toasted sesame seeds.'
+      'Rinse jasmine rice under cold water until water runs mostly clear. Combine with 270ml water and a pinch of salt in a saucepan; bring to a simmer, cover tightly, and cook on low for 12–14 minutes, then rest 5 minutes off heat.',
+      'Whisk white miso paste, 1 tsp toasted sesame oil, and 1 tbsp warm water until smooth and spreadable.',
+      'Pat salmon fillets thoroughly dry and season lightly with black pepper. Brush the top flesh generously with half the miso glaze.',
+      'Heat a lightly oiled skillet over medium heat. Sear salmon skin-side down for 4 minutes until crisp, flip carefully, brush with remaining glaze, and cook 2–3 minutes until just opaque at the center (125–130°F for tender medium).',
+      'Steam or microwave shelled edamame with a splash of water for 3 minutes until bright green. Thinly slice Persian cucumbers into crisp rounds and fan the avocado.',
+      'Fluff rice with a fork and divide into two deep bowls. Arrange salmon, edamame, cucumber, and avocado over rice, finishing with toasted sesame seeds and any pan glaze.',
     ],
   },
   {
     id: 'herb-lemon-chicken-skillet',
     title: 'Herb-Roasted Lemon Chicken Skillet',
-    subtitle: 'Golden roasted chicken thighs with blistered cherry tomatoes, baby potatoes, and rosemary',
+    subtitle:
+      'Crisp-skinned chicken thighs roasted in one skillet with golden baby potatoes, burst cherry tomatoes, sweet roasted garlic, and fresh rosemary',
+    cuisine: 'Mediterranean',
+    flavorProfile: 'Bright Citrus · Savory Herbs · Jammy Tomato',
     mealTypes: ['dinner', 'lunch'],
     prepTimeMinutes: 12,
     cookTimeMinutes: 30,
@@ -44,7 +66,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Gluten-Free', 'Dairy-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 540, protein: 44, carbs: 32, fat: 24 },
     imageUrl: '/src/assets/images/recipe_chicken_skillet_1795692436877.jpg',
-    batchTip: 'Reheats cleanly for 4 days; halve cherry tomatoes only right before roasting so they blister evenly.',
+    equipment: ['12-inch cast-iron skillet or roasting pan', 'Instant-read thermometer'],
+    nutritionHighlights: [
+      '44g protein per serving with iron & B6',
+      'Lycopene-rich blistered tomatoes',
+      'Potassium-dense whole baby potatoes',
+    ],
+    chefTip:
+      'Place halved potatoes cut-side down in the pan juices so they caramelize like roasted fries while the chicken renders flavor onto them. Wait until minute 20 to add cherry tomatoes so they burst without turning watery.',
+    batchTip:
+      'Reheats cleanly for 4 days; spoon a little pan juice into each storage container before chilling so chicken stays juicy.',
+    reheatTip:
+      'Reheat in a 375°F (190°C) oven or air fryer for 6–7 minutes to re-crisp the skin, or microwave covered for 90 seconds.',
+    swaps: [
+      'Use boneless chicken thighs and reduce total roast time by 6–8 minutes.',
+      'Swap baby potatoes for cubed sweet potato or white cannellini beans.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-8', name: 'Bone-in chicken thighs', quantity: 800, unit: 'g', category: 'Meat & Fish', estimatedPrice: 7.20 },
@@ -56,16 +93,21 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-14', name: 'Olive oil', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.60 },
     ],
     instructions: [
-      'Preheat oven to 425°F (220°C). Halve baby potatoes and toss with 1 tbsp olive oil, salt, and black pepper in a cast-iron skillet.',
-      'Nestle seasoned chicken thighs skin-side up among the potatoes, tucking in smashed garlic cloves, lemon slices, and fresh herbs.',
-      'Roast for 20 minutes, then scatter whole cherry tomatoes into the pan juices.',
-      'Continue roasting for 10–12 minutes until chicken reaches 165°F and tomatoes burst.'
+      'Preheat oven to 425°F (220°C). Halve baby yellow potatoes (quarter any large ones) and toss right in a 12-inch ovenproof skillet with 1 tbsp olive oil, 1/2 tsp kosher salt, and cracked black pepper. Arrange cut-side down.',
+      'Pat chicken thighs dry, rub with remaining 1 tbsp olive oil, salt, pepper, and chopped rosemary/thyme leaves. Nestle skin-side up among the potatoes without overlapping.',
+      'Tuck unpeeled smashed garlic cloves and thin lemon rounds into the gaps around the chicken.',
+      'Roast uncovered on the middle rack for 20 minutes until potato bottoms brown and chicken skin starts to tighten.',
+      'Scatter whole cherry tomatoes across the skillet and baste chicken with pan juices. Return to oven for 10–12 minutes until chicken reaches 165°F (74°C) internally, skin is deep golden, and tomatoes burst.',
+      'Rest 5 minutes before serving so juices settle, then spoon warm garlicky pan sauce over each portion.',
     ],
   },
   {
     id: 'coconut-lentil-dal',
     title: 'Spiced Coconut Red Lentil Dal',
-    subtitle: 'Velvety red lentils simmered with turmeric, ginger, spinach, and coconut milk',
+    subtitle:
+      'Velvety red lentils simmered with toasted cumin, turmeric, garam masala, sweet coconut milk, fresh spinach, and bright lime',
+    cuisine: 'South Asian',
+    flavorProfile: 'Warmly Spiced · Creamy Coconut · Bright Citrus',
     mealTypes: ['dinner', 'lunch'],
     prepTimeMinutes: 10,
     cookTimeMinutes: 25,
@@ -74,7 +116,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Budget', 'Batch Friendly'],
     macrosPerServing: { calories: 430, protein: 19, carbs: 56, fat: 14 },
     imageUrl: '/src/assets/images/recipe_lentil_curry_1795692437482.jpg',
-    batchTip: 'Freezes exceptionally well in single-serving containers for up to 2 months.',
+    equipment: ['Heavy-bottomed Dutch oven or deep pot', 'Wooden spoon'],
+    nutritionHighlights: [
+      'High-fiber plant protein (~14g fiber/serving)',
+      'Anti-inflammatory turmeric & ginger',
+      'Zero cholesterol · iron & folate rich',
+    ],
+    chefTip:
+      'Bloom your dry spices in warm oil for 45–60 seconds right after the onions soften—toasting turmeric and cumin in fat unlocks fat-soluble aromatics that raw simmering cannot replicate.',
+    batchTip:
+      'Thickens slightly overnight, which makes it even better for work lunches; freezes cleanly in single-serving jars for up to 2 months.',
+    reheatTip:
+      'Add a 2 tbsp splash of water or vegetable broth before microwaving or warming on the stove to restore its silky spoonable consistency.',
+    swaps: [
+      'Add a handful of cooked shredded chicken or pan-seared tofu on top for +20g extra protein.',
+      'Swap baby spinach for finely chopped kale or Swiss chard (simmer 3 extra minutes).',
+    ],
     storageDays: 5,
     ingredients: [
       { id: 'ing-15', name: 'Red split lentils', quantity: 300, unit: 'g', category: 'Pantry', estimatedPrice: 1.80 },
@@ -86,16 +143,21 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-21', name: 'Cumin, turmeric & garam masala', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.60 },
     ],
     instructions: [
-      'Sauté diced onion in 1 tbsp oil over medium heat until translucent, about 5 minutes.',
-      'Add grated ginger, garlic, cumin, turmeric, and garam masala; stir 1 minute until fragrant.',
-      'Stir in rinsed red lentils, canned tomatoes, coconut milk, and 400ml water. Simmer 18–20 minutes until creamy.',
-      'Fold in fresh baby spinach until wilted, season with salt and fresh lime juice, and top with cilantro.'
+      'Finely dice the yellow onion and rinse red split lentils in a fine-mesh sieve until water runs clear.',
+      'Warm 1 tbsp oil in a Dutch oven over medium heat. Sauté diced onion with a pinch of salt for 5–6 minutes until translucent and lightly golden at the edges.',
+      'Stir in cumin, turmeric, and garam masala; cook 45–60 seconds, stirring constantly, until deeply fragrant.',
+      'Pour in rinsed lentils, canned diced tomatoes with their juices, coconut milk, and 400ml water. Stir to scrape up browned spices from the pot floor.',
+      'Bring to a gentle boil, reduce heat to medium-low, and simmer uncovered for 18–20 minutes, stirring every 4 minutes so lentils break down into a velvety stew without sticking.',
+      'Fold in baby spinach until wilted (about 2 minutes). Squeeze in fresh lime juice, taste and adjust salt, and scatter torn fresh cilantro on top.',
     ],
   },
   {
     id: 'berry-almond-overnight-oats',
     title: 'Greek Yogurt Berry Overnight Oats',
-    subtitle: 'Creamy protein-packed rolled oats with chia seeds, blueberries, and toasted almonds',
+    subtitle:
+      'Thick, pudding-like cold-soaked oats layered with tangy Greek yogurt, plump chia seeds, burst berries, and crunchy toasted almonds',
+    cuisine: 'Nordic / Modern Cafe',
+    flavorProfile: 'Creamy Vanilla-Cinnamon · Tart Berry · Nutty Crunch',
     mealTypes: ['breakfast'],
     prepTimeMinutes: 5,
     cookTimeMinutes: 0,
@@ -104,7 +166,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Vegetarian', 'Quick', 'Budget', 'Batch Friendly'],
     macrosPerServing: { calories: 410, protein: 26, carbs: 49, fat: 12 },
     imageUrl: '/src/assets/images/recipe_berry_oats_1795692438626.jpg',
-    batchTip: 'Prep 4 jars at once on Sunday evening; keep almonds separate until serving to preserve crunch.',
+    equipment: ['2 airtight 16oz glass jars or bowls', 'Spoon'],
+    nutritionHighlights: [
+      '26g protein without protein powder',
+      'Soluble beta-glucan fiber for steady blood sugar',
+      'Plant omega-3s & calcium from chia + yogurt',
+    ],
+    chefTip:
+      'Whisk the yogurt, milk, and chia seeds completely smooth BEFORE adding the oats—otherwise chia seeds clump into little pockets at the bottom of the jar.',
+    batchTip:
+      'Prep 4 jars at once on Sunday night; store almonds in a small dry baggie and sprinkle right before eating so they stay snappy.',
+    reheatTip:
+      'Designed to be eaten cold straight from the fridge; if you prefer warm oats, microwave uncovered for 60 seconds and stir in a splash of milk.',
+    swaps: [
+      'Use unsweetened soy milk or almond milk for dairy-sensitive mornings (with dairy-free yogurt).',
+      'Swap blueberries/raspberries for diced strawberries, mango, or thawed frozen mixed berries.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-22', name: 'Rolled oats', quantity: 100, unit: 'g', category: 'Bakery & Grains', estimatedPrice: 0.65 },
@@ -115,16 +192,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-27', name: 'Sliced almonds', quantity: 30, unit: 'g', category: 'Pantry', estimatedPrice: 0.85 },
     ],
     instructions: [
-      'Whisk Greek yogurt, milk, chia seeds, and a pinch of cinnamon together in two jars.',
-      'Stir in rolled oats until evenly coated.',
-      'Refrigerate at least 4 hours or overnight.',
-      'Top with fresh blueberries, raspberries, and toasted sliced almonds right before eating.'
+      'Divide Greek yogurt, milk (or soy milk), chia seeds, a pinch of cinnamon, and a tiny pinch of salt between two 16oz glass jars; whisk thoroughly until silky and clump-free.',
+      'Stir in old-fashioned rolled oats until every flake is submerged.',
+      'Gently fold in half the blueberries and raspberries so their juices streak through the oat base, reserving the rest for topping.',
+      'Seal lids tightly and refrigerate at least 4 hours or overnight (oats absorb liquid and thicken into a mousse-like texture).',
+      'When ready to eat, top with remaining fresh berries and toasted sliced almonds for crunch.',
     ],
   },
   {
     id: 'spinach-feta-egg-muffins',
     title: 'Spinach & Feta Baked Egg Cups',
-    subtitle: 'Savory grab-and-go baked egg frittata cups with wilted spinach and crumbled feta',
+    subtitle:
+      'Fluffy, savory baked frittata muffins studded with sweet red bell pepper, wilted baby spinach, and tangy crumbled feta',
+    cuisine: 'Greek-Inspired',
+    flavorProfile: 'Savory · Tangy Feta · Tender Custard',
     mealTypes: ['breakfast', 'snacks'],
     prepTimeMinutes: 10,
     cookTimeMinutes: 20,
@@ -133,7 +214,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Low Carb', 'Vegetarian', 'Gluten-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 275, protein: 21, carbs: 5, fat: 19 },
     imageUrl: '/assets/aistudio/IMG_4301_430d5de4.jpeg',
-    batchTip: 'Bake a full 12-cup tray on Sunday; warm 2–3 cups in 30 seconds on busy mornings.',
+    equipment: ['12-cup standard muffin tin', 'Large pouring bowl', 'Whisk'],
+    nutritionHighlights: [
+      '21g protein with just 5g net carbs per serving',
+      'Choline, vitamin D, and lutein from whole eggs',
+      'Low-glycemic breakfast or afternoon protein snack',
+    ],
+    chefTip:
+      'Pull the muffin tin from the oven the instant the centers no longer jiggle—overbaking eggs makes them rubbery and releases moisture as they cool.',
+    batchTip:
+      'Bake a full 12-cup tray (3 cups = 1 serving) on Sunday; store in an airtight box lined with a paper towel to stay dry for 5 days.',
+    reheatTip:
+      'Wrap 2–3 egg cups in a damp paper towel and microwave for 25–35 seconds until steamed and tender.',
+    swaps: [
+      'Swap feta for sharp cheddar, goat cheese, or diced cooked turkey bacon.',
+      'Use chopped broccoli florets or sun-dried tomatoes instead of red bell pepper.',
+    ],
     storageDays: 5,
     ingredients: [
       { id: 'ing-28', name: 'Large eggs', quantity: 10, unit: 'whole', category: 'Dairy & Eggs', estimatedPrice: 3.40 },
@@ -143,16 +239,21 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-32', name: 'Olive oil spray & pepper', quantity: 1, unit: 'tsp', category: 'Spices & Oils', estimatedPrice: 0.20 },
     ],
     instructions: [
-      'Preheat oven to 350°F (175°C) and lightly oil a 12-cup muffin tin.',
-      'Finely chop spinach and bell pepper; divide evenly across the muffin cups.',
-      'Whisk eggs with black pepper and pour over vegetables, then crumble feta on top.',
-      'Bake 18–20 minutes until puffed and set in the center.'
+      'Preheat oven to 350°F (175°C). Brush or spray all 12 cups of a muffin tin generously with olive oil (silicone liners also release cleanly).',
+      'Finely dice red bell pepper and roughly chop baby spinach. Divide the vegetables evenly into the bottoms of the 12 cups.',
+      'Crack eggs into a large spouted pitcher or bowl, season with freshly cracked black pepper and a light pinch of salt (feta is salty), and whisk until streaks disappear.',
+      'Pour egg mixture evenly over the vegetables, filling each cup about three-quarters full. Crumble feta evenly across the tops.',
+      'Bake 18–20 minutes until puffed, lightly golden around the edges, and just set in the center.',
+      'Cool in the tin for 5 minutes before loosening edges with a butter knife and lifting onto a wire rack.',
     ],
   },
   {
     id: 'avocado-sourdough-poached-eggs',
     title: 'Sourdough Toast with Eggs & Dukkah',
-    subtitle: 'Thick toasted country sourdough with smashed avocado, two soft eggs, and spiced seeds',
+    subtitle:
+      'Crackling blistered sourdough layered with lemony smashed avocado, two jammy-yolk eggs, and warm toasted cumin-sesame spice',
+    cuisine: 'Cafe / Middle Eastern',
+    flavorProfile: 'Nutty Crunch · Rich Jammy Yolk · Bright Lemon',
     mealTypes: ['breakfast'],
     prepTimeMinutes: 5,
     cookTimeMinutes: 8,
@@ -161,6 +262,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['Vegetarian', 'Quick'],
     macrosPerServing: { calories: 465, protein: 19, carbs: 36, fat: 28 },
     imageUrl: '/assets/aistudio/IMG_4303_a0119713.jpeg',
+    equipment: ['Toaster or cast-iron pan', 'Small lidded saucepan or skillet'],
+    nutritionHighlights: [
+      'Fermented sourdough for gentler digestion',
+      'Heart-healthy monounsaturated avocado fats',
+      '19g protein in under 15 minutes',
+    ],
+    chefTip:
+      'Lower eggs straight from the fridge into already-boiling water and set a strict 6.5-minute timer, then plunge into cold water for 60 seconds—guaranteed jammy yolks and easy-to-peel whites.',
+    batchTip:
+      'Toast extra cumin and sesame seeds in a small jar ahead of time; assemble toast fresh each morning in 4 minutes.',
+    reheatTip:
+      'Best assembled fresh; soft-boiled eggs can be boiled up to 3 days ahead and warmed in hot tap water for 2 minutes.',
+    swaps: [
+      'Use gluten-free seeded bread for a gluten-free breakfast.',
+      'Add 40g smoked salmon or cottage cheese under the avocado to boost protein past 30g.',
+    ],
     storageDays: 1,
     ingredients: [
       { id: 'ing-33', name: 'Country sourdough bread', quantity: 2, unit: 'slices', category: 'Bakery & Grains', estimatedPrice: 1.20 },
@@ -170,16 +287,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-37', name: 'Cumin & sesame seeds', quantity: 1, unit: 'tsp', category: 'Spices & Oils', estimatedPrice: 0.25 },
     ],
     instructions: [
-      'Toast sourdough slices until deeply golden and crisp.',
-      'Smash avocado with lemon juice and flaky sea salt.',
-      'Soft-boil or fry two eggs to preference (6.5 minutes for jammy yolks).',
-      'Spread avocado on toast, top with eggs, and finish with toasted cumin-sesame sprinkle.'
+      'Bring a small saucepan of water to a gentle boil. Lower cold eggs in with a spoon and simmer 6.5 minutes for jammy yolks (or pan-fry gently over medium-low heat).',
+      'Toast country sourdough slices until deeply golden and sturdy enough to hold toppings.',
+      'Scoop avocado into a small bowl, add fresh lemon juice and a pinch of flaky sea salt, and mash with a fork leaving a bit of chunky texture.',
+      'Transfer boiled eggs to cold water for 1 minute, peel carefully, and halve lengthwise.',
+      'Spread lemony avocado edge-to-edge on warm toast, nestle eggs on top, and shower with toasted cumin-sesame sprinkle and black pepper.',
     ],
   },
   {
     id: 'turkey-taco-quinoa-skillet',
     title: 'Lean Turkey & Black Bean Taco Bowls',
-    subtitle: 'Spiced ground turkey simmered with black beans, sweet corn, salsa, and cilantro rice',
+    subtitle:
+      'Savory chili-cumin ground turkey simmered with black beans, sweet corn, and chunky tomato salsa over fluffy herb-flecked quinoa',
+    cuisine: 'Tex-Mex',
+    flavorProfile: 'Smoky Chili · Savory · Sweet Corn & Zesty Salsa',
     mealTypes: ['lunch', 'dinner'],
     prepTimeMinutes: 8,
     cookTimeMinutes: 16,
@@ -188,7 +309,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Gluten-Free', 'Dairy-Free', 'Budget', 'Batch Friendly'],
     macrosPerServing: { calories: 495, protein: 38, carbs: 46, fat: 16 },
     imageUrl: '/assets/aistudio/IMG_4304_135f6f90.jpeg',
-    batchTip: 'Portion turkey-bean mixture into 4 meal prep containers; pack fresh salsa and lime wedges separately.',
+    equipment: ['Large deep skillet', 'Small saucepan for quinoa'],
+    nutritionHighlights: [
+      '38g lean protein + 10g fiber per bowl',
+      'Complete plant + poultry amino acid blend',
+      'Budget-friendly pantry black beans & corn',
+    ],
+    chefTip:
+      'Let the ground turkey sit untouched in the hot pan for 2–3 minutes before breaking it up—creating real browned crust develops deep umami flavor instead of grey steamed meat.',
+    batchTip:
+      'Portion warm turkey-bean mix and quinoa into 4 containers; pack fresh salsa separately so you can heat the base hot and top it cool.',
+    reheatTip:
+      'Microwave base for 90 seconds with 1 tbsp water, stir halfway through, then spoon cool salsa on top.',
+    swaps: [
+      'Swap quinoa for jasmine rice, brown rice, or shredded romaine for taco salads.',
+      'Substitute lean ground chicken or extra-firm crumbled tofu.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-38', name: 'Lean ground turkey', quantity: 500, unit: 'g', category: 'Meat & Fish', estimatedPrice: 5.50 },
@@ -199,16 +335,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-43', name: 'Chili powder, cumin & oregano', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.45 },
     ],
     instructions: [
-      'Cook quinoa according to package directions (about 15 minutes).',
-      'Brown ground turkey in a large skillet over medium-high heat with chili powder, cumin, and garlic.',
-      'Add drained black beans, corn, and half the salsa; simmer 5 minutes until thickened.',
-      'Serve over warm quinoa with remaining fresh salsa.'
+      'Rinse quinoa thoroughly in a fine strainer to remove natural bitterness. Simmer with 400ml water and a pinch of salt, covered, for 14–15 minutes until little spirals appear; fluff and rest.',
+      'Meanwhile, heat a wide skillet over medium-high heat with 1 tsp oil. Press ground turkey into an even layer and sear untouched for 3 minutes until browned underneath, then break apart.',
+      'Sprinkle chili powder, ground cumin, dried oregano, and 1/2 tsp salt over the turkey; stir 1 minute until spices smell smoky.',
+      'Fold in rinsed, drained black beans, frozen sweet corn, half the chunky salsa, and a splash of water. Simmer 5–6 minutes until glossy and thickened.',
+      'Divide fluffy quinoa across 4 bowls or meal-prep containers, spoon turkey-bean mixture on top, and finish with remaining fresh salsa.',
     ],
   },
   {
     id: 'mediterranean-chickpea-salad',
     title: 'Mediterranean Chickpea & Halloumi Salad',
-    subtitle: 'Crisp cucumber, Kalamata olives, roasted chickpeas, and seared halloumi in lemon herb vinaigrette',
+    subtitle:
+      'Squeaky golden pan-seared halloumi over crunchy Persian cucumber, sweet cherry tomatoes, creamy chickpeas, and bright lemon-oregano greens',
+    cuisine: 'Eastern Mediterranean',
+    flavorProfile: 'Salty Caramelized Cheese · Crisp Veg · Lemon Oregano',
     mealTypes: ['lunch'],
     prepTimeMinutes: 10,
     cookTimeMinutes: 8,
@@ -217,7 +357,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['Vegetarian', 'Gluten-Free', 'Quick'],
     macrosPerServing: { calories: 510, protein: 24, carbs: 38, fat: 29 },
     imageUrl: '/assets/aistudio/IMG_4305_74cf7aee.jpeg',
-    batchTip: 'Keep vinaigrette in a separate jar so greens stay crisp up to 3 days.',
+    equipment: ['Dry nonstick or cast-iron skillet', 'Large mixing bowl'],
+    nutritionHighlights: [
+      '24g vegetarian protein with bone-building calcium',
+      'High-polyphenol extra virgin olive oil dressing',
+      'Prebiotic chickpea fiber for gut health',
+    ],
+    chefTip:
+      'Pat halloumi slices completely dry and sear in a hot DRY skillet—halloumi contains enough natural fat to crisp into golden-brown planks without extra oil.',
+    batchTip:
+      'Keep lemon-olive oil vinaigrette in a mini jar and sear halloumi fresh or pack separately so mixed greens stay crisp up to 3 days.',
+    reheatTip:
+      'Best served at room temperature or with warm freshly seared halloumi over chilled chickpea salad.',
+    swaps: [
+      'Swap halloumi for cubed feta or grilled paneer if unavailable.',
+      'Add cooked farro or couscous if you want higher post-workout carbohydrates.',
+    ],
     storageDays: 3,
     ingredients: [
       { id: 'ing-44', name: 'Chickpeas (canned)', quantity: 400, unit: 'g', category: 'Pantry', estimatedPrice: 1.20 },
@@ -228,15 +383,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-49', name: 'Olive oil & lemon juice', quantity: 3, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.70 },
     ],
     instructions: [
-      'Slice halloumi into 1cm planks and pan-sear in a dry nonstick skillet 2 minutes per side until golden.',
-      'Toss drained chickpeas, halved cherry tomatoes, diced cucumber, and baby greens in a wide bowl.',
-      'Whisk olive oil, lemon juice, dried oregano, and salt; dress salad and top with warm halloumi.'
+      'Rinse and drain canned chickpeas thoroughly, letting them air-dry slightly while prepping veggies.',
+      'Slice halloumi block into 1cm thick planks and blot dry with a paper towel.',
+      'Halve cherry tomatoes, dice Persian cucumbers into crisp 1cm cubes, and combine in a large bowl with chickpeas and baby greens.',
+      'Whisk extra virgin olive oil, fresh lemon juice, 1/2 tsp dried oregano, black pepper, and a pinch of salt; toss gently with the salad.',
+      'Heat a dry nonstick skillet over medium-high heat and sear halloumi 2 minutes per side until blistered deep golden-brown. Slice into warm strips and lay over the dressed salad.',
     ],
   },
   {
     id: 'garlic-shrimp-zucchini-noodles',
     title: 'Garlic Chili Shrimp & Zucchini Noodles',
-    subtitle: 'Quick-seared wild shrimp with blistered tomatoes, lemon zest, and spiralized zucchini',
+    subtitle:
+      'Plump wild shrimp seared in sizzling garlic-chili olive oil with burst cherry tomatoes and tender-crisp spiralized zucchini',
+    cuisine: 'Coastal Italian',
+    flavorProfile: 'Garlicky Heat · Sweet Burst Tomato · Fresh Lemon',
     mealTypes: ['dinner', 'lunch'],
     prepTimeMinutes: 8,
     cookTimeMinutes: 10,
@@ -245,6 +405,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Low Carb', 'Gluten-Free', 'Dairy-Free', 'Quick'],
     macrosPerServing: { calories: 335, protein: 37, carbs: 14, fat: 15 },
     imageUrl: '/assets/aistudio/IMG_4306_e27fff42.jpeg',
+    equipment: ['Spiralizer or Y-peeler', '12-inch wide skillet'],
+    nutritionHighlights: [
+      '37g lean protein at just 335 calories',
+      'Rich in selenium, iodine, and astaxanthin',
+      'Ultra-light 18-minute weeknight dinner',
+    ],
+    chefTip:
+      'Never overcook zucchini noodles—toss them into the hot shrimp pan for only 60–90 seconds at the very end so they stay al dente instead of releasing a puddle of water.',
+    batchTip:
+      'Pre-spiralize zucchini on paper towels inside a vented container; sear shrimp and noodles fresh in under 6 minutes.',
+    reheatTip:
+      'Warm leftovers gently in a skillet over medium-low heat for 2 minutes rather than microwaving, so shrimp stays snappy.',
+    swaps: [
+      'Use 50% spaghetti + 50% zucchini noodles if you want more energy for training days.',
+      'Swap shrimp for diced chicken tenderloins or sea scallops.',
+    ],
     storageDays: 2,
     ingredients: [
       { id: 'ing-50', name: 'Peeled raw shrimp', quantity: 350, unit: 'g', category: 'Meat & Fish', estimatedPrice: 7.50 },
@@ -254,15 +430,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-54', name: 'Olive oil & chili flakes', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.50 },
     ],
     instructions: [
-      'Spiralize or ribbon-peel zucchini into noodles and pat dry with paper towel.',
-      'Sauté sliced garlic and chili flakes in olive oil for 45 seconds, then sear shrimp 2 minutes per side until pink.',
-      'Toss in halved cherry tomatoes and zucchini noodles for 90 seconds just until tender-crisp; finish with lemon juice.'
+      'Spiralize zucchini (or peel into long ribbons with a Y-peeler) and pat dry between clean kitchen towels.',
+      'Pat peeled shrimp dry and season with kosher salt and black pepper. Thinly slice garlic cloves and halve cherry tomatoes.',
+      'Warm olive oil in a wide skillet over medium heat. Add sliced garlic and crushed red chili flakes; swirl 45 seconds until garlic edges turn pale gold.',
+      'Raise heat to medium-high, arrange shrimp in a single layer, and sear 90 seconds per side until pink and curled into loose C-shapes. Add cherry tomatoes for the last minute until skins blister.',
+      'Drop in zucchini noodles and toss constantly with tongs for 60–90 seconds until coated in garlic-tomato oil and tender-crisp. Serve immediately with fresh lemon zest and juice.',
     ],
   },
   {
     id: 'beef-broccoli-stirfry',
     title: 'Ginger Beef & Broccoli Stir-Fry',
-    subtitle: 'Velveted flank steak and crisp broccoli florets tossed in savory garlic-ginger soy glaze',
+    subtitle:
+      'Silky cornstarch-velveted flank steak and crisp emerald broccoli florets coated in a glossy ginger-garlic soy glaze over jasmine rice',
+    cuisine: 'Cantonese-Inspired',
+    flavorProfile: 'Savory Glossy Umami · Fresh Ginger Zing · Crisp Broccoli',
     mealTypes: ['dinner'],
     prepTimeMinutes: 12,
     cookTimeMinutes: 12,
@@ -271,7 +452,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Dairy-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 520, protein: 40, carbs: 42, fat: 20 },
     imageUrl: '/assets/aistudio/IMG_4307_1673913f.jpeg',
-    batchTip: 'Slice beef across the grain and marinate Sunday night for a 10-minute Tuesday cook.',
+    equipment: ['Carbon steel wok or 12-inch skillet', 'Medium rice saucepan'],
+    nutritionHighlights: [
+      '40g protein with highly bioavailable heme iron & zinc',
+      'Vitamin C & sulforaphane from crisp broccoli',
+      'Takeout-level flavor with controlled sodium & oil',
+    ],
+    chefTip:
+      'Freeze flank steak for 15 minutes before slicing—firm meat lets your knife shave paper-thin strips cleanly against the grain for restaurant-tender bites.',
+    batchTip:
+      'Slice and marinate beef on Sunday night in an airtight bag for a true 10-minute Tuesday wok dinner.',
+    reheatTip:
+      'Sprinkle 1 tsp water over rice and beef before microwaving covered for 90 seconds; broccoli keeps its bright bite.',
+    swaps: [
+      'Swap flank steak for sirloin tips, skirt steak, or sliced chicken thigh.',
+      'Use tamari instead of soy sauce to make the dish 100% gluten-free.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-55', name: 'Flank steak', quantity: 550, unit: 'g', category: 'Meat & Fish', estimatedPrice: 9.80 },
@@ -282,16 +478,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-60', name: 'Sesame oil & cornstarch', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.50 },
     ],
     instructions: [
-      'Thinly slice flank steak against the grain and toss with 1 tbsp soy sauce and 1 tbsp cornstarch.',
-      'Steam or blanch broccoli florets for 2 minutes until bright green, then drain.',
-      'Sear beef in a smoking-hot wok or skillet for 3 minutes, remove, then stir-fry ginger and garlic.',
-      'Return beef and broccoli with remaining soy sauce and 2 tbsp water; toss until glossy and serve with rice.'
+      'Steam jasmine rice with 360ml water and a pinch of salt for 14 minutes until fluffy.',
+      'Slice flank steak thinly ACROSS the grain. Toss in a bowl with 1 tbsp soy sauce, 1 tsp sesame oil, and 1 tbsp cornstarch until evenly coated.',
+      'Cut broccoli into bite-sized florets. Blanch in simmering water (or steam) for 90 seconds until vivid green, then drain well.',
+      'Heat 1 tbsp neutral oil in a wok or large skillet over high heat until lightly smoking. Sear steak in a single layer 2 minutes undisturbed, flip, cook 1 minute more, and transfer to a plate.',
+      'Lower heat to medium; stir-fry minced ginger and garlic for 30 seconds. Return beef and broccoli with remaining 3 tbsp soy sauce and 3 tbsp water; toss 60 seconds until the cornstarch forms a glossy glaze. Serve immediately over rice.',
     ],
   },
   {
     id: 'pasta-al-limone-peas',
     title: 'Creamy Lemon Pasta with Sweet Peas & Ricotta',
-    subtitle: 'Al dente rigatoni emulsified with bright lemon zest, whole-milk ricotta, and green peas',
+    subtitle:
+      'Ridged rigatoni glossed in a bright, velvety emulsion of whipped whole-milk ricotta, aged Parmesan, sweet green peas, and fresh lemon zest',
+    cuisine: 'Italian',
+    flavorProfile: 'Bright Lemon Zest · Velvety Ricotta · Sweet Pea',
     mealTypes: ['dinner', 'lunch'],
     prepTimeMinutes: 5,
     cookTimeMinutes: 14,
@@ -300,6 +500,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['Vegetarian', 'Quick', 'Budget'],
     macrosPerServing: { calories: 510, protein: 21, carbs: 68, fat: 16 },
     imageUrl: '/assets/aistudio/IMG_4308_4ecf8a9d.jpeg',
+    equipment: ['Large pasta pot', 'Microplane zester', 'Tongs'],
+    nutritionHighlights: [
+      '21g vegetarian protein without heavy cream',
+      'Energizing complex carbohydrates for active days',
+      'On the table in under 20 minutes from one pot',
+    ],
+    chefTip:
+      'ALWAYS mix the ricotta and Parmesan off the burner using hot starchy pasta water—direct high heat can curdle ricotta, while warm starchy water turns it into restaurant silk.',
+    batchTip:
+      'Makes 4 generous bowls; save an extra 1/4 cup pasta water in a small jar if planning to reheat tomorrow.',
+    reheatTip:
+      'Warm gently on the stovetop or microwave with 2 tbsp milk or water, stirring halfway so the ricotta sauce stays creamy.',
+    swaps: [
+      'Use chickpea or lentil rigatoni to double protein to ~34g per serving.',
+      'Fold in shredded rotisserie chicken or white beans for heartier lunches.',
+    ],
     storageDays: 3,
     ingredients: [
       { id: 'ing-61', name: 'Rigatoni pasta', quantity: 360, unit: 'g', category: 'Bakery & Grains', estimatedPrice: 1.80 },
@@ -310,15 +526,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-66', name: 'Black pepper & olive oil', quantity: 1, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.35 },
     ],
     instructions: [
-      'Boil salted water and cook rigatoni until 1 minute shy of al dente; drop frozen peas in for the last 2 minutes.',
-      'Reserve 1 cup starchy pasta cooking water before draining.',
-      'Off heat, toss hot pasta and peas with ricotta, grated Parmesan, lemon zest, lemon juice, and splashes of pasta water until silky.'
+      'Bring a large pot of generously salted water to a rolling boil. Zest and juice both lemons into a large heatproof serving bowl; add ricotta, grated Parmesan, olive oil, and plenty of freshly cracked black pepper.',
+      'Cook rigatoni according to package directions until al dente, dropping frozen green peas directly into the boiling pasta water during the final 2 minutes.',
+      'Before draining, scoop out 1 full cup of cloudy, starchy pasta cooking water.',
+      'Whisk 1/3 cup hot pasta water into the ricotta-lemon bowl until smooth and creamy.',
+      'Drain rigatoni and peas and transfer immediately into the bowl (or back into the warm pot OFF the heat). Toss vigorously, adding more splashes of pasta water until every ridge is glossy and coated. Taste and adjust salt and pepper.',
     ],
   },
   {
     id: 'tofu-peanut-noodle-salad',
     title: 'Crispy Tofu & Sesame Peanut Crunch Salad',
-    subtitle: 'Pan-crisped tofu cubes over shredded cabbage, bell peppers, and creamy ginger-peanut dressing',
+    subtitle:
+      'Golden pan-crisped extra-firm tofu over vibrant shredded red cabbage, sweet carrots, fresh cilantro, and zesty ginger-peanut dressing',
+    cuisine: 'Southeast Asian-Inspired',
+    flavorProfile: 'Nutty Peanut · Crisp Slaw · Tangy Lime & Ginger',
     mealTypes: ['lunch', 'dinner'],
     prepTimeMinutes: 12,
     cookTimeMinutes: 14,
@@ -327,7 +548,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Vegetarian', 'Dairy-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 490, protein: 29, carbs: 36, fat: 26 },
     imageUrl: '/assets/aistudio/IMG_4309_72d63f9c.jpeg',
-    batchTip: 'Shredded cabbage holds crunch for 4 days without wilting.',
+    equipment: ['Clean kitchen towel + heavy skillet (for pressing)', 'Nonstick skillet', 'Large bowl'],
+    nutritionHighlights: [
+      '29g complete plant protein with isoflavones & calcium',
+      'Anthocyanin antioxidants from crisp red cabbage',
+      'Stays crunchy up to 4 days in meal-prep containers',
+    ],
+    chefTip:
+      'Press cubed tofu wrapped in a clean towel for 10 minutes before searing, then resist flipping for the first 3 minutes in hot oil—letting a dry crust form prevents sticking.',
+    batchTip:
+      'Red cabbage never gets soggy like delicate greens; pack tofu in a separate corner if you want to warm just the tofu before tossing.',
+    reheatTip:
+      'Enjoy cold straight from the fridge as a crunchy noodle-style salad, or warm only the tofu cubes in an air fryer for 3 minutes.',
+    swaps: [
+      'Swap peanut butter for almond butter or sunflower seed butter (nut-free).',
+      'Toss in cooked soba or rice vermicelli noodles for higher carb recovery days.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-67', name: 'Extra-firm tofu', quantity: 400, unit: 'g', category: 'Produce', estimatedPrice: 2.80 },
@@ -338,15 +574,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-72', name: 'Sesame oil', quantity: 1, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.40 },
     ],
     instructions: [
-      'Press tofu 10 minutes, cube, toss with 1 tsp soy sauce, and pan-sear in 1 tbsp oil until golden on all sides.',
-      'Whisk peanut butter, soy sauce, lime juice, sesame oil, and warm water into a pourable dressing.',
-      'Toss shredded cabbage, julienned carrots, and crispy tofu with dressing and cilantro.'
+      'Drain extra-firm tofu, wrap in a clean towel under a heavy pan for 10 minutes, then cut into 2cm cubes. Toss lightly with 1 tsp soy sauce.',
+      'Heat 1 tbsp oil in a nonstick skillet over medium-high heat. Sear tofu cubes untouched for 3 minutes per side until blistered golden-brown on multiple edges; transfer to a plate.',
+      'Meanwhile, whisk natural peanut butter, remaining soy sauce, fresh lime juice, toasted sesame oil, and 2–3 tbsp warm water until silky and pourable.',
+      'Finely shred red cabbage, matchstick or grate carrots, and chop fresh cilantro.',
+      'Toss vegetables with peanut dressing until evenly lacquered, then fold in crispy tofu right before serving.',
     ],
   },
   {
     id: 'cottage-cheese-protein-pancakes',
     title: 'Oat & Cottage Cheese Protein Pancakes',
-    subtitle: 'Tender blender oat pancakes packed with cottage cheese and topped with warm cinnamon apples',
+    subtitle:
+      'Light, tender blender oatcakes packed with whipped cottage cheese and whole eggs, crowned with warm cinnamon-sautéed Honeycrisp apples',
+    cuisine: 'American Comfort',
+    flavorProfile: 'Warm Cinnamon Apple · Tender Oatcake · Lightly Sweet',
     mealTypes: ['breakfast'],
     prepTimeMinutes: 5,
     cookTimeMinutes: 10,
@@ -355,6 +596,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Vegetarian', 'Quick', 'Budget'],
     macrosPerServing: { calories: 385, protein: 28, carbs: 44, fat: 10 },
     imageUrl: '/assets/aistudio/IMG_4310_ff2e17dd.jpeg',
+    equipment: ['Blender or food processor', 'Nonstick griddle or skillet'],
+    nutritionHighlights: [
+      '28g protein with slow-digesting casein + whole oats',
+      'Zero refined flour or added white sugar',
+      'Only 10g fat for light, high-satiety mornings',
+    ],
+    chefTip:
+      'Let the blended oat batter rest for 2 minutes before pouring onto the griddle—the oats hydrate slightly so pancakes flip cleanly without tearing.',
+    batchTip:
+      'Double the batter on Sunday and freeze extra pancakes between squares of parchment paper for instant weekday toaster breakfasts.',
+    reheatTip:
+      'Pop chilled pancakes directly into a toaster on medium for 90 seconds, or microwave 30 seconds.',
+    swaps: [
+      'Swap Honeycrisp apple for mashed ripe banana or a handful of blueberries folded into the batter.',
+      'Add 1 tsp vanilla extract or a drizzle of pure maple syrup if desired.',
+    ],
     storageDays: 3,
     ingredients: [
       { id: 'ing-73', name: 'Low-fat cottage cheese', quantity: 220, unit: 'g', category: 'Dairy & Eggs', estimatedPrice: 2.10 },
@@ -364,15 +621,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-77', name: 'Cinnamon & baking powder', quantity: 1, unit: 'tsp', category: 'Spices & Oils', estimatedPrice: 0.20 },
     ],
     instructions: [
-      'Blend cottage cheese, rolled oats, eggs, cinnamon, and baking powder for 30 seconds until smooth.',
-      'Cook 1/4-cup portions on a lightly greased griddle 2 minutes per side until bubbles set.',
-      'Top with thinly sliced sautéed cinnamon apples.'
+      'Add cottage cheese, rolled oats, eggs, 1/2 tsp cinnamon, and 1/2 tsp baking powder to a blender; blend 30–40 seconds until completely smooth, then let batter sit 2 minutes.',
+      'Thinly slice Honeycrisp apple and toss with a pinch of cinnamon and 1 tbsp water; sauté in a small skillet 3–4 minutes until tender and caramelized.',
+      'Warm a lightly greased nonstick griddle over medium-low heat. Pour 1/4-cup rounds of batter.',
+      'Cook 2–3 minutes until tiny bubbles form on top and edges look matte, flip gently, and cook 90 seconds until golden.',
+      'Stack warm pancakes and spoon tender cinnamon apples and pan juices over top.',
     ],
   },
   {
     id: 'sheet-pan-sausage-peppers',
     title: 'Sheet-Pan Chicken Sausage & Sweet Peppers',
-    subtitle: 'Roasted Italian chicken sausage with caramelized bell peppers, red onion, and balsamic',
+    subtitle:
+      'Savory Italian chicken sausage coins roasted with caramelized tri-color bell peppers, sweet red onion, and aromatic Mediterranean herbs',
+    cuisine: 'Italian-American',
+    flavorProfile: 'Savory Herb · Sweet Charred Peppers · Zero Cleanup',
     mealTypes: ['dinner'],
     prepTimeMinutes: 8,
     cookTimeMinutes: 22,
@@ -381,7 +643,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Low Carb', 'Gluten-Free', 'Dairy-Free', 'Budget'],
     macrosPerServing: { calories: 390, protein: 29, carbs: 18, fat: 22 },
     imageUrl: '/assets/aistudio/IMG_4311_708fefcd.jpeg',
-    batchTip: 'Zero pots to wash—line sheet pan with parchment for a 1-minute cleanup.',
+    equipment: ['Large rimmed sheet pan (half-sheet)', 'Parchment paper'],
+    nutritionHighlights: [
+      '29g protein with only 18g carbohydrates',
+      'Over 150% daily vitamin C from roasted bell peppers',
+      '5 ingredients · 1-pan minimal prep',
+    ],
+    chefTip:
+      'Slice peppers into thick 2cm strips rather than thin slivers and leave space on the pan—crowding traps steam, whereas spacing gives sweet charred edges.',
+    batchTip:
+      'Line the sheet pan with parchment paper for 30-second cleanup; keeps 4 days in meal-prep containers.',
+    reheatTip:
+      'Reheat in a hot skillet or 400°F air fryer for 4 minutes to keep pepper edges caramelized, or microwave 75 seconds.',
+    swaps: [
+      'Serve over rice, quinoa, or tucked into warm hoagie rolls if you want extra carbs.',
+      'Swap chicken sausage for spicy turkey sausage or plant-based Italian links.',
+    ],
     storageDays: 4,
     ingredients: [
       { id: 'ing-78', name: 'Italian chicken sausage', quantity: 550, unit: 'g', category: 'Meat & Fish', estimatedPrice: 6.40 },
@@ -390,15 +667,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-81', name: 'Olive oil & Italian seasoning', quantity: 2, unit: 'tbsp', category: 'Spices & Oils', estimatedPrice: 0.50 },
     ],
     instructions: [
-      'Preheat oven to 425°F (220°C). Slice sausages into thick coins and cut peppers and red onion into strips.',
-      'Toss everything on a large baking sheet with olive oil, Italian seasoning, salt, and pepper.',
-      'Roast 20–22 minutes, tossing halfway, until edges char lightly.'
+      'Preheat oven to 425°F (220°C) and line a large rimmed baking sheet with parchment paper.',
+      'Slice Italian chicken sausages diagonally into 1.5cm coins. Seed and cut bell peppers into wide strips and slice red onion into thick wedges.',
+      'Toss sausage, peppers, and onion on the sheet pan with olive oil, Italian seasoning, kosher salt, and black pepper; spread into a single even layer.',
+      'Roast 20–22 minutes, tossing once halfway through, until sausage edges are browned and pepper skins blister slightly.',
+      'Finish with a splash of balsamic or red wine vinegar if on hand, and divide into 4 portions.',
     ],
   },
   {
     id: 'grilled-chicken-caesar-wrap',
     title: 'Grilled Chicken & Crisp Romaine Wrap',
-    subtitle: 'Herb-grilled chicken breast, crunchy romaine, shaved Parmesan, and light yogurt Caesar',
+    subtitle:
+      'Juicy herb-seared chicken breast, crisp romaine hearts, shaved Parmesan, and a bright protein-rich Greek yogurt Caesar rolled in whole-wheat flatbread',
+    cuisine: 'American Bistro',
+    flavorProfile: 'Creamy Tangy Caesar · Crisp Romaine · Savory Char',
     mealTypes: ['lunch'],
     prepTimeMinutes: 8,
     cookTimeMinutes: 10,
@@ -407,6 +689,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Quick'],
     macrosPerServing: { calories: 445, protein: 39, carbs: 34, fat: 16 },
     imageUrl: '/assets/aistudio/IMG_4312_14196f08.jpeg',
+    equipment: ['Grill pan or skillet', 'Small whisk bowl'],
+    nutritionHighlights: [
+      '39g lean protein with Greek yogurt dressing swap',
+      '60% less saturated fat than classic mayo Caesar',
+      'Portable high-protein workday lunch',
+    ],
+    chefTip:
+      'Warm the tortillas directly over a dry pan for 15 seconds per side right before rolling—pliable warm wraps fold tightly without cracking along the seam.',
+    batchTip:
+      'Grill chicken and whisk yogurt Caesar dressing ahead; assemble wraps the morning of so romaine stays crisp.',
+    reheatTip:
+      'Designed to enjoy chilled or pressed in a dry panini/skillet for 2 minutes until lightly toasted outside.',
+    swaps: [
+      'Use gluten-free tortillas or serve as a chopped salad bowl with whole-grain croutons.',
+      'Swap chicken breast for grilled shrimp or crispy chickpeas.',
+    ],
     storageDays: 2,
     ingredients: [
       { id: 'ing-82', name: 'Chicken breast', quantity: 300, unit: 'g', category: 'Meat & Fish', estimatedPrice: 4.20 },
@@ -416,15 +714,20 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-86', name: 'Parmesan cheese', quantity: 30, unit: 'g', category: 'Dairy & Eggs', estimatedPrice: 1.00 },
     ],
     instructions: [
-      'Season and grill chicken breast 5 minutes per side until cooked through; slice thinly.',
-      'Whisk Greek yogurt, grated Parmesan, lemon juice, Dijon, and minced garlic.',
-      'Toss chopped romaine with dressing, pile into warmed tortillas with chicken, and roll tightly.'
+      'Slice chicken breast horizontally into thin cutlets for quick even cooking. Season with salt, pepper, and garlic powder.',
+      'Sear in a lightly oiled grill pan or skillet over medium-high heat for 4–5 minutes per side until 165°F; rest 3 minutes, then slice into strips.',
+      'Whisk Greek yogurt, finely grated Parmesan, a squeeze of lemon juice, 1 tsp water, and cracked black pepper into a creamy Caesar dressing.',
+      'Chop crisp romaine hearts and toss thoroughly with dressing and remaining Parmesan.',
+      'Warm whole wheat tortillas 15 seconds per side in the dry pan, mound dressed romaine and sliced chicken down the center, fold ends in, and roll snugly. Slice diagonally.',
     ],
   },
   {
     id: 'hummus-veggie-protein-box',
     title: 'Roasted Pepper Hummus & Veggie Box',
-    subtitle: 'Creamy chickpea hummus paired with crisp carrots, cucumber spears, and seed crackers',
+    subtitle:
+      'Velvety roasted red pepper chickpea hummus paired with cold, snappy carrot batons, crisp cucumber spears, and crunchy seed crackers',
+    cuisine: 'Mediterranean Mezze',
+    flavorProfile: 'Smoky Sweet Pepper · Fresh Crunch · Toasted Seeds',
     mealTypes: ['snacks'],
     prepTimeMinutes: 5,
     cookTimeMinutes: 0,
@@ -433,7 +736,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['Vegetarian', 'Dairy-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 235, protein: 9, carbs: 26, fat: 11 },
     imageUrl: '/assets/aistudio/IMG_4313_5d27e136.jpeg',
-    batchTip: 'Slice carrots and cucumbers into water-filled jars on Sunday to keep snappy for 5 days.',
+    equipment: ['2 divided snack containers'],
+    nutritionHighlights: [
+      'Fiber + plant protein for steady afternoon focus',
+      'Zero cooking · 5-minute bento prep',
+      'Beta-carotene & hydration from fresh raw veg',
+    ],
+    chefTip:
+      'Keep crackers in a separate mini pouch or top compartment so moisture from the cucumbers never softens their crunch.',
+    batchTip:
+      'Slice carrots and cucumbers into cold water-filled jars on Sunday to keep them ultra-crisp for up to 5 days.',
+    reheatTip:
+      'No-cook cold snack box—enjoy straight from your fridge or insulated lunch bag.',
+    swaps: [
+      'Add two hard-boiled eggs or turkey roll-ups to transform into a 22g-protein light lunch.',
+      'Swap seed crackers for toasted pita triangles or snap peas.',
+    ],
     storageDays: 5,
     ingredients: [
       { id: 'ing-87', name: 'Roasted red pepper hummus', quantity: 160, unit: 'g', category: 'Pantry', estimatedPrice: 2.50 },
@@ -442,14 +760,18 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-90', name: 'Whole-grain seed crackers', quantity: 60, unit: 'g', category: 'Bakery & Grains', estimatedPrice: 1.50 },
     ],
     instructions: [
-      'Cut carrots and cucumber into uniform dipping batons.',
-      'Portion hummus into containers alongside crisp veggies and seed crackers.'
+      'Peel carrots and slice both carrots and Persian cucumber into sturdy 8cm dipping batons.',
+      'Spoon roasted red pepper hummus into small dip cups or container wells; optionally dust with smoked paprika.',
+      'Pack crisp veggies alongside whole-grain seed crackers in divided containers.',
     ],
   },
   {
     id: 'edamame-sea-salt-snack',
     title: 'Steamed Sea Salt Edamame & Almonds',
-    subtitle: 'Warm protein-rich edamame pods dusted with flaky sea salt and roasted almonds',
+    subtitle:
+      'Plump steamed edamame pods dusted with crisp Maldon-style sea salt paired with crunchy dry-roasted almonds',
+    cuisine: 'Japanese Snack',
+    flavorProfile: 'Briny Flaky Salt · Nutty Roasted Crunch · Sweet Soy',
     mealTypes: ['snacks'],
     prepTimeMinutes: 2,
     cookTimeMinutes: 4,
@@ -458,6 +780,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 220, protein: 16, carbs: 11, fat: 13 },
     imageUrl: '/assets/aistudio/IMG_4314_e8fc2776.jpeg',
+    equipment: ['Steamer basket or microwave-safe bowl'],
+    nutritionHighlights: [
+      '16g complete plant protein at just 220 kcal',
+      'Vitamin E & magnesium from roasted almonds',
+      'Ready in 6 minutes with minimal cleanup',
+    ],
+    chefTip:
+      'Toss edamame pods with flaky salt while they are still steaming-damp—the moisture melts a trace of salt onto the shell while leaving crisp crystals for each bite.',
+    batchTip:
+      'Steam a whole bag of frozen pods at once and portion into grab-and-go containers with almonds kept dry on the side.',
+    reheatTip:
+      'Great eaten chilled straight from the fridge, or microwave 30 seconds for warm salty pods.',
+    swaps: [
+      'Dust pods with togarashi chili spice, garlic powder, or furikake for bold flavor.',
+      'Swap roasted almonds for dry-roasted cashews or pumpkin seeds.',
+    ],
     storageDays: 3,
     ingredients: [
       { id: 'ing-91', name: 'Frozen edamame pods', quantity: 220, unit: 'g', category: 'Frozen', estimatedPrice: 2.10 },
@@ -465,14 +803,18 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-93', name: 'Flaky sea salt', quantity: 0.5, unit: 'tsp', category: 'Spices & Oils', estimatedPrice: 0.05 },
     ],
     instructions: [
-      'Steam or microwave edamame pods for 4 minutes until bright green and tender.',
-      'Drain well, toss with flaky sea salt, and pair with roasted almonds.'
+      'Place frozen edamame pods in a steamer basket over boiling water (or a covered microwave-safe bowl with 2 tbsp water) and steam 4–5 minutes until tender and bright green.',
+      'Drain thoroughly and shake dry in a colander.',
+      'Toss warm pods with flaky sea salt and serve alongside crisp roasted almonds.',
     ],
   },
   {
     id: 'apple-peanut-butter-yogurt',
     title: 'Whipped Peanut Yogurt & Crisp Apple Slices',
-    subtitle: 'Greek yogurt swirled with natural peanut butter and cinnamon for dipping crisp apple wedges',
+    subtitle:
+      'Thick Greek yogurt whipped smooth with roasted peanut butter and warm cinnamon alongside crisp, chilled Honeycrisp apple wedges',
+    cuisine: 'Modern American',
+    flavorProfile: 'Velvety Roasted Peanut · Crisp Sweet-Tart Apple · Warm Cinnamon',
     mealTypes: ['snacks', 'breakfast'],
     prepTimeMinutes: 4,
     cookTimeMinutes: 0,
@@ -481,6 +823,22 @@ export const INITIAL_RECIPES: Recipe[] = [
     dietaryTags: ['High Protein', 'Vegetarian', 'Gluten-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 265, protein: 18, carbs: 25, fat: 11 },
     imageUrl: '/assets/aistudio/IMG_4315_a005fa6c.jpeg',
+    equipment: ['Small dipping bowl', 'Spoon & apple slicer'],
+    nutritionHighlights: [
+      '18g dairy + nut protein in 4 minutes flat',
+      'Satisfies sweet cravings with natural fruit fiber',
+      'Probiotic live cultures from Greek yogurt',
+    ],
+    chefTip:
+      'Stir the peanut butter into the cold yogurt slowly in small circles—after 20 seconds it emulsifies into a surprisingly light, cheesecake-like mousse.',
+    batchTip:
+      'Whip 3–4 portions of peanut yogurt dip into small jars ahead; slice the apple fresh or dip slices in lemon-water to prevent browning.',
+    reheatTip:
+      'Serve chilled right from the refrigerator.',
+    swaps: [
+      'Swap peanut butter for almond butter, tahini, or sunflower seed butter.',
+      'Use crisp pears or banana coins instead of Honeycrisp apple.',
+    ],
     storageDays: 1,
     ingredients: [
       { id: 'ing-94', name: 'Nonfat Greek yogurt', quantity: 150, unit: 'g', category: 'Dairy & Eggs', estimatedPrice: 1.25 },
@@ -488,8 +846,9 @@ export const INITIAL_RECIPES: Recipe[] = [
       { id: 'ing-96', name: 'Honeycrisp apple', quantity: 1, unit: 'whole', category: 'Produce', estimatedPrice: 1.10 },
     ],
     instructions: [
-      'Stir Greek yogurt, peanut butter, and a dash of cinnamon in a small bowl until velvety.',
-      'Core and slice crisp apple into wedges for dipping.'
+      'Combine nonfat Greek yogurt, natural peanut butter, and a generous pinch of cinnamon in a small bowl; stir steadily until whipped smooth and uniform.',
+      'Core Honeycrisp apple and cut into 8–10 crisp wedges.',
+      'Serve immediately for dipping, optionally dusting the yogurt swirl with extra cinnamon.',
     ],
   },
 ];

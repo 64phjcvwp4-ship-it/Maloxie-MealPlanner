@@ -7,6 +7,7 @@ import {
   Check,
   Trash2,
   RotateCcw,
+  Pencil,
 } from 'lucide-react';
 import {
   DietaryTag,
@@ -15,9 +16,18 @@ import {
   Ingredient,
   MealSlotType,
   MealTemplate,
+  PricingConfig,
   Recipe,
 } from '../types/mealPlanner';
 import { GROCERY_CATEGORY_ORDER, MEAL_SLOT_LABELS, formatQuantity } from '../utils/groceryUtils';
+import {
+  convertBaseUsdToLocal,
+  convertLocalToBaseUsd,
+  formatCurrency,
+  getCurrencyOption,
+  getIngredientLocalPrice,
+  roundForCurrencyInput,
+} from '../utils/currencyUtils';
 import { formatFullDayLabel } from '../utils/dateUtils';
 import { RecipeImage } from './RecipeImage';
 import { SoapBubbleSearch } from '../../components/soap-bubble';
@@ -234,6 +244,9 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
 interface RecipeDetailModalProps {
   recipe: Recipe | null;
   isFavorite: boolean;
+  pricing: PricingConfig;
+  onSetPriceOverride: (key: string, quantity: number, totalLocalPrice: number) => void;
+  onClearPriceOverride: (key: string) => void;
   onToggleFavorite: (recipeId: string) => void;
   onClose: () => void;
   onAssignToDate: (recipeId: string, date: string, slot: MealSlotType, servings: number) => void;
@@ -243,6 +256,9 @@ interface RecipeDetailModalProps {
 export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   recipe,
   isFavorite,
+  pricing,
+  onSetPriceOverride,
+  onClearPriceOverride,
   onToggleFavorite,
   onClose,
   onAssignToDate,
@@ -252,19 +268,27 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   const [selectedDate, setSelectedDate] = useState<string>(availableDates[0] || '');
   const [selectedSlot, setSelectedSlot] = useState<MealSlotType>(recipe?.mealTypes[0] || 'dinner');
   const [addedFeedback, setAddedFeedback] = useState(false);
+  const [editingIngKey, setEditingIngKey] = useState<string | null>(null);
+  const [draftIngPrice, setDraftIngPrice] = useState('');
 
   React.useEffect(() => {
     if (recipe) {
       setServings(recipe.servings);
       setSelectedSlot(recipe.mealTypes[0] || 'dinner');
       setAddedFeedback(false);
+      setEditingIngKey(null);
     }
   }, [recipe]);
 
   if (!recipe) return null;
 
+  const activeCurrency = getCurrencyOption(pricing.currencyCode);
   const scale = servings / Math.max(1, recipe.servings);
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
+  const totalRecipeCost = recipe.ingredients.reduce(
+    (sum, ing) => sum + getIngredientLocalPrice(ing, scale, pricing).price,
+    0
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
@@ -292,10 +316,18 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             <X className="w-4 h-4" />
           </BubbleIconButton>
           <div className="absolute bottom-4 left-6 right-6 text-[#FAF8F6]">
-            <div className="text-xs text-[#E5DFDA] flex items-center gap-2 mb-1">
+            <div className="text-xs text-[#E5DFDA] flex flex-wrap items-center gap-2 mb-1">
+              {recipe.cuisine && (
+                <>
+                  <span className="font-medium text-[#FAF8F6]">{recipe.cuisine}</span>
+                  <span aria-hidden="true">·</span>
+                </>
+              )}
               <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
               <span aria-hidden="true">·</span>
-              <span>{totalTime} min total</span>
+              <span>
+                {totalTime} min total ({recipe.prepTimeMinutes}m prep / {recipe.cookTimeMinutes}m cook)
+              </span>
               <span aria-hidden="true">·</span>
               <span>{recipe.difficulty}</span>
             </div>
@@ -332,6 +364,13 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
                 {recipe.macrosPerServing.fat}g
               </span>
             </div>
+            <div className="h-6 w-px bg-[#D9D0CB]" />
+            <div>
+              <span className="text-[#6A6754] block">Yield & Prep</span>
+              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
+                {recipe.servings} srv · {recipe.prepTimeMinutes}m / {recipe.cookTimeMinutes}m
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -347,22 +386,44 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#4A483A]">
-            <span>{recipe.subtitle}</span>
-            {recipe.dietaryTags.length > 0 && (
-              <>
+          <div className="space-y-2 pb-4 border-b border-[#D9D0CB]">
+            <p className="text-sm text-[#2E2D24] leading-relaxed">{recipe.subtitle}</p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#6A6754]">
+              {recipe.flavorProfile && (
+                <span className="font-medium text-[#4A483A]">{recipe.flavorProfile}</span>
+              )}
+              {recipe.flavorProfile && recipe.dietaryTags.length > 0 && (
                 <span aria-hidden="true">·</span>
-                <span className="text-[#6A6754] font-semibold">
+              )}
+              {recipe.dietaryTags.length > 0 && (
+                <span className="font-semibold text-[#6A6754]">
                   {recipe.dietaryTags.join(' · ')}
                 </span>
-              </>
+              )}
+            </div>
+            {recipe.nutritionHighlights && recipe.nutritionHighlights.length > 0 && (
+              <p className="text-xs text-[#4A483A]">
+                <span className="font-semibold text-[#2E2D24]">Nutrition Highlights: </span>
+                {recipe.nutritionHighlights.join(' · ')}
+              </p>
+            )}
+            {recipe.equipment && recipe.equipment.length > 0 && (
+              <p className="text-xs text-[#6A6754]">
+                <span className="font-semibold text-[#2E2D24]">Equipment: </span>
+                {recipe.equipment.join(' · ')}
+              </p>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-5 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#2E2D24]">Ingredients</h3>
+                <div>
+                  <h3 className="text-sm font-semibold text-[#2E2D24]">Ingredients</h3>
+                  <p className="text-[11px] font-mono tabular-nums text-[#14532D]">
+                    Est. {formatCurrency(totalRecipeCost, pricing.currencyCode)} ({formatCurrency(totalRecipeCost / Math.max(1, servings), pricing.currencyCode)}/srv)
+                  </p>
+                </div>
                 <div className="inline-flex items-center gap-1 border border-[#D9D0CB] rounded-full px-2 py-0.5 text-xs">
                   <button
                     type="button"
@@ -387,36 +448,147 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </div>
 
               <ul className="divide-y divide-[#D9D0CB] border-t border-b border-[#D9D0CB]">
-                {recipe.ingredients.map((ing) => (
-                  <li key={ing.id} className="py-2 flex items-center justify-between gap-2 text-xs">
-                    <span className="text-[#4A483A]">{ing.name}</span>
-                    <span className="font-mono tabular-nums text-[#2E2D24] whitespace-nowrap">
-                      {formatQuantity(ing.quantity * scale)} {ing.unit}
-                    </span>
-                  </li>
-                ))}
+                {recipe.ingredients.map((ing) => {
+                  const scaledQty = ing.quantity * scale;
+                  const { key, price, isCustom } = getIngredientLocalPrice(ing, scale, pricing);
+                  const isEditing = editingIngKey === key;
+
+                  return (
+                    <li key={ing.id} className="py-2 flex items-center justify-between gap-2 text-xs">
+                      <div className="min-w-0">
+                        <span className="text-[#4A483A]">{ing.name}</span>
+                        {isCustom && (
+                          <span className="ml-1.5 text-[10px] text-[#9E5236] font-medium">
+                            · Local
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 font-mono tabular-nums">
+                        <span className="text-[#2E2D24] whitespace-nowrap">
+                          {formatQuantity(scaledQty)} {ing.unit}
+                        </span>
+
+                        {isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              step={activeCurrency.decimals === 0 ? 50 : 0.25}
+                              value={draftIngPrice}
+                              onChange={(e) => setDraftIngPrice(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const num = Number(draftIngPrice);
+                                  if (!Number.isNaN(num) && num >= 0) {
+                                    onSetPriceOverride(key, scaledQty, num);
+                                  }
+                                  setEditingIngKey(null);
+                                } else if (e.key === 'Escape') {
+                                  setEditingIngKey(null);
+                                }
+                              }}
+                              aria-label={`Price for ${ing.name}`}
+                              className="w-16 px-1.5 py-0.5 text-[11px] bg-[#FAF8F6] text-[#14532D] border border-[#908B6F] rounded focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const num = Number(draftIngPrice);
+                                if (!Number.isNaN(num) && num >= 0) {
+                                  onSetPriceOverride(key, scaledQty, num);
+                                }
+                                setEditingIngKey(null);
+                              }}
+                              aria-label={`Save price for ${ing.name}`}
+                              className="p-0.5 rounded bg-[#6A6754] text-[#FAF8F6]"
+                            >
+                              <Check className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingIngKey(key);
+                              setDraftIngPrice(
+                                String(roundForCurrencyInput(price, pricing.currencyCode))
+                              );
+                            }}
+                            title="Edit local ingredient price"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#14532D] hover:text-[#2E2D24]"
+                          >
+                            <span>{formatCurrency(price, pricing.currencyCode)}</span>
+                            <Pencil className="w-2.5 h-2.5 opacity-45" />
+                          </button>
+                        )}
+
+                        {isCustom && (
+                          <button
+                            type="button"
+                            onClick={() => onClearPriceOverride(key)}
+                            title="Reset ingredient price"
+                            aria-label={`Reset price for ${ing.name}`}
+                            className="text-[#908B6F] hover:text-[#2E2D24]"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
-            <div className="md:col-span-7 space-y-4">
-              <h3 className="text-sm font-semibold text-[#2E2D24]">Instructions</h3>
-              <ol className="space-y-3">
-                {recipe.instructions.map((step, i) => (
-                  <li key={i} className="flex gap-3 text-sm text-[#4A483A] leading-relaxed">
-                    <span className="font-mono text-xs font-semibold text-[#6A6754] pt-0.5 shrink-0">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
+            <div className="md:col-span-7 space-y-5">
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-[#2E2D24]">Instructions</h3>
+                <ol className="space-y-3">
+                  {recipe.instructions.map((step, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-[#4A483A] leading-relaxed">
+                      <span className="font-mono text-xs font-semibold text-[#6A6754] pt-0.5 shrink-0">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
 
-              {(recipe.batchTip || recipe.storageDays) && (
-                <div className="p-3.5 bg-[#F3EFEC] border border-[#D9D0CB] rounded-lg text-xs text-[#4A483A] space-y-1">
-                  <div className="font-medium text-[#2E2D24]">
-                    Batch & Storage{recipe.storageDays ? ` · Keeps ${recipe.storageDays} days chilled` : ''}
+              {recipe.chefTip && (
+                <div className="pt-4 border-t border-[#D9D0CB] text-xs text-[#4A483A] space-y-1">
+                  <div className="font-semibold text-[#2E2D24]">Chef&apos;s Technique</div>
+                  <p className="leading-relaxed">{recipe.chefTip}</p>
+                </div>
+              )}
+
+              {recipe.swaps && recipe.swaps.length > 0 && (
+                <div className="pt-4 border-t border-[#D9D0CB] text-xs text-[#4A483A] space-y-1.5">
+                  <div className="font-semibold text-[#2E2D24]">Smart Swaps & Variations</div>
+                  <ul className="space-y-1 list-disc pl-4">
+                    {recipe.swaps.map((swap, idx) => (
+                      <li key={idx} className="leading-relaxed">
+                        {swap}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(recipe.batchTip || recipe.reheatTip || recipe.storageDays) && (
+                <div className="p-3.5 bg-[#F3EFEC] border border-[#D9D0CB] rounded-lg text-xs text-[#4A483A] space-y-1.5">
+                  <div className="font-semibold text-[#2E2D24]">
+                    Batch, Storage & Reheating
+                    {recipe.storageDays ? ` · Keeps ${recipe.storageDays} days chilled` : ''}
                   </div>
-                  {recipe.batchTip && <p>{recipe.batchTip}</p>}
+                  {recipe.batchTip && <p className="leading-relaxed">{recipe.batchTip}</p>}
+                  {recipe.reheatTip && (
+                    <p className="leading-relaxed">
+                      <span className="font-semibold text-[#2E2D24]">Reheating: </span>
+                      {recipe.reheatTip}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -474,15 +646,18 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
 
 interface CustomRecipeModalProps {
   open: boolean;
+  pricing: PricingConfig;
   onClose: () => void;
   onSaveRecipe: (recipe: Recipe) => void;
 }
 
 export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
   open,
+  pricing,
   onClose,
   onSaveRecipe,
 }) => {
+  const activeCurrency = getCurrencyOption(pricing.currencyCode);
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [mealTypes, setMealTypes] = useState<MealSlotType[]>(['dinner']);
@@ -505,6 +680,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
       estimatedPrice: 4.5,
     },
   ]);
+  const [localPrices, setLocalPrices] = useState<Record<string, string>>({});
   const [instructionsText, setInstructionsText] = useState(
     'Season protein and prep vegetables.\nCook in skillet over medium-high heat until golden.\nServe warm.'
   );
@@ -549,7 +725,19 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const validIngredients = ingredients.filter((i) => i.name.trim().length > 0);
+    const validIngredients = ingredients
+      .filter((i) => i.name.trim().length > 0)
+      .map((ing) => {
+        const enteredLocal = localPrices[ing.id];
+        if (enteredLocal !== undefined && !Number.isNaN(Number(enteredLocal))) {
+          return {
+            ...ing,
+            estimatedPrice: convertLocalToBaseUsd(Math.max(0, Number(enteredLocal)), pricing),
+          };
+        }
+        return ing;
+      });
+
     const newRecipe: Recipe = {
       id: `custom-${Date.now()}`,
       title: title.trim(),
@@ -590,6 +778,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
     onSaveRecipe(newRecipe);
     setTitle('');
     setSubtitle('');
+    setLocalPrices({});
     onClose();
   };
 
@@ -791,55 +980,81 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
               </BubbleButton>
             </div>
             <div className="space-y-2">
-              {ingredients.map((ing, idx) => (
-                <div key={ing.id} className="grid grid-cols-12 gap-2 items-center">
-                  <input
-                    type="text"
-                    placeholder="Ingredient"
-                    value={ing.name}
-                    onChange={(e) => updateIngredient(idx, { name: e.target.value })}
-                    className="col-span-4 px-2.5 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
-                  />
-                  <input
-                    type="number"
-                    step="0.25"
-                    min="0"
-                    value={ing.quantity}
-                    onChange={(e) => updateIngredient(idx, { quantity: Number(e.target.value) })}
-                    className="col-span-2 px-2 py-1.5 text-xs font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="unit"
-                    value={ing.unit}
-                    onChange={(e) => updateIngredient(idx, { unit: e.target.value })}
-                    className="col-span-2 px-2 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
-                  />
-                  <select
-                    value={ing.category}
-                    onChange={(e) =>
-                      updateIngredient(idx, { category: e.target.value as GroceryCategory })
-                    }
-                    className="col-span-3 px-2 py-1.5 text-xs border border-[#D9D0CB] rounded-md bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
-                  >
-                    {GROCERY_CATEGORY_ORDER.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setIngredients((prev) => prev.filter((_, i) => i !== idx))
-                    }
-                    aria-label="Remove ingredient"
-                    className="col-span-1 p-1 text-[#908B6F] hover:text-[#B43C2E] flex justify-center"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
+              {ingredients.map((ing, idx) => {
+                const defaultLocal = roundForCurrencyInput(
+                  convertBaseUsdToLocal(ing.estimatedPrice, pricing),
+                  pricing.currencyCode
+                );
+                const priceVal = localPrices[ing.id] ?? String(defaultLocal);
+                return (
+                  <div key={ing.id} className="grid grid-cols-12 gap-1.5 items-center">
+                    <input
+                      type="text"
+                      placeholder="Ingredient"
+                      value={ing.name}
+                      onChange={(e) => updateIngredient(idx, { name: e.target.value })}
+                      className="col-span-3 px-2 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                    />
+                    <input
+                      type="number"
+                      step="0.25"
+                      min="0"
+                      value={ing.quantity}
+                      onChange={(e) => updateIngredient(idx, { quantity: Number(e.target.value) })}
+                      aria-label="Ingredient quantity"
+                      className="col-span-2 px-2 py-1.5 text-xs font-mono bg-[#FAF8F6] text-[#2E2D24] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="unit"
+                      value={ing.unit}
+                      onChange={(e) => updateIngredient(idx, { unit: e.target.value })}
+                      aria-label="Ingredient unit"
+                      className="col-span-2 px-2 py-1.5 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                    />
+                    <select
+                      value={ing.category}
+                      onChange={(e) =>
+                        updateIngredient(idx, { category: e.target.value as GroceryCategory })
+                      }
+                      aria-label="Ingredient category"
+                      className="col-span-2 px-1.5 py-1.5 text-xs border border-[#D9D0CB] rounded-md bg-[#FAF8F6] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                    >
+                      {GROCERY_CATEGORY_ORDER.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="col-span-2 relative flex items-center">
+                      <span className="absolute left-1.5 text-[10px] font-mono text-[#6A6754] pointer-events-none">
+                        {activeCurrency.symbol.trim()}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step={activeCurrency.decimals === 0 ? 50 : 0.25}
+                        value={priceVal}
+                        onChange={(e) =>
+                          setLocalPrices((prev) => ({ ...prev, [ing.id]: e.target.value }))
+                        }
+                        aria-label={`Price in ${activeCurrency.code}`}
+                        className="w-full pl-6 pr-1.5 py-1.5 text-xs font-mono bg-[#FAF8F6] text-[#14532D] border border-[#D9D0CB] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIngredients((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                      aria-label="Remove ingredient"
+                      className="col-span-1 p-1 text-[#908B6F] hover:text-[#B43C2E] flex justify-center"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -886,6 +1101,7 @@ interface ApplyTemplateModalProps {
   templates: MealTemplate[];
   activeWeekIndex: number;
   planningHorizonWeeks: number;
+  pricing: PricingConfig;
   onClose: () => void;
   onApplyTemplate: (template: MealTemplate, scope: 'current' | 'all') => void;
   onSaveCurrentAsTemplate: (name: string) => void;
@@ -896,6 +1112,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
   templates,
   activeWeekIndex,
   planningHorizonWeeks,
+  pricing,
   onClose,
   onApplyTemplate,
   onSaveCurrentAsTemplate,
@@ -970,7 +1187,13 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
                   <span>~{tmpl.avgDailyProtein}g protein</span>
                   <span aria-hidden="true">·</span>
                   <span className="font-semibold text-[#14532D]">
-                    ~${tmpl.estimatedWeeklyCost}/wk
+                    ~
+                    {formatCurrency(
+                      convertBaseUsdToLocal(tmpl.estimatedWeeklyCost, pricing),
+                      pricing.currencyCode,
+                      { compact: true }
+                    )}
+                    /wk
                   </span>
                 </div>
               </div>

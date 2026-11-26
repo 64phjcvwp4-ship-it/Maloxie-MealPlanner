@@ -37,7 +37,7 @@ service cloud.firestore {
         && t.protein is number && t.protein >= 0 && t.protein <= 1000
         && t.carbs is number && t.carbs >= 0 && t.carbs <= 1500
         && t.fat is number && t.fat >= 0 && t.fat <= 500
-        && t.weeklyBudget is number && t.weeklyBudget >= 0 && t.weeklyBudget <= 10000;
+        && t.weeklyBudget is number && t.weeklyBudget >= 0 && t.weeklyBudget <= 10000000;
     }
 
     function isValidPlannerStateFields(data, userId) {
@@ -70,6 +70,14 @@ service cloud.firestore {
         && data.manualItems.size() <= 150
         && data.completedPrepTaskIds is list
         && data.completedPrepTaskIds.size() <= 200
+        && data.currencyCode is string
+        && data.currencyCode.size() >= 3
+        && data.currencyCode.size() <= 8
+        && data.regionalPriceFactor is number
+        && data.regionalPriceFactor >= 0.1
+        && data.regionalPriceFactor <= 5
+        && data.priceOverrides is map
+        && data.priceOverrides.size() <= 400
         && data.lastClientId is string
         && data.lastClientId.size() > 0
         && data.lastClientId.size() <= 64;
@@ -123,6 +131,9 @@ service cloud.firestore {
             'clearedKeys',
             'manualItems',
             'completedPrepTaskIds',
+            'currencyCode',
+            'regionalPriceFactor',
+            'priceOverrides',
             'lastClientId',
             'createdAt',
             'updatedAt'
@@ -141,6 +152,9 @@ service cloud.firestore {
             'clearedKeys',
             'manualItems',
             'completedPrepTaskIds',
+            'currencyCode',
+            'regionalPriceFactor',
+            'priceOverrides',
             'lastClientId',
             'createdAt',
             'updatedAt'
@@ -165,6 +179,9 @@ service cloud.firestore {
             'clearedKeys',
             'manualItems',
             'completedPrepTaskIds',
+            'currencyCode',
+            'regionalPriceFactor',
+            'priceOverrides',
             'lastClientId',
             'updatedAt'
           ])

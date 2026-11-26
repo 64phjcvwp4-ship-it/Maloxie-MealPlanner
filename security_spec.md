@@ -12,7 +12,7 @@
    - Immutability enforced for `uid`, `ownerId`, and `createdAt`.
    - Server timestamps enforced (`createdAt == request.time` on create; `updatedAt == request.time` on create & update).
    - Native Firestore Maps and Lists only (no JSON-serialized blobs).
-   - Volumetric caps (`daysMap.size() <= 90`, `customRecipes.size() <= 100`, `customTemplates.size() <= 30`, `favoriteIds.size() <= 200`, `manualItems.size() <= 150`, grocery key lists `<= 500`, `planningHorizonWeeks` 1..8, `householdMultiplier` 0.5..12, `targets` numeric bounds).
+   - Volumetric caps (`daysMap.size() <= 90`, `customRecipes.size() <= 100`, `customTemplates.size() <= 30`, `favoriteIds.size() <= 200`, `manualItems.size() <= 150`, grocery key lists `<= 500`, `priceOverrides.size() <= 400`, `planningHorizonWeeks` 1..8, `householdMultiplier` 0.5..12, `regionalPriceFactor` 0.1..5, `currencyCode` 3..8 chars, `targets` numeric bounds including multi-currency `weeklyBudget` up to 10,000,000).
 
 ## Dirty Dozen Verification Matrix
 1. Unauthenticated read/write to `/users/u1` or `/users/u1/planner/default` -> **DENY**

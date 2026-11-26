@@ -82,7 +82,7 @@
             "protein": { "type": "number", "minimum": 0, "maximum": 1000 },
             "carbs": { "type": "number", "minimum": 0, "maximum": 1500 },
             "fat": { "type": "number", "minimum": 0, "maximum": 500 },
-            "weeklyBudget": { "type": "number", "minimum": 0, "maximum": 10000 }
+            "weeklyBudget": { "type": "number", "minimum": 0, "maximum": 10000000 }
           },
           "required": ["calories", "protein", "carbs", "fat", "weeklyBudget"]
         },
@@ -116,6 +116,21 @@
           "maxItems": 200,
           "items": { "type": "string", "maxLength": 160 }
         },
+        "currencyCode": {
+          "type": "string",
+          "maxLength": 8,
+          "description": "Active ISO currency code for food prices and weekly budget."
+        },
+        "regionalPriceFactor": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 5,
+          "description": "Regional grocery cost multiplier relative to baseline prices."
+        },
+        "priceOverrides": {
+          "type": "object",
+          "description": "Map of normalized grocery item keys to custom local per-unit prices in the active currency."
+        },
         "lastClientId": {
           "type": "string",
           "maxLength": 64,
@@ -144,6 +159,9 @@
         "clearedKeys",
         "manualItems",
         "completedPrepTaskIds",
+        "currencyCode",
+        "regionalPriceFactor",
+        "priceOverrides",
         "lastClientId",
         "createdAt",
         "updatedAt"

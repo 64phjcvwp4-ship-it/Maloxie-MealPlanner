@@ -21,6 +21,7 @@ import {
   MealSlotType,
   MealTemplate,
   NutritionTargets,
+  PricingConfig,
   Recipe,
 } from './types/mealPlanner';
 import { INITIAL_RECIPES } from './data/recipes';
@@ -31,6 +32,13 @@ import {
   getWeekDates,
 } from './utils/dateUtils';
 import { computeDayMacros, generateGroceryList } from './utils/groceryUtils';
+import {
+  DEFAULT_PRICING_CONFIG,
+  convertLocalToBaseUsd,
+  formatCurrency,
+  getCurrencyOption,
+  roundForCurrencyInput,
+} from './utils/currencyUtils';
 import { GlassSlabLogo } from '../components/glass-slab-logo';
 import MoltenMetal from '../components/MoltenMetal';
 import AnimatedContent from '../components/AnimatedContent';
@@ -121,6 +129,12 @@ export default function App() {
             clearedKeys: parsed.clearedKeys || [],
             manualItems: parsed.manualItems || [],
             completedPrepTaskIds: parsed.completedPrepTaskIds || [],
+            currencyCode: parsed.currencyCode || DEFAULT_PRICING_CONFIG.currencyCode,
+            regionalPriceFactor:
+              typeof parsed.regionalPriceFactor === 'number' && parsed.regionalPriceFactor > 0
+                ? parsed.regionalPriceFactor
+                : DEFAULT_PRICING_CONFIG.regionalPriceFactor,
+            priceOverrides: parsed.priceOverrides || {},
           };
         }
       }
@@ -152,6 +166,9 @@ export default function App() {
       clearedKeys: [],
       manualItems: [],
       completedPrepTaskIds: [],
+      currencyCode: DEFAULT_PRICING_CONFIG.currencyCode,
+      regionalPriceFactor: DEFAULT_PRICING_CONFIG.regionalPriceFactor,
+      priceOverrides: {},
     };
   };
 
@@ -182,6 +199,15 @@ export default function App() {
   );
   const [completedPrepIdsArr, setCompletedPrepIdsArr] = useState<string[]>(
     initial.completedPrepTaskIds
+  );
+  const [currencyCode, setCurrencyCode] = useState<string>(
+    initial.currencyCode || DEFAULT_PRICING_CONFIG.currencyCode
+  );
+  const [regionalPriceFactor, setRegionalPriceFactor] = useState<number>(
+    initial.regionalPriceFactor || DEFAULT_PRICING_CONFIG.regionalPriceFactor
+  );
+  const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>(
+    initial.priceOverrides || {}
   );
 
   // Modals & transient state
@@ -221,7 +247,23 @@ export default function App() {
     setClearedKeysArr(remote.clearedKeys || []);
     setManualItems(remote.manualItems || []);
     setCompletedPrepIdsArr(remote.completedPrepTaskIds || []);
+    setCurrencyCode(remote.currencyCode || DEFAULT_PRICING_CONFIG.currencyCode);
+    setRegionalPriceFactor(
+      typeof remote.regionalPriceFactor === 'number' && remote.regionalPriceFactor > 0
+        ? remote.regionalPriceFactor
+        : DEFAULT_PRICING_CONFIG.regionalPriceFactor
+    );
+    setPriceOverrides(remote.priceOverrides || {});
   }, []);
+
+  const pricing: PricingConfig = useMemo(
+    () => ({
+      currencyCode,
+      regionalPriceFactor,
+      priceOverrides,
+    }),
+    [currencyCode, regionalPriceFactor, priceOverrides]
+  );
 
   const currentPayload: PersistedState = useMemo(
     () => ({
@@ -237,6 +279,9 @@ export default function App() {
       clearedKeys: clearedKeysArr,
       manualItems,
       completedPrepTaskIds: completedPrepIdsArr,
+      currencyCode,
+      regionalPriceFactor,
+      priceOverrides,
     }),
     [
       planningHorizonWeeks,
@@ -251,6 +296,9 @@ export default function App() {
       clearedKeysArr,
       manualItems,
       completedPrepIdsArr,
+      currencyCode,
+      regionalPriceFactor,
+      priceOverrides,
     ]
   );
 
@@ -494,7 +542,8 @@ export default function App() {
       daysMap,
       recipesMap,
       householdMultiplier,
-      manualItems
+      manualItems,
+      pricing
     ).filter((i) => !clearedKeys.has(i.key) && !alreadyHaveKeys.has(i.key));
 
     const estCost = grocery.reduce((s, i) => s + i.estimatedPrice, 0);
@@ -512,6 +561,7 @@ export default function App() {
     recipesMap,
     householdMultiplier,
     manualItems,
+    pricing,
     clearedKeys,
     alreadyHaveKeys,
     checkedKeys,
@@ -700,7 +750,9 @@ export default function App() {
       name,
       tagline: 'Custom saved weekly plan',
       focusTag: 'Batch Friendly',
-      estimatedWeeklyCost: Math.round(activeWeekSummary.estCost),
+      estimatedWeeklyCost: Math.round(
+        convertLocalToBaseUsd(activeWeekSummary.estCost, pricing)
+      ),
       avgDailyCalories: activeWeekSummary.avgDailyCalories,
       avgDailyProtein: targets.protein,
       days,
@@ -773,6 +825,93 @@ export default function App() {
     handleAssignMeal(cookDate, slot, recipeId, 1, false);
     handleAssignMeal(leftoverDate, 'lunch', recipeId, 1, true, cookDate);
     showToast('Scheduled batch cook + next-day leftover');
+  };
+
+  const handleChangeCurrency = (nextCode: string) => {
+    if (nextCode === currencyCode) return;
+    const prevCurr = getCurrencyOption(currencyCode);
+    const nextCurr = getCurrencyOption(nextCode);
+    const prevFactor = regionalPriceFactor || 1;
+    const fxRatio = nextCurr.exchangeRate / Math.max(0.0001, prevCurr.exchangeRate);
+    const regionalRatio =
+      (nextCurr.exchangeRate * nextCurr.defaultRegionalFactor) /
+      Math.max(0.0001, prevCurr.exchangeRate * prevFactor);
+
+    setTargets((prev) => ({
+      ...prev,
+      weeklyBudget: Math.max(
+        nextCurr.budgetStep,
+        Math.round((prev.weeklyBudget * regionalRatio) / nextCurr.budgetStep) *
+          nextCurr.budgetStep
+      ),
+    }));
+
+    setPriceOverrides((prev) => {
+      const converted: Record<string, number> = {};
+      for (const [k, unitPrice] of Object.entries(prev)) {
+        converted[k] = roundForCurrencyInput(unitPrice * fxRatio, nextCurr.code);
+      }
+      return converted;
+    });
+
+    setManualItems((prev) =>
+      prev.map((item) => ({
+        ...item,
+        estimatedPrice: roundForCurrencyInput(item.estimatedPrice * fxRatio, nextCurr.code),
+      }))
+    );
+
+    setCurrencyCode(nextCurr.code);
+    setRegionalPriceFactor(nextCurr.defaultRegionalFactor);
+    showToast(`Switched prices to ${nextCurr.code} (${nextCurr.regionLabel})`);
+  };
+
+  const handleChangeRegionalFactor = (factor: number) => {
+    const clamped = Math.max(0.25, Math.min(2.5, Math.round(factor * 20) / 20));
+    setRegionalPriceFactor(clamped);
+  };
+
+  const handleSetPriceOverride = (
+    itemKey: string,
+    quantity: number,
+    totalLocalPrice: number
+  ) => {
+    const safeQty = Math.max(0.01, quantity);
+    const safeTotal = Math.max(0, totalLocalPrice);
+    const perUnitLocal = safeTotal / safeQty;
+    setPriceOverrides((prev) => ({
+      ...prev,
+      [itemKey]: perUnitLocal,
+    }));
+    showToast('Updated local food price');
+  };
+
+  const handleClearPriceOverride = (itemKey: string) => {
+    setPriceOverrides((prev) => {
+      const next = { ...prev };
+      delete next[itemKey];
+      return next;
+    });
+    showToast('Reset food price to regional default');
+  };
+
+  const handleResetAllPrices = () => {
+    setPriceOverrides({});
+    showToast('Reset all custom food prices');
+  };
+
+  const handleUpdateManualItemPrice = (manualId: string, newPrice: number) => {
+    setManualItems((prev) =>
+      prev.map((item) =>
+        item.id === manualId
+          ? {
+              ...item,
+              estimatedPrice: roundForCurrencyInput(Math.max(0, newPrice), currencyCode),
+            }
+          : item
+      )
+    );
+    showToast('Updated item price');
   };
 
   const handleApplyAiAction = useCallback(
@@ -1121,7 +1260,7 @@ export default function App() {
             </p>
 
             {/* Compact Weekly Snapshot Strip */}
-            <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-2xl bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 shadow-sm">
+            <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-2xl bg-[#FAF8F6]/88 maloxie-peach-block">
               <button
                 type="button"
                 onClick={() => navigateAndScroll('calendar')}
@@ -1148,7 +1287,8 @@ export default function App() {
                 className="text-center rounded-xl py-1 hover:bg-[#D9D0CB]/30 transition-colors"
               >
                 <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#14532D]">
-                  ${activeWeekSummary.estCost.toFixed(0)} / ${targets.weeklyBudget}
+                  {formatCurrency(activeWeekSummary.estCost, currencyCode, { compact: true })} /{' '}
+                  {formatCurrency(targets.weeklyBudget, currencyCode, { compact: true })}
                 </div>
                 <div className="text-xs text-[#6A6754]">weekly budget</div>
               </button>
@@ -1163,7 +1303,7 @@ export default function App() {
         className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 pb-12 space-y-5"
       >
         {/* Workspace Navigation Tabs & Contextual Summary */}
-        <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
+        <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-full overflow-x-auto">
             {WORKSPACE_TABS.map((tab) => {
               const Icon = tab.icon;
@@ -1259,6 +1399,13 @@ export default function App() {
               clearedKeys={clearedKeys}
               manualItems={manualItems}
               weeklyBudget={targets.weeklyBudget}
+              pricing={pricing}
+              onChangeCurrency={handleChangeCurrency}
+              onChangeRegionalFactor={handleChangeRegionalFactor}
+              onSetPriceOverride={handleSetPriceOverride}
+              onClearPriceOverride={handleClearPriceOverride}
+              onResetAllPrices={handleResetAllPrices}
+              onUpdateManualItemPrice={handleUpdateManualItemPrice}
               onUpdateBudget={(weeklyBudget) =>
                 setTargets((prev) => ({ ...prev, weeklyBudget }))
               }
@@ -1281,7 +1428,11 @@ export default function App() {
               daysMap={daysMap}
               recipesMap={recipesMap}
               targets={targets}
+              pricing={pricing}
+              householdMultiplier={householdMultiplier}
               onUpdateTargets={setTargets}
+              onOpenRecipeDetail={(recipe) => setDetailRecipe(recipe)}
+              onNavigateToCalendar={() => setActiveTab('calendar')}
             />
           )}
 
@@ -1295,6 +1446,7 @@ export default function App() {
               recipesMap={recipesMap}
               householdMultiplier={householdMultiplier}
               weeklyBudget={targets.weeklyBudget}
+              pricing={pricing}
               completedPrepTaskIds={completedPrepTaskIds}
               onTogglePrepTask={handleTogglePrepTask}
               onAssignBatchWithLeftover={handleAssignBatchWithLeftover}
@@ -1326,6 +1478,9 @@ export default function App() {
       <RecipeDetailModal
         recipe={detailRecipe}
         isFavorite={detailRecipe ? favoriteIds.has(detailRecipe.id) : false}
+        pricing={pricing}
+        onSetPriceOverride={handleSetPriceOverride}
+        onClearPriceOverride={handleClearPriceOverride}
         onToggleFavorite={handleToggleFavorite}
         onClose={() => setDetailRecipe(null)}
         onAssignToDate={(recipeId, date, slot, servings) => {
@@ -1337,6 +1492,7 @@ export default function App() {
 
       <CustomRecipeModal
         open={customMealOpen}
+        pricing={pricing}
         onClose={() => setCustomMealOpen(false)}
         onSaveRecipe={handleSaveCustomRecipe}
       />
@@ -1346,6 +1502,7 @@ export default function App() {
         templates={allTemplates}
         activeWeekIndex={activeWeekIndex}
         planningHorizonWeeks={planningHorizonWeeks}
+        pricing={pricing}
         onClose={() => setTemplatesModalOpen(false)}
         onApplyTemplate={handleApplyTemplate}
         onSaveCurrentAsTemplate={handleSaveCurrentAsTemplate}
@@ -1376,6 +1533,7 @@ export default function App() {
           householdMultiplier,
           manualItems,
           favoriteIds,
+          pricing,
         }}
         onApplyAction={handleApplyAiAction}
       />

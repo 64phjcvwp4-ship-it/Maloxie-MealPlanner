@@ -80,6 +80,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
       return (
         r.title.toLowerCase().includes(q) ||
         r.subtitle.toLowerCase().includes(q) ||
+        (r.cuisine?.toLowerCase().includes(q) ?? false) ||
+        (r.flavorProfile?.toLowerCase().includes(q) ?? false) ||
         r.ingredients.some((i) => i.name.toLowerCase().includes(q))
       );
     });
@@ -100,9 +102,9 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
         src: getRecipeCarouselSrc(r),
         alt: r.title,
         title: r.title,
-        subtitle: `${r.macrosPerServing.calories} kcal · ${r.macrosPerServing.protein}g P · ${
-          r.prepTimeMinutes + r.cookTimeMinutes
-        } min`,
+        subtitle: `${r.cuisine ? `${r.cuisine} · ` : ''}${r.macrosPerServing.calories} kcal · ${
+          r.macrosPerServing.protein
+        }g P · ${r.prepTimeMinutes + r.cookTimeMinutes} min`,
       })),
     [filtered]
   );
@@ -116,9 +118,9 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
       img: getRecipeCarouselSrc(r),
       alt: r.title,
       title: r.title,
-      description: `${r.macrosPerServing.calories} kcal · ${r.macrosPerServing.protein}g P · ${
-        r.prepTimeMinutes + r.cookTimeMinutes
-      } min`,
+      description: `${r.cuisine ? `${r.cuisine} · ` : ''}${r.macrosPerServing.calories} kcal · ${
+        r.macrosPerServing.protein
+      }g P · ${r.prepTimeMinutes + r.cookTimeMinutes}m`,
       width: 640,
       height: heights[idx % heights.length],
       span: idx === 0 && r.imageUrl ? 2 : 1,
@@ -128,7 +130,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Search & Primary Filter Bar */}
-      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 space-y-4 shadow-sm">
+      <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-4 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex-1 max-w-md text-xs">
             <SoapBubbleSearch
@@ -236,7 +238,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             {favoriteRecipes.slice(0, 4).map((recipe) => (
               <div
                 key={`fav-${recipe.id}`}
-                className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-3.5 flex items-center justify-between gap-3 hover:border-[#908B6F] transition-colors shadow-sm"
+                className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-3.5 flex items-center justify-between gap-3"
               >
                 <button
                   type="button"
@@ -267,7 +269,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
 
       {/* Recipe Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-12 text-center space-y-3 shadow-sm">
+        <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-12 text-center space-y-3">
           <p className="text-sm text-[#4A483A]">
             No recipes match your active search or dietary filters.
           </p>
@@ -288,7 +290,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
       ) : (
         <>
           {/* Liquid FlexCarousel Showcase */}
-          <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+          <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
             <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-[#2E2D24]">
@@ -404,12 +406,36 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
 
             {activeCarouselRecipe && (
               <div className="px-5 py-3 border-t border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex flex-wrap items-center gap-2 text-[#4A483A] min-w-0">
-                  <span className="font-semibold text-[#2E2D24]">
-                    {activeCarouselRecipe.title}
-                  </span>
-                  <span aria-hidden="true">·</span>
-                  <span>{activeCarouselRecipe.dietaryTags.slice(0, 3).join(' · ')}</span>
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-[#4A483A]">
+                    <span className="font-semibold text-[#2E2D24]">
+                      {activeCarouselRecipe.title}
+                    </span>
+                    {activeCarouselRecipe.cuisine && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span>{activeCarouselRecipe.cuisine}</span>
+                      </>
+                    )}
+                    <span aria-hidden="true">·</span>
+                    <span>
+                      Prep {activeCarouselRecipe.prepTimeMinutes}m / Cook{' '}
+                      {activeCarouselRecipe.cookTimeMinutes}m
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{activeCarouselRecipe.dietaryTags.slice(0, 3).join(' · ')}</span>
+                  </div>
+                  {(activeCarouselRecipe.flavorProfile ||
+                    activeCarouselRecipe.nutritionHighlights?.[0]) && (
+                    <p className="text-[11px] text-[#6A6754] truncate">
+                      {activeCarouselRecipe.flavorProfile}
+                      {activeCarouselRecipe.flavorProfile &&
+                      activeCarouselRecipe.nutritionHighlights?.[0]
+                        ? ' — '
+                        : ''}
+                      {activeCarouselRecipe.nutritionHighlights?.[0]}
+                    </p>
+                  )}
                 </div>
                 <div className="font-mono tabular-nums text-[#4A483A] shrink-0">
                   {activeCarouselRecipe.macrosPerServing.calories} kcal ·{' '}
@@ -457,7 +483,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             </div>
 
             {browseLayout === 'masonry' ? (
-              <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-4 sm:p-5">
                 <Masonry
                   items={masonryItems}
                   columns="auto"
@@ -496,7 +522,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
             return (
               <article
                 key={recipe.id}
-                className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden flex flex-col justify-between hover:border-[#908B6F] transition-colors shadow-sm"
+                className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden flex flex-col justify-between"
               >
                 <div>
                   <div className="relative h-44 bg-[#EAE4E0] overflow-hidden">
@@ -528,12 +554,18 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                   </div>
 
                   <div className="p-4 space-y-2">
-                    <div className="text-xs text-[#6A6754] flex items-center gap-1.5">
+                    <div className="text-xs text-[#6A6754] flex flex-wrap items-center gap-1.5">
+                      {recipe.cuisine && (
+                        <>
+                          <span className="font-medium text-[#4A483A]">{recipe.cuisine}</span>
+                          <span aria-hidden="true">·</span>
+                        </>
+                      )}
                       <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
                       <span aria-hidden="true">·</span>
                       <span className="inline-flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {totalMins}m
+                        {totalMins}m ({recipe.prepTimeMinutes}/{recipe.cookTimeMinutes})
                       </span>
                       <span aria-hidden="true">·</span>
                       <span>{recipe.difficulty}</span>
@@ -557,6 +589,12 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
 
                     <p className="text-xs text-[#6A6754] line-clamp-2 leading-relaxed">
                       {recipe.subtitle}
+                    </p>
+
+                    <p className="text-[11px] text-[#4A483A] truncate">
+                      {recipe.flavorProfile
+                        ? `${recipe.flavorProfile} · ${recipe.ingredients.length} ingredients`
+                        : `${recipe.ingredients.length} ingredients · Keeps ${recipe.storageDays}d`}
                     </p>
                   </div>
                 </div>

@@ -41,6 +41,8 @@ export interface Recipe {
   id: string;
   title: string;
   subtitle: string;
+  cuisine?: string;
+  flavorProfile?: string;
   mealTypes: MealSlotType[];
   prepTimeMinutes: number;
   cookTimeMinutes: number;
@@ -50,9 +52,14 @@ export interface Recipe {
   macrosPerServing: Macros;
   ingredients: Ingredient[];
   instructions: string[];
-  imageUrl?: string;
+  equipment?: string[];
+  nutritionHighlights?: string[];
+  chefTip?: string;
   batchTip?: string;
+  reheatTip?: string;
+  swaps?: string[];
   storageDays?: number;
+  imageUrl?: string;
   isCustom?: boolean;
 }
 
@@ -103,6 +110,12 @@ export interface MealTemplate {
     note?: string;
     slots: Partial<Record<MealSlotType, Array<{ recipeId: string; servings: number; isLeftover?: boolean; leftoverOffsetDays?: number }>>>;
   }>;
+}
+
+export interface PricingConfig {
+  currencyCode: string;
+  regionalPriceFactor: number;
+  priceOverrides: Record<string, number>;
 }
 
 export type ActiveTab = 'calendar' | 'recipes' | 'grocery' | 'nutrition' | 'prep';

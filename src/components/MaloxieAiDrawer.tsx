@@ -10,6 +10,7 @@ import {
   type MaloxieMessage,
   type PlannerContext,
 } from '../utils/maloxieAiEngine';
+import { DEFAULT_PRICING_CONFIG, formatCurrency } from '../utils/currencyUtils';
 
 interface MaloxieAiDrawerProps {
   visible: boolean;
@@ -25,15 +26,6 @@ const CRYSTAL_COLORS = [
   '#D9D0CB',
   '#908B6F',
   '#6A6754',
-];
-
-const QUICK_PROMPTS = [
-  'Review my week',
-  'Create a high-protein week',
-  'Fill my empty slots',
-  'Create a budget week under $75',
-  'Quick 20-minute weeknight plan',
-  'Vegetarian week plan',
 ];
 
 export const MaloxieAiDrawer: React.FC<MaloxieAiDrawerProps> = ({
@@ -54,6 +46,22 @@ export const MaloxieAiDrawer: React.FC<MaloxieAiDrawerProps> = ({
   const replyTimerRef = useRef<number | null>(null);
 
   const liveAudit = useMemo(() => analyzeActiveWeek(context), [context]);
+  const activeCurrencyCode = (context.pricing || DEFAULT_PRICING_CONFIG).currencyCode;
+  const quickPrompts = useMemo(() => {
+    const budgetTargetLabel = formatCurrency(
+      Math.max(1, Math.round(context.targets.weeklyBudget * 0.75)),
+      activeCurrencyCode,
+      { compact: true }
+    );
+    return [
+      'Review my week',
+      'Create a high-protein week',
+      'Fill my empty slots',
+      `Create a budget week under ${budgetTargetLabel}`,
+      'Quick 20-minute weeknight plan',
+      'Vegetarian week plan',
+    ];
+  }, [context.targets.weeklyBudget, activeCurrencyCode]);
 
   useEffect(() => {
     if (!open) return;
@@ -250,14 +258,19 @@ export const MaloxieAiDrawer: React.FC<MaloxieAiDrawerProps> = ({
                 <span aria-hidden="true">·</span>
                 <span>{liveAudit.avgCalories} kcal/day</span>
                 <span aria-hidden="true">·</span>
-                <span>${Math.round(liveAudit.estWeeklyCost)} est.</span>
+                <span>
+                  {formatCurrency(liveAudit.estWeeklyCost, activeCurrencyCode, {
+                    compact: true,
+                  })}{' '}
+                  est.
+                </span>
               </div>
             </div>
           </div>
 
           {/* Quick Prompt Bar */}
           <div className="px-4 py-2.5 border-b border-[#D9D0CB]/12 flex items-center gap-1.5 overflow-x-auto bg-[#2A2922]">
-            {QUICK_PROMPTS.map((q) => (
+            {quickPrompts.map((q) => (
               <button
                 key={q}
                 type="button"

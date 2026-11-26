@@ -5,10 +5,18 @@ import type {
   MealSlotType,
   NutritionTargets,
   PlannedMealEntry,
+  PricingConfig,
   Recipe,
 } from '../types/mealPlanner';
 import { addDaysISO, formatShortDayHeader } from './dateUtils';
 import { computeDayMacros, generateGroceryList } from './groceryUtils';
+import {
+  DEFAULT_PRICING_CONFIG,
+  convertBaseUsdToLocal,
+  formatCurrency,
+  getCurrencyOption,
+  getIngredientLocalPrice,
+} from './currencyUtils';
 
 function formatShortDay(isoDate: string): string {
   const { weekday, monthShort, dayNum } = formatShortDayHeader(isoDate);
@@ -66,6 +74,7 @@ export interface PlannerContext {
   householdMultiplier: number;
   manualItems: ManualGroceryItem[];
   favoriteIds: Set<string>;
+  pricing?: PricingConfig;
 }
 
 const SLOTS: MealSlotType[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
@@ -74,8 +83,14 @@ function uid(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function estimateRecipeCostPerServing(recipe: Recipe): number {
-  const total = recipe.ingredients.reduce((sum, ing) => sum + ing.estimatedPrice, 0);
+function estimateRecipeCostPerServing(
+  recipe: Recipe,
+  pricing: PricingConfig = DEFAULT_PRICING_CONFIG
+): number {
+  const total = recipe.ingredients.reduce(
+    (sum, ing) => sum + getIngredientLocalPrice(ing, 1, pricing).price,
+    0
+  );
   return total / Math.max(1, recipe.servings);
 }
 
@@ -124,6 +139,7 @@ export function analyzeActiveWeek(ctx: PlannerContext): WeekAudit {
   const emptyDates: WeekAudit['emptyDates'] = [];
   const priciestMeals: WeekAudit['priciestMeals'] = [];
 
+  const pricing = ctx.pricing || DEFAULT_PRICING_CONFIG;
   for (const date of activeWeekDates) {
     const day = daysMap[date];
     const missingSlots: MealSlotType[] = [];
@@ -144,7 +160,7 @@ export function analyzeActiveWeek(ctx: PlannerContext): WeekAudit {
               date,
               slot,
               recipe: r,
-              costPerServing: estimateRecipeCostPerServing(r),
+              costPerServing: estimateRecipeCostPerServing(r, pricing),
             });
           }
         }
@@ -182,7 +198,8 @@ export function analyzeActiveWeek(ctx: PlannerContext): WeekAudit {
     daysMap,
     recipesMap,
     householdMultiplier,
-    manualItems
+    manualItems,
+    pricing
   );
   const estWeeklyCost = grocery.reduce((sum, item) => sum + item.estimatedPrice, 0);
 
@@ -254,7 +271,8 @@ function scoreRecipeForSlot(
     score += Math.max(0, 35 - totalMins) * 0.9;
   }
 
-  const costPerSrv = estimateRecipeCostPerServing(recipe);
+  // Compare cost in base USD units so scoring remains currency-agnostic
+  const costPerSrv = estimateRecipeCostPerServing(recipe, DEFAULT_PRICING_CONFIG);
   if (opts.avoidHighCost) {
     score -= costPerSrv * 8;
     if (recipe.dietaryTags.includes('Budget')) score += 20;
@@ -433,7 +451,8 @@ function buildGeneratedWeekPlan(
     weekDaysMap,
     ctx.recipesMap,
     ctx.householdMultiplier,
-    []
+    [],
+    ctx.pricing || DEFAULT_PRICING_CONFIG
   );
   const estCost = grocery.reduce((s, i) => s + i.estimatedPrice, 0);
 
@@ -512,6 +531,8 @@ function buildFillEmptySlotsPatch(
 function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
   const audit = analyzeActiveWeek(ctx);
   const { targets, activeWeekIndex } = ctx;
+  const pricing = ctx.pricing || DEFAULT_PRICING_CONFIG;
+  const fmt = (val: number) => formatCurrency(val, pricing.currencyCode, { compact: true });
   const weekNum = activeWeekIndex + 1;
 
   if (audit.plannedMeals === 0) {
@@ -523,7 +544,7 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
       id: uid('ai'),
       role: 'assistant',
       title: `Week ${weekNum} is currently empty`,
-      body: `You haven't scheduled any meals for Week ${weekNum} yet. I can generate a balanced 7-day plan averaging ${starter.avgCals} kcal/day and ${starter.avgProtein}g protein (~$${Math.round(starter.estCost)}/wk) so you can start right away.`,
+      body: `You haven't scheduled any meals for Week ${weekNum} yet. I can generate a balanced 7-day plan averaging ${starter.avgCals} kcal/day and ${starter.avgProtein}g protein (~${fmt(starter.estCost)}/wk) so you can start right away.`,
       highlights: [
         'Includes planned next-day leftovers to cut weeknight cooking in half',
         'Automatically populates your Grocery List and Sunday Prep Guide',
@@ -584,12 +605,12 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
 
   if (budgetDiff <= 0) {
     insights.push(
-      `Budget: Estimated $${audit.estWeeklyCost.toFixed(0)} — $${Math.abs(Math.round(budgetDiff))} under your $${targets.weeklyBudget} cap.`
+      `Budget: Estimated ${fmt(audit.estWeeklyCost)} — ${fmt(Math.abs(budgetDiff))} under your ${fmt(targets.weeklyBudget)} cap.`
     );
   } else {
     const topPriced = audit.priciestMeals[0];
     insights.push(
-      `Budget: Estimated $${audit.estWeeklyCost.toFixed(0)} ($${Math.round(budgetDiff)} over your $${targets.weeklyBudget} cap${topPriced ? `; ${topPriced.recipe.title} is the priciest item` : ''}).`
+      `Budget: Estimated ${fmt(audit.estWeeklyCost)} (${fmt(budgetDiff)} over your ${fmt(targets.weeklyBudget)} cap${topPriced ? `; ${topPriced.recipe.title} is the priciest item` : ''}).`
     );
   }
 
@@ -604,6 +625,7 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
   }
 
   const actions: MaloxieAction[] = [];
+  const budgetTolerance = convertBaseUsdToLocal(5, pricing);
 
   if (audit.emptySlotCount > 0) {
     const fill = buildFillEmptySlotsPatch(ctx, {
@@ -620,7 +642,7 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
     }
   }
 
-  if (budgetDiff > 5) {
+  if (budgetDiff > budgetTolerance) {
     const budgetPlan = buildGeneratedWeekPlan(ctx.activeWeekDates, ctx, {
       focusTags: ['Budget', 'Batch Friendly'],
       avoidHighCost: true,
@@ -629,7 +651,7 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
     });
     actions.push({
       type: 'apply_week_plan',
-      label: `Switch to Budget Plan (~$${Math.round(budgetPlan.estCost)}/wk)`,
+      label: `Switch to Budget Plan (~${fmt(budgetPlan.estCost)}/wk)`,
       weekDaysMap: budgetPlan.weekDaysMap,
       scope: 'current',
     });
@@ -648,7 +670,7 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
   }
 
   const verdict =
-    audit.emptySlotCount === 0 && Math.abs(calDiff) <= 180 && protDiff >= -10 && budgetDiff <= 5
+    audit.emptySlotCount === 0 && Math.abs(calDiff) <= 180 && protDiff >= -10 && budgetDiff <= budgetTolerance
       ? `Week ${weekNum} is well balanced across macros, variety, and budget.`
       : `Here is a full audit of Week ${weekNum} with direct fixes you can apply in one click.`;
 
@@ -665,12 +687,14 @@ function buildFeedbackResponse(ctx: PlannerContext): MaloxieMessage {
 
 export function createInitialAiGreeting(ctx: PlannerContext): MaloxieMessage {
   const audit = analyzeActiveWeek(ctx);
+  const pricing = ctx.pricing || DEFAULT_PRICING_CONFIG;
+  const fmt = (val: number) => formatCurrency(val, pricing.currencyCode, { compact: true });
   const weekNum = ctx.activeWeekIndex + 1;
   return {
     id: uid('ai-welcome'),
     role: 'assistant',
     title: 'Maloxie AI is ready',
-    body: `I read your live planner for Week ${weekNum} (${audit.plannedMeals} meals scheduled, ${audit.avgCalories || 0} avg kcal/day, ~$${Math.round(audit.estWeeklyCost)} est.). Ask me to critique your week, build a custom menu, boost protein, or cut grocery costs.`,
+    body: `I read your live planner for Week ${weekNum} (${audit.plannedMeals} meals scheduled, ${audit.avgCalories || 0} avg kcal/day, ~${fmt(audit.estWeeklyCost)} est.). Ask me to critique your week, build a custom menu, boost protein, or cut grocery costs.`,
     highlights: [
       'Built-in planning & nutrition analysis — works offline and syncs with your cloud account',
       'Click any suggestion below or type your calorie, budget, or dietary goal',
@@ -685,15 +709,26 @@ export function generateMaloxieAiReply(
 ): MaloxieMessage {
   const q = prompt.trim().toLowerCase();
   const weekNum = ctx.activeWeekIndex + 1;
+  const pricing = ctx.pricing || DEFAULT_PRICING_CONFIG;
+  const curr = getCurrencyOption(pricing.currencyCode);
+  const fmt = (val: number) => formatCurrency(val, pricing.currencyCode, { compact: true });
 
-  // Parse numeric constraints if user mentions calories, protein, or budget
+  // Parse numeric constraints if user mentions calories, protein, or budget in any currency
   const calMatch = q.match(/(\d{3,4})\s*(?:k?cal|calories)/i);
   const protMatch = q.match(/(\d{2,3})\s*g?\s*protein/i);
-  const budgetMatch = q.match(/(?:under|below|max|budget|\$)\s*\$?\s*(\d{2,4})/i);
+  const normalizedPromptForBudget = q.replace(/,/g, '');
+  const budgetMatch = normalizedPromptForBudget.match(
+    /(?:under|below|max|budget|cap)\s*(?:[a-z$£€₦₹¥₵]{1,4}\s*)?(\d{2,7})|(?:[$£€₦₹¥₵]|ksh|ca\$|a\$|mx\$|r\$|aed|chf|kr|s\$)\s*(\d{2,7})/i
+  );
 
   const parsedCalories = calMatch ? Math.min(5000, Math.max(1100, Number(calMatch[1]))) : undefined;
   const parsedProtein = protMatch ? Math.min(350, Math.max(40, Number(protMatch[1]))) : undefined;
-  const parsedBudget = budgetMatch ? Math.min(1000, Math.max(30, Number(budgetMatch[1]))) : undefined;
+  const rawBudgetNum = budgetMatch ? Number(budgetMatch[1] || budgetMatch[2]) : undefined;
+  const minBudget = Math.max(10, Math.round(convertBaseUsdToLocal(25, pricing)));
+  const parsedBudget =
+    rawBudgetNum && Number.isFinite(rawBudgetNum)
+      ? Math.min(10000000, Math.max(minBudget, rawBudgetNum))
+      : undefined;
 
   // 1. Target update intent without full menu rebuild if explicitly asking to set/change targets
   if (
@@ -711,11 +746,11 @@ export function generateMaloxieAiReply(
       id: uid('ai'),
       role: 'assistant',
       title: 'Updated target proposal',
-      body: `I prepared your new daily & weekly nutrition targets based on your request.`,
+      body: `I prepared your new daily & weekly nutrition targets (${curr.code}) based on your request.`,
       highlights: [
         `Daily calories: ${nextTargets.calories} kcal`,
         `Daily protein: ${nextTargets.protein}g`,
-        `Weekly grocery cap: $${nextTargets.weeklyBudget}`,
+        `Weekly grocery cap: ${fmt(nextTargets.weeklyBudget)}`,
       ],
       actions: [
         {
@@ -785,7 +820,7 @@ export function generateMaloxieAiReply(
 
   // 4. Plan creation intent (budget, high-protein, vegetarian, quick, low-carb, gluten-free, dairy-free, or custom)
   const preferHighProtein = /protein|muscle|lean|gym|macro/.test(q);
-  const avoidHighCost = /budget|cheap|save|cost|afford|inexpensive|dollar|\$/.test(q);
+  const avoidHighCost = /budget|cheap|save|cost|afford|inexpensive|dollar|naira|pound|euro|[$£€₦₹¥₵]/.test(q);
   const preferQuick = /quick|fast|20|busy|easy|minimal|weeknight/.test(q);
   const preferVegetarian = /vegetarian|veggie|plant|meatless/.test(q);
   const preferLowCarb = /low carb|keto|less carb/.test(q);
@@ -834,12 +869,12 @@ export function generateMaloxieAiReply(
     const highlights = [
       `Focus: ${focusSummary}`,
       `Estimated nutrition: ${generated.avgCals} kcal/day · ${generated.avgProtein}g protein/day`,
-      `Estimated grocery total: ~$${Math.round(generated.estCost)} (${ctx.householdMultiplier}x household)`,
+      `Estimated grocery total: ~${fmt(generated.estCost)} (${ctx.householdMultiplier}x household)`,
     ];
 
     if (parsedBudget && generated.estCost > parsedBudget) {
       highlights.push(
-        `Tip: Swap salmon or steak nights to keep groceries closer to your $${parsedBudget} cap.`
+        `Tip: Swap salmon or steak nights to keep groceries closer to your ${fmt(parsedBudget)} cap.`
       );
     }
 
@@ -876,14 +911,15 @@ export function generateMaloxieAiReply(
 
   // 5. Fallback helpful guidance + quick week summary
   const audit = analyzeActiveWeek(ctx);
+  const exampleBudget = fmt(Math.max(minBudget, Math.round(ctx.targets.weeklyBudget * 0.75)));
   return {
     id: uid('ai'),
     role: 'assistant',
     title: 'How I can help with your meal plan',
-    body: `Right now Week ${weekNum} has ${audit.plannedMeals} meals planned averaging ${audit.avgCalories || 0} kcal/day and ~$${Math.round(audit.estWeeklyCost)} in groceries. Try asking me for one of these:`,
+    body: `Right now Week ${weekNum} has ${audit.plannedMeals} meals planned averaging ${audit.avgCalories || 0} kcal/day and ~${fmt(audit.estWeeklyCost)} in groceries. Try asking me for one of these:`,
     highlights: [
       '"Review my week" — inspect calorie, protein, and budget gaps',
-      '"Create a high-protein week under $90" — generate a tailored 7-day menu',
+      `"Create a high-protein week under ${exampleBudget}" — generate a tailored 7-day menu`,
       '"Fill my empty slots" — complete open slots without overwriting current meals',
       '"Make a quick 20-minute vegetarian week" — filter and schedule fast plant-forward dishes',
     ],

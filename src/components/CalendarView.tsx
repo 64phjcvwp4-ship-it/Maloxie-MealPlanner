@@ -189,7 +189,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Toolbar: Horizon, Week Tabs, View Switcher, Templates */}
-      <div className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-sm">
+      <div className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5 p-1 bg-[#EAE4E0]/75 rounded-2xl flex-wrap">
             {weeksDates.map((dates, idx) => (
@@ -283,7 +283,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           className="space-y-6"
         >
           {weeksDates.map((weekDates, wIdx) => (
-            <div key={wIdx} className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+            <div key={wIdx} className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
               <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-sm font-semibold text-[#2E2D24]">
@@ -407,7 +407,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 return (
                   <div
                     key={date}
-                    className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl flex flex-col overflow-hidden shadow-sm"
+                    className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl flex flex-col overflow-hidden"
                   >
                     {/* Day Header & Mini Nutrition Bar */}
                     <div className="p-3 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 space-y-2">
@@ -623,7 +623,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Quick-Assign Drag Tray */}
           {drawerOpen && (
-            <aside className="w-full 2xl:w-[270px] shrink-0 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+            <aside className="w-full 2xl:w-[270px] shrink-0 bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
               <div className="p-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-[#2E2D24]">
@@ -684,7 +684,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* Active Week Visual Menu Moodboard */}
       {weekMasonryItems.length > 0 && (
-        <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
+        <section className="bg-[#FAF8F6]/88 maloxie-peach-block rounded-xl overflow-hidden">
           <div className="px-5 py-3.5 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-[#2E2D24]">

@@ -4,8 +4,13 @@ import {
   ManualGroceryItem,
   Macros,
   MealSlotType,
+  PricingConfig,
   Recipe,
 } from '../types/mealPlanner';
+import {
+  DEFAULT_PRICING_CONFIG,
+  getIngredientLocalPrice,
+} from './currencyUtils';
 
 export const GROCERY_CATEGORY_ORDER: GroceryCategory[] = [
   'Produce',
@@ -34,6 +39,7 @@ export interface AggregatedGroceryItem {
   recipeSources: string[];
   isManual?: boolean;
   manualId?: string;
+  isCustomPrice?: boolean;
 }
 
 export function formatQuantity(value: number): string {
@@ -58,7 +64,8 @@ export function generateGroceryList(
   daysMap: Record<string, DayPlan>,
   recipesMap: Record<string, Recipe>,
   householdMultiplier: number,
-  manualItems: ManualGroceryItem[]
+  manualItems: ManualGroceryItem[],
+  pricing: PricingConfig = DEFAULT_PRICING_CONFIG
 ): AggregatedGroceryItem[] {
   const bucket = new Map<string, AggregatedGroceryItem>();
 
@@ -75,17 +82,19 @@ export function generateGroceryList(
         const scale = (entry.servings / Math.max(1, recipe.servings)) * householdMultiplier;
 
         for (const ing of recipe.ingredients) {
-          const normalizedName = ing.name.trim().toLowerCase();
-          const normalizedUnit = ing.unit.trim().toLowerCase();
-          const key = `${ing.category}::${normalizedName}::${normalizedUnit}`;
+          const { key, price: scaledPrice, isCustom } = getIngredientLocalPrice(
+            ing,
+            scale,
+            pricing
+          );
 
           const existing = bucket.get(key);
           const scaledQty = ing.quantity * scale;
-          const scaledPrice = ing.estimatedPrice * scale;
 
           if (existing) {
             existing.quantity += scaledQty;
             existing.estimatedPrice += scaledPrice;
+            if (isCustom) existing.isCustomPrice = true;
             if (!existing.recipeSources.includes(recipe.title)) {
               existing.recipeSources.push(recipe.title);
             }
@@ -98,6 +107,7 @@ export function generateGroceryList(
               category: ing.category,
               estimatedPrice: scaledPrice,
               recipeSources: [recipe.title],
+              isCustomPrice: isCustom,
             });
           }
         }
@@ -117,6 +127,7 @@ export function generateGroceryList(
       recipeSources: ['Custom item'],
       isManual: true,
       manualId: item.id,
+      isCustomPrice: true,
     });
   }
 
