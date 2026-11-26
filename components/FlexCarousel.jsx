@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Renderer, Program, Mesh, Triangle, Plane, Texture, RenderTarget } from 'ogl';
 
 import './FlexCarousel.css';
@@ -256,7 +256,7 @@ const Digits = ({ value }) => (
   </span>
 );
 
-const FlexCarousel = ({
+const FlexCarousel = forwardRef(({
   items = DEFAULT_ITEMS,
   preset = 'liquid',
   intro = 'rise',
@@ -284,7 +284,7 @@ const FlexCarousel = ({
   onSelect,
   className = '',
   style
-}) => {
+}, ref) => {
   const containerRef = useRef(null);
   const settingsRef = useRef(null);
   const itemsRef = useRef(items);
@@ -364,6 +364,16 @@ const FlexCarousel = ({
   useEffect(() => {
     engineRef.current?.setItems(itemsRef.current);
   }, [itemsKey]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      prev: () => engineRef.current?.step(-1),
+      next: () => engineRef.current?.step(1),
+      goTo: index => engineRef.current?.goTo(index)
+    }),
+    []
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -458,6 +468,8 @@ const FlexCarousel = ({
     let goal = 0;
     let mode = 'spring';
     let wheelAt = 0;
+    let wheelAnchor = 0;
+    let wheelStartIndex = 0;
     let raf = 0;
     let last = performance.now();
     let visible = true;
@@ -485,6 +497,7 @@ const FlexCarousel = ({
       startX: 0,
       startY: 0,
       startPos: 0,
+      dragAnchor: 0,
       dragging: false,
       touch: false,
       samples: []
@@ -793,8 +806,14 @@ const FlexCarousel = ({
       }
 
       if (mode === 'wheel' && now - wheelAt > 150) {
-        goal = snapPoint(m, goal);
-        mode = 'spring';
+        const snapped = snapPoint(m, goal);
+        const snappedIdx = nearest(m, snapped);
+        if (snappedIdx === wheelStartIndex && Math.abs(goal - wheelAnchor) >= 20) {
+          step(m, goal > wheelAnchor ? 1 : -1);
+        } else {
+          goal = snapped;
+          mode = 'spring';
+        }
       }
       if (!pointer.dragging) {
         const spinning = introState.running && introState.kind === 'spin';
@@ -821,7 +840,9 @@ const FlexCarousel = ({
         const shift = Math.round(pos / m.loop) * m.loop;
         pos -= shift;
         goal -= shift;
+        wheelAnchor -= shift;
         pointer.startPos -= shift;
+        pointer.dragAnchor -= shift;
       }
 
       const current = nearest(m, pos);
@@ -1049,6 +1070,7 @@ const FlexCarousel = ({
       pointer.x = x;
       pointer.y = y;
       pointer.startPos = pos;
+      pointer.dragAnchor = pos;
       pointer.dragging = false;
       pointer.samples = [{ x, t: performance.now() }];
       interactedAt = performance.now();
@@ -1121,6 +1143,13 @@ const FlexCarousel = ({
       if (!pointer.down || e.pointerId !== pointer.id) return;
       pointer.down = false;
       container.removeAttribute('data-dragging');
+      try {
+        if (container.hasPointerCapture?.(e.pointerId)) {
+          container.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        // Ignore if pointer capture was not active
+      }
       const s = settingsRef.current;
       if (!s) return;
       const m = metrics(s);
@@ -1136,8 +1165,15 @@ const FlexCarousel = ({
         }
         vel = velocity;
         const landing = snapPoint(m, pos + velocity * 0.32);
+        const startIdx = nearest(m, pointer.dragAnchor);
+        const landIdx = nearest(m, landing);
         goal = landing;
-        if (Math.abs(velocity) > 400 && Math.abs(landing - pos) < 1) step(m, velocity > 0 ? 1 : -1);
+        if (
+          landIdx === startIdx &&
+          (Math.abs(velocity) > 300 || Math.abs(pos - pointer.dragAnchor) >= 36)
+        ) {
+          step(m, pos >= pointer.dragAnchor ? 1 : -1);
+        }
         mode = 'spring';
         start();
         return;
@@ -1197,8 +1233,13 @@ const FlexCarousel = ({
       skipIntro();
       interactedAt = performance.now();
       if (closeFocus()) return;
-      const delta = Math.max(-120, Math.min(120, (horizontal ? dx : dy) * unit));
-      goal += delta * 1.25;
+      const m = metrics(s);
+      if (mode !== 'wheel') {
+        wheelAnchor = goal;
+        wheelStartIndex = nearest(m, goal);
+      }
+      const delta = Math.max(-240, Math.min(240, (horizontal ? dx : dy) * unit));
+      goal += delta * 1.6;
       mode = 'wheel';
       wheelAt = performance.now();
       start();
@@ -1304,7 +1345,23 @@ const FlexCarousel = ({
         dirty = true;
         start();
       },
-      setItems
+      setItems,
+      step: delta => {
+        const s = settingsRef.current;
+        if (!s || !slots.length) return;
+        skipIntro();
+        closeFocus();
+        interactedAt = performance.now();
+        step(metrics(s), delta);
+      },
+      goTo: index => {
+        const s = settingsRef.current;
+        if (!s || !slots.length) return;
+        skipIntro();
+        closeFocus();
+        interactedAt = performance.now();
+        goTo(metrics(s), index);
+      }
     };
 
     resize();
@@ -1371,6 +1428,6 @@ const FlexCarousel = ({
       </div>
     </div>
   );
-};
+});
 
 export default FlexCarousel;

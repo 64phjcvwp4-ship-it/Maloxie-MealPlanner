@@ -8,7 +8,12 @@ import {
   ShoppingBasket,
   Activity,
   ChefHat,
+  Cloud,
+  CloudOff,
+  LogOut,
+  RefreshCw,
 } from 'lucide-react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import {
   ActiveTab,
   DayPlan,
@@ -46,23 +51,23 @@ import {
   RecipeDetailModal,
 } from './components/Modals';
 
+import { MaloxieAiDrawer } from './components/MaloxieAiDrawer';
+import type { MaloxieAction } from './utils/maloxieAiEngine';
+import {
+  auth,
+  signInWithGoogle,
+  signOutUser,
+} from './firebase';
+import {
+  fetchCloudPlannerState,
+  saveCloudPlannerState,
+  subscribeToCloudPlannerState,
+  upsertUserProfile,
+  type PersistedState,
+} from './utils/cloudSync';
+
 const STORAGE_KEY = 'mise-meal-planner-v1';
 const MALOXIE_LOGO = '/assets/aistudio/IMG_4277_e1118095.jpeg';
-
-interface PersistedState {
-  planningHorizonWeeks: number;
-  daysMap: Record<string, DayPlan>;
-  customRecipes: Recipe[];
-  customTemplates: MealTemplate[];
-  favoriteIds: string[];
-  targets: NutritionTargets;
-  householdMultiplier: number;
-  checkedKeys: string[];
-  alreadyHaveKeys: string[];
-  clearedKeys: string[];
-  manualItems: ManualGroceryItem[];
-  completedPrepTaskIds: string[];
-}
 
 function buildInitialDaysMap(startMonday: Date): Record<string, DayPlan> {
   const week1 = getWeekDates(startMonday, 0);
@@ -190,9 +195,67 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [introStage, setIntroStage] = useState<'visible' | 'scattering' | 'done'>('visible');
 
+  // Cloud account sync state
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
+  const cloudDocExistsRef = useRef(false);
+  const cloudInitialSyncDoneRef = useRef(false);
+  const suppressNextCloudPushRef = useRef(false);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
   };
+
+  const applyPersistedState = useCallback((remote: PersistedState) => {
+    setPlanningHorizonWeeks(remote.planningHorizonWeeks || 2);
+    setDaysMap(remote.daysMap || {});
+    setCustomRecipes(remote.customRecipes || []);
+    setCustomTemplates(remote.customTemplates || []);
+    setFavoriteIdsArr(remote.favoriteIds || []);
+    setTargets(remote.targets);
+    setHouseholdMultiplier(remote.householdMultiplier || 1);
+    setCheckedKeysArr(remote.checkedKeys || []);
+    setAlreadyHaveKeysArr(remote.alreadyHaveKeys || []);
+    setClearedKeysArr(remote.clearedKeys || []);
+    setManualItems(remote.manualItems || []);
+    setCompletedPrepIdsArr(remote.completedPrepTaskIds || []);
+  }, []);
+
+  const currentPayload: PersistedState = useMemo(
+    () => ({
+      planningHorizonWeeks,
+      daysMap,
+      customRecipes,
+      customTemplates,
+      favoriteIds: favoriteIdsArr,
+      targets,
+      householdMultiplier,
+      checkedKeys: checkedKeysArr,
+      alreadyHaveKeys: alreadyHaveKeysArr,
+      clearedKeys: clearedKeysArr,
+      manualItems,
+      completedPrepTaskIds: completedPrepIdsArr,
+    }),
+    [
+      planningHorizonWeeks,
+      daysMap,
+      customRecipes,
+      customTemplates,
+      favoriteIdsArr,
+      targets,
+      householdMultiplier,
+      checkedKeysArr,
+      alreadyHaveKeysArr,
+      clearedKeysArr,
+      manualItems,
+      completedPrepIdsArr,
+    ]
+  );
+
+  const latestPayloadRef = useRef<PersistedState>(currentPayload);
+  latestPayloadRef.current = currentPayload;
 
   const handleIntroScatterStart = useCallback(() => {
     setIntroStage((s) => (s === 'visible' ? 'scattering' : s));
@@ -209,49 +272,161 @@ export default function App() {
   }, [toastMessage]);
 
   useEffect(() => {
-    const payload: PersistedState = {
-      planningHorizonWeeks,
-      daysMap,
-      customRecipes,
-      customTemplates,
-      favoriteIds: favoriteIdsArr,
-      targets,
-      householdMultiplier,
-      checkedKeys: checkedKeysArr,
-      alreadyHaveKeys: alreadyHaveKeysArr,
-      clearedKeys: clearedKeysArr,
-      manualItems,
-      completedPrepTaskIds: completedPrepIdsArr,
-    };
+    let unsubscribeSnapshot: (() => void) | undefined;
+    let cancelled = false;
 
-    const persist = () => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (nextUser) => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = undefined;
+      }
+
+      setUser(nextUser);
+      setAuthReady(true);
+
+      if (!nextUser) {
+        cloudDocExistsRef.current = false;
+        cloudInitialSyncDoneRef.current = false;
+        setSyncStatus('idle');
+        return;
+      }
+
+      cloudInitialSyncDoneRef.current = false;
+      setSyncStatus('syncing');
+
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        await upsertUserProfile(nextUser);
+        if (cancelled) return;
+
+        const remoteState = await fetchCloudPlannerState(nextUser.uid);
+        if (cancelled) return;
+
+        if (remoteState) {
+          cloudDocExistsRef.current = true;
+          suppressNextCloudPushRef.current = true;
+          applyPersistedState(remoteState);
+        } else {
+          await saveCloudPlannerState(nextUser.uid, latestPayloadRef.current, false);
+          if (cancelled) return;
+          cloudDocExistsRef.current = true;
+        }
+
+        cloudInitialSyncDoneRef.current = true;
+        setSyncStatus('synced');
+
+        unsubscribeSnapshot = subscribeToCloudPlannerState(
+          nextUser.uid,
+          (incomingState) => {
+            suppressNextCloudPushRef.current = true;
+            applyPersistedState(incomingState);
+            setSyncStatus('synced');
+          },
+          () => {
+            setSyncStatus('error');
+          }
+        );
+      } catch {
+        if (!cancelled) {
+          setSyncStatus('error');
+          showToast('Cloud sync failed. Changes saved locally.');
+        }
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
+  }, [applyPersistedState]);
+
+  const handleGoogleSignIn = async () => {
+    if (authBusy) return;
+    setAuthBusy(true);
+    try {
+      const cred = await signInWithGoogle();
+      const firstName = cred.user.displayName?.split(' ')[0] || 'account';
+      showToast(`Signed in to ${firstName}'s cloud sync`);
+    } catch (error) {
+      const code = (error as { code?: string })?.code || '';
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        showToast('Sign-in cancelled');
+      } else {
+        showToast('Could not complete Google sign-in');
+      }
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (authBusy) return;
+    setAuthBusy(true);
+    try {
+      await signOutUser();
+      showToast('Signed out of cloud sync');
+    } catch {
+      showToast('Could not sign out');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleManualRetrySync = async () => {
+    if (!user) return;
+    setSyncStatus('syncing');
+    try {
+      await saveCloudPlannerState(user.uid, latestPayloadRef.current, cloudDocExistsRef.current);
+      cloudDocExistsRef.current = true;
+      cloudInitialSyncDoneRef.current = true;
+      setSyncStatus('synced');
+      showToast('Synced to cloud');
+    } catch {
+      setSyncStatus('error');
+      showToast('Cloud sync failed. Check connection.');
+    }
+  };
+
+  useEffect(() => {
+    const persistLocal = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentPayload));
       } catch {
         // Ignore storage quota errors
       }
     };
 
-    const timer = window.setTimeout(persist, 350);
-    window.addEventListener('beforeunload', persist);
+    const localTimer = window.setTimeout(persistLocal, 350);
+    window.addEventListener('beforeunload', persistLocal);
+
+    let cloudTimer: number | undefined;
+    if (user && authReady && cloudInitialSyncDoneRef.current) {
+      if (suppressNextCloudPushRef.current) {
+        suppressNextCloudPushRef.current = false;
+      } else {
+        setSyncStatus('syncing');
+        cloudTimer = window.setTimeout(async () => {
+          try {
+            await saveCloudPlannerState(
+              user.uid,
+              currentPayload,
+              cloudDocExistsRef.current
+            );
+            cloudDocExistsRef.current = true;
+            setSyncStatus('synced');
+          } catch {
+            setSyncStatus('error');
+          }
+        }, 650);
+      }
+    }
+
     return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('beforeunload', persist);
+      window.clearTimeout(localTimer);
+      if (cloudTimer !== undefined) window.clearTimeout(cloudTimer);
+      window.removeEventListener('beforeunload', persistLocal);
     };
-  }, [
-    planningHorizonWeeks,
-    daysMap,
-    customRecipes,
-    customTemplates,
-    favoriteIdsArr,
-    targets,
-    householdMultiplier,
-    checkedKeysArr,
-    alreadyHaveKeysArr,
-    clearedKeysArr,
-    manualItems,
-    completedPrepIdsArr,
-  ]);
+  }, [currentPayload, user, authReady]);
 
   const recipes = useMemo(
     () => [...customRecipes, ...INITIAL_RECIPES],
@@ -600,6 +775,78 @@ export default function App() {
     showToast('Scheduled batch cook + next-day leftover');
   };
 
+  const handleApplyAiAction = useCallback(
+    (action: MaloxieAction) => {
+      if (action.type === 'apply_week_plan') {
+        setDaysMap((prev) => {
+          const next = { ...prev };
+          if (action.scope === 'current') {
+            Object.assign(next, action.weekDaysMap);
+          } else {
+            const sourceEntries = Object.values(action.weekDaysMap);
+            weeksDates.forEach((week) => {
+              week.forEach((date, idx) => {
+                const templateDay = sourceEntries[idx % sourceEntries.length];
+                if (!templateDay) return;
+                const prevDate = idx > 0 ? week[idx - 1] : undefined;
+                next[date] = {
+                  date,
+                  note: templateDay.note,
+                  slots: {
+                    breakfast: templateDay.slots.breakfast.map((e) => ({
+                      ...e,
+                      instanceId: `${date}-breakfast-${Math.random().toString(36).slice(2, 9)}`,
+                      leftoverFromDate: e.isLeftover && prevDate ? prevDate : undefined,
+                    })),
+                    lunch: templateDay.slots.lunch.map((e) => ({
+                      ...e,
+                      instanceId: `${date}-lunch-${Math.random().toString(36).slice(2, 9)}`,
+                      leftoverFromDate: e.isLeftover && prevDate ? prevDate : undefined,
+                    })),
+                    dinner: templateDay.slots.dinner.map((e) => ({
+                      ...e,
+                      instanceId: `${date}-dinner-${Math.random().toString(36).slice(2, 9)}`,
+                      leftoverFromDate: e.isLeftover && prevDate ? prevDate : undefined,
+                    })),
+                    snacks: templateDay.slots.snacks.map((e) => ({
+                      ...e,
+                      instanceId: `${date}-snacks-${Math.random().toString(36).slice(2, 9)}`,
+                      leftoverFromDate: e.isLeftover && prevDate ? prevDate : undefined,
+                    })),
+                  },
+                };
+              });
+            });
+          }
+          return next;
+        });
+        if (action.recommendedTargets) {
+          setTargets((prev) => ({
+            ...prev,
+            ...action.recommendedTargets,
+          }));
+        }
+        showToast(
+          action.scope === 'all'
+            ? `Applied Maloxie AI plan to all ${weeksDates.length} weeks`
+            : `Applied Maloxie AI plan to Week ${activeWeekIndex + 1}`
+        );
+      } else if (action.type === 'fill_empty_slots') {
+        setDaysMap((prev) => ({
+          ...prev,
+          ...action.patchDaysMap,
+        }));
+        showToast(
+          `Added ${action.addedCount} meal${action.addedCount === 1 ? '' : 's'} to Week ${activeWeekIndex + 1}`
+        );
+      } else if (action.type === 'apply_targets') {
+        setTargets(action.targets);
+        showToast('Updated nutrition & budget targets');
+      }
+    },
+    [activeWeekIndex, weeksDates]
+  );
+
   const navigateAndScroll = (tab: ActiveTab) => {
     setActiveTab(tab);
     workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -715,7 +962,78 @@ export default function App() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
+          {user ? (
+            <div className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-full bg-[#2E2D24]/80 border border-[#D9D0CB]/25 text-xs text-[#FAF8F6]">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName || 'Account avatar'}
+                  referrerPolicy="no-referrer"
+                  className="w-6 h-6 rounded-full object-cover border border-[#D9D0CB]/40"
+                />
+              ) : (
+                <span className="w-6 h-6 rounded-full bg-[#908B6F] text-[#FAF8F6] text-[11px] font-semibold flex items-center justify-center">
+                  {(user.displayName || user.email || 'M').slice(0, 1).toUpperCase()}
+                </span>
+              )}
+
+              <div className="hidden sm:flex flex-col leading-none pr-0.5">
+                <span className="font-medium text-[#FAF8F6] max-w-[100px] truncate">
+                  {user.displayName?.split(' ')[0] || 'Account'}
+                </span>
+                {syncStatus === 'error' ? (
+                  <button
+                    type="button"
+                    onClick={handleManualRetrySync}
+                    className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-[#E4A88E] hover:underline text-left"
+                  >
+                    <CloudOff className="w-2.5 h-2.5" />
+                    <span>Retry sync</span>
+                  </button>
+                ) : (
+                  <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-[#D9D0CB]">
+                    {syncStatus === 'syncing' ? (
+                      <>
+                        <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                        <span>Syncing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Cloud className="w-2.5 h-2.5 text-[#908B6F]" />
+                        <span>Synced</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={authBusy}
+                aria-label="Sign out"
+                title="Sign out"
+                className="p-1 rounded-full text-[#D9D0CB] hover:text-[#FAF8F6] hover:bg-[#FAF8F6]/10 transition-colors disabled:opacity-50"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <BubbleButton
+              variant="dark"
+              size="md"
+              onClick={handleGoogleSignIn}
+              disabled={authBusy || !authReady}
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {authBusy ? 'Signing in...' : 'Cloud Sync'}
+              </span>
+              <span className="sm:hidden">{authBusy ? '...' : 'Sync'}</span>
+            </BubbleButton>
+          )}
+
           <BubbleButton
             variant="primary"
             size="md"
@@ -1038,12 +1356,29 @@ export default function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 right-5 z-50 px-4 py-2.5 bg-[#3B392D] text-[#FAF8F6] border border-[#908B6F]/40 text-xs font-medium rounded-lg shadow-lg flex items-center gap-2"
+          className="fixed bottom-5 left-5 z-50 px-4 py-2.5 bg-[#3B392D] text-[#FAF8F6] border border-[#908B6F]/40 text-xs font-medium rounded-lg shadow-lg flex items-center gap-2"
         >
           <Check className="w-3.5 h-3.5 text-[#D9D0CB]" />
           <span>{toastMessage}</span>
         </div>
       )}
+
+      <MaloxieAiDrawer
+        visible={introStage === 'done'}
+        context={{
+          activeWeekIndex,
+          activeWeekDates,
+          weeksDates,
+          daysMap,
+          recipes,
+          recipesMap,
+          targets,
+          householdMultiplier,
+          manualItems,
+          favoriteIds,
+        }}
+        onApplyAction={handleApplyAiAction}
+      />
 
       </div>
 

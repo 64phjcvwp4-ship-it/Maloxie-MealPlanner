@@ -1,0 +1,180 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core Auth & Payload Helpers
+    function isAuthenticated() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTargets(t) {
+      return t is map
+        && t.keys().hasAll(['calories', 'protein', 'carbs', 'fat', 'weeklyBudget'])
+        && t.keys().hasOnly(['calories', 'protein', 'carbs', 'fat', 'weeklyBudget'])
+        && t.calories is number && t.calories >= 500 && t.calories <= 10000
+        && t.protein is number && t.protein >= 0 && t.protein <= 1000
+        && t.carbs is number && t.carbs >= 0 && t.carbs <= 1500
+        && t.fat is number && t.fat >= 0 && t.fat <= 500
+        && t.weeklyBudget is number && t.weeklyBudget >= 0 && t.weeklyBudget <= 10000;
+    }
+
+    function isValidPlannerStateFields(data, userId) {
+      return data.ownerId is string
+        && data.ownerId == userId
+        && data.ownerId.size() > 0
+        && data.ownerId.size() <= 128
+        && data.planningHorizonWeeks is int
+        && data.planningHorizonWeeks >= 1
+        && data.planningHorizonWeeks <= 8
+        && data.daysMap is map
+        && data.daysMap.size() <= 90
+        && data.customRecipes is list
+        && data.customRecipes.size() <= 100
+        && data.customTemplates is list
+        && data.customTemplates.size() <= 30
+        && data.favoriteIds is list
+        && data.favoriteIds.size() <= 200
+        && isValidTargets(data.targets)
+        && data.householdMultiplier is number
+        && data.householdMultiplier >= 0.5
+        && data.householdMultiplier <= 12
+        && data.checkedKeys is list
+        && data.checkedKeys.size() <= 500
+        && data.alreadyHaveKeys is list
+        && data.alreadyHaveKeys.size() <= 500
+        && data.clearedKeys is list
+        && data.clearedKeys.size() <= 500
+        && data.manualItems is list
+        && data.manualItems.size() <= 150
+        && data.completedPrepTaskIds is list
+        && data.completedPrepTaskIds.size() <= 200
+        && data.lastClientId is string
+        && data.lastClientId.size() > 0
+        && data.lastClientId.size() <= 64;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId)
+        && isValidId(userId)
+        && incoming().keys().hasAll(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'updatedAt'])
+        && incoming().keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'updatedAt'])
+        && incoming().uid is string && incoming().uid == userId && incoming().uid.size() <= 128
+        && incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 254
+        && incoming().displayName is string && incoming().displayName.size() <= 120
+        && incoming().photoURL is string && incoming().photoURL.size() <= 500
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidId(userId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'displayName', 'photoURL', 'updatedAt'])
+        && incoming().uid == existing().uid
+        && incoming().uid == userId
+        && incoming().createdAt == existing().createdAt
+        && incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 254
+        && incoming().displayName is string && incoming().displayName.size() <= 120
+        && incoming().photoURL is string && incoming().photoURL.size() <= 500
+        && incoming().updatedAt == request.time;
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      match /planner/{stateId} {
+        allow read: if isOwner(userId) && isValidId(userId) && isValidId(stateId);
+
+        allow create: if isOwner(userId)
+          && isValidId(userId)
+          && isValidId(stateId)
+          && incoming().keys().hasAll([
+            'ownerId',
+            'planningHorizonWeeks',
+            'daysMap',
+            'customRecipes',
+            'customTemplates',
+            'favoriteIds',
+            'targets',
+            'householdMultiplier',
+            'checkedKeys',
+            'alreadyHaveKeys',
+            'clearedKeys',
+            'manualItems',
+            'completedPrepTaskIds',
+            'lastClientId',
+            'createdAt',
+            'updatedAt'
+          ])
+          && incoming().keys().hasOnly([
+            'ownerId',
+            'planningHorizonWeeks',
+            'daysMap',
+            'customRecipes',
+            'customTemplates',
+            'favoriteIds',
+            'targets',
+            'householdMultiplier',
+            'checkedKeys',
+            'alreadyHaveKeys',
+            'clearedKeys',
+            'manualItems',
+            'completedPrepTaskIds',
+            'lastClientId',
+            'createdAt',
+            'updatedAt'
+          ])
+          && isValidPlannerStateFields(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+
+        allow update: if isOwner(userId)
+          && isValidId(userId)
+          && isValidId(stateId)
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'planningHorizonWeeks',
+            'daysMap',
+            'customRecipes',
+            'customTemplates',
+            'favoriteIds',
+            'targets',
+            'householdMultiplier',
+            'checkedKeys',
+            'alreadyHaveKeys',
+            'clearedKeys',
+            'manualItems',
+            'completedPrepTaskIds',
+            'lastClientId',
+            'updatedAt'
+          ])
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && isValidPlannerStateFields(incoming(), userId)
+          && incoming().updatedAt == request.time;
+
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(stateId);
+      }
+    }
+  }
+}

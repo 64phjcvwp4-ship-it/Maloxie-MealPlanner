@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Heart,
   Plus,
@@ -6,6 +6,8 @@ import {
   SlidersHorizontal,
   LayoutGrid,
   Columns3,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   DietaryTag,
@@ -19,7 +21,7 @@ import { RecipeImage } from './RecipeImage';
 import { SoapBubbleSearch } from '../../components/soap-bubble';
 import { BubbleButton, BubbleIconButton } from './BubbleControls';
 import AnimatedContent from '../../components/AnimatedContent';
-import FlexCarousel from '../../components/FlexCarousel';
+import FlexCarousel, { type FlexCarouselHandle } from '../../components/FlexCarousel';
 import Masonry, { type MasonryItem } from '../../components/Masonry';
 
 interface RecipeLibraryViewProps {
@@ -56,6 +58,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | DifficultyLevel>('All');
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [browseLayout, setBrowseLayout] = useState<'masonry' | 'grid'>('masonry');
+  const carouselRef = useRef<FlexCarouselHandle>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -292,11 +295,29 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                   Recipe Showcase ({filtered.length})
                 </h2>
                 <p className="text-xs text-[#6A6754]">
-                  Drag, scroll, or click a card to zoom into focus
+                  Use arrows, drag, scroll, or click a card to zoom into focus
                 </p>
               </div>
               {activeCarouselRecipe && (
                 <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 mr-1">
+                    <BubbleIconButton
+                      variant="default"
+                      iconSize="sm"
+                      onClick={() => carouselRef.current?.prev()}
+                      aria-label="Previous recipe"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5 text-[#4A483A]" />
+                    </BubbleIconButton>
+                    <BubbleIconButton
+                      variant="default"
+                      iconSize="sm"
+                      onClick={() => carouselRef.current?.next()}
+                      aria-label="Next recipe"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5 text-[#4A483A]" />
+                    </BubbleIconButton>
+                  </div>
                   <BubbleIconButton
                     variant="default"
                     iconSize="sm"
@@ -331,6 +352,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
               className="bg-gradient-to-b from-[#FAF8F6]/55 via-[#F4F1EE]/45 to-[#EAE4E0]/60 text-[#2E2D24]"
             >
               <FlexCarousel
+                ref={carouselRef}
                 items={carouselItems}
                 preset="liquid"
                 intro="rise"
@@ -356,6 +378,28 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                 captureWheel
                 onChange={(idx) => setCarouselIndex(idx)}
               />
+              {filtered.length > 1 && (
+                <>
+                  <BubbleIconButton
+                    variant="default"
+                    iconSize="md"
+                    onClick={() => carouselRef.current?.prev()}
+                    aria-label="Scroll showcase left"
+                    className="!absolute left-3 top-1/2 -translate-y-1/2 z-20 shadow-md"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[#2E2D24]" />
+                  </BubbleIconButton>
+                  <BubbleIconButton
+                    variant="default"
+                    iconSize="md"
+                    onClick={() => carouselRef.current?.next()}
+                    aria-label="Scroll showcase right"
+                    className="!absolute right-3 top-1/2 -translate-y-1/2 z-20 shadow-md"
+                  >
+                    <ChevronRight className="w-4 h-4 text-[#2E2D24]" />
+                  </BubbleIconButton>
+                </>
+              )}
             </div>
 
             {activeCarouselRecipe && (

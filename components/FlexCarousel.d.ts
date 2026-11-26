@@ -37,5 +37,13 @@ export interface FlexCarouselProps {
   style?: CSSProperties;
 }
 
-declare const FlexCarousel: React.FC<FlexCarouselProps>;
+export interface FlexCarouselHandle {
+  prev: () => void;
+  next: () => void;
+  goTo: (index: number) => void;
+}
+
+declare const FlexCarousel: React.ForwardRefExoticComponent<
+  FlexCarouselProps & React.RefAttributes<FlexCarouselHandle>
+>;
 export default FlexCarousel;

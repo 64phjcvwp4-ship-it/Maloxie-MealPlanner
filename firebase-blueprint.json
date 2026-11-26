@@ -1,0 +1,163 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private user account profile for Google-authenticated Maloxie cloud sync.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Authentication user ID.",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified Google account email address (private to owner).",
+          "maxLength": 254
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name.",
+          "maxLength": 120
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Profile avatar URL.",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when account record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when account record was last updated."
+        }
+      },
+      "required": ["uid", "email", "displayName", "photoURL", "createdAt", "updatedAt"]
+    },
+    "PlannerState": {
+      "title": "PlannerState",
+      "description": "Synced weekly meal planner workspace state for a user.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Owner UID matching request.auth.uid.",
+          "maxLength": 128
+        },
+        "planningHorizonWeeks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Number of weeks in planning horizon."
+        },
+        "daysMap": {
+          "type": "object",
+          "description": "Map of ISO date (YYYY-MM-DD) to planned day slots and notes."
+        },
+        "customRecipes": {
+          "type": "array",
+          "maxItems": 100,
+          "description": "User-created custom recipes."
+        },
+        "customTemplates": {
+          "type": "array",
+          "maxItems": 30,
+          "description": "User-saved weekly meal templates."
+        },
+        "favoriteIds": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "type": "string", "maxLength": 128 },
+          "description": "Favorited recipe IDs."
+        },
+        "targets": {
+          "type": "object",
+          "properties": {
+            "calories": { "type": "number", "minimum": 500, "maximum": 10000 },
+            "protein": { "type": "number", "minimum": 0, "maximum": 1000 },
+            "carbs": { "type": "number", "minimum": 0, "maximum": 1500 },
+            "fat": { "type": "number", "minimum": 0, "maximum": 500 },
+            "weeklyBudget": { "type": "number", "minimum": 0, "maximum": 10000 }
+          },
+          "required": ["calories", "protein", "carbs", "fat", "weeklyBudget"]
+        },
+        "householdMultiplier": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 12,
+          "description": "Grocery scaling multiplier for household size."
+        },
+        "checkedKeys": {
+          "type": "array",
+          "maxItems": 500,
+          "items": { "type": "string", "maxLength": 160 }
+        },
+        "alreadyHaveKeys": {
+          "type": "array",
+          "maxItems": 500,
+          "items": { "type": "string", "maxLength": 160 }
+        },
+        "clearedKeys": {
+          "type": "array",
+          "maxItems": 500,
+          "items": { "type": "string", "maxLength": 160 }
+        },
+        "manualItems": {
+          "type": "array",
+          "maxItems": 150
+        },
+        "completedPrepTaskIds": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "type": "string", "maxLength": 160 }
+        },
+        "lastClientId": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Client instance identifier for echo suppression."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "planningHorizonWeeks",
+        "daysMap",
+        "customRecipes",
+        "customTemplates",
+        "favoriteIds",
+        "targets",
+        "householdMultiplier",
+        "checkedKeys",
+        "alreadyHaveKeys",
+        "clearedKeys",
+        "manualItems",
+        "completedPrepTaskIds",
+        "lastClientId",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user account profile document."
+    },
+    "/users/{userId}/planner/{stateId}": {
+      "schema": { "$ref": "#/entities/PlannerState" },
+      "description": "User's cloud-synced meal planner state document."
+    }
+  }
+}
