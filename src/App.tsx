@@ -28,6 +28,8 @@ import {
 import { computeDayMacros, generateGroceryList } from './utils/groceryUtils';
 import { GlassSlabLogo } from '../components/glass-slab-logo';
 import MoltenMetal from '../components/MoltenMetal';
+import AnimatedContent from '../components/AnimatedContent';
+import Crosshair from '../components/Crosshair';
 import { SoapBubbleMaterial } from '../components/soap-bubble';
 import { BubbleButton } from './components/BubbleControls';
 import { MaloxieMark } from './components/MaloxieMark';
@@ -86,6 +88,7 @@ const WORKSPACE_TABS: Array<{
 export default function App() {
   const startMonday = useMemo(() => getMondayOfCurrentWeek(new Date()), []);
   const pageRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
 
   const loadInitialState = (): PersistedState => {
@@ -649,11 +652,27 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section: MoltenMetal Background + Centered GlassSlabLogo */}
+      {/* Hero Section: MoltenMetal Background + Crosshair + Centered GlassSlabLogo */}
       <section
         id="top"
+        ref={heroRef}
         className="relative overflow-hidden bg-[#0F1117] pt-10 pb-14 px-4 sm:px-8"
       >
+        <Crosshair
+          containerRef={heroRef}
+          color="#ffffff"
+          targetEffect="lock"
+          thickness={1}
+          opacity={0.85}
+          smoothing={0.35}
+          showCoordinates
+          lineStyle="solid"
+          blendMode="normal"
+          gap={0}
+          fade={0}
+          clickPulse
+          hideCursor={false}
+        />
         <div className="absolute inset-0 w-full h-full">
           <MoltenMetal
             colors={['#ffffff', '#ffffff']}
@@ -700,38 +719,62 @@ export default function App() {
             />
           </div>
 
-          <h1 className="mt-4 font-display text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.12]">
-            Plan meals that{' '}
-            <span className="text-[#86EFAC]">actually stick</span>
-          </h1>
+          <AnimatedContent
+            distance={100}
+            direction="vertical"
+            duration={0.8}
+            ease="power3.out"
+            blur={0}
+            stagger={0.08}
+            threshold={0.1}
+            trigger="mount"
+            className="w-full flex flex-col items-center"
+          >
+            <h1 className="mt-4 font-display text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.12]">
+              Plan meals that{' '}
+              <span className="text-[#86EFAC]">actually stick</span>
+            </h1>
 
-          <p className="mt-3.5 text-sm sm:text-base text-white/80 max-w-xl leading-relaxed">
-            Maloxie turns weekly meal planning into a calm daily ritual. Schedule
-            multi-week menus, auto-build smart grocery lists, and track macros in
-            one place.
-          </p>
+            <p className="mt-3.5 text-sm sm:text-base text-white/80 max-w-xl leading-relaxed">
+              Maloxie turns weekly meal planning into a calm daily ritual. Schedule
+              multi-week menus, auto-build smart grocery lists, and track macros in
+              one place.
+            </p>
 
-          {/* Compact Weekly Snapshot Strip */}
-          <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-xl bg-white/85 backdrop-blur-md border border-[#E5E7EB]">
-            <div className="text-center">
-              <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
-                {activeWeekSummary.plannedMeals}
-              </div>
-              <div className="text-xs text-[#6B7280]">meals planned</div>
+            {/* Compact Weekly Snapshot Strip */}
+            <div className="mt-8 w-full max-w-2xl grid grid-cols-3 gap-4 px-5 py-4 rounded-2xl bg-white/85 backdrop-blur-md border border-[#E5E7EB]">
+              <button
+                type="button"
+                onClick={() => navigateAndScroll('calendar')}
+                className="text-center rounded-xl py-1 hover:bg-black/5 transition-colors"
+              >
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
+                  {activeWeekSummary.plannedMeals}
+                </div>
+                <div className="text-xs text-[#6B7280]">meals planned</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateAndScroll('nutrition')}
+                className="text-center border-x border-[#E5E7EB] py-1 hover:bg-black/5 transition-colors"
+              >
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
+                  {activeWeekSummary.avgDailyCalories.toLocaleString()}
+                </div>
+                <div className="text-xs text-[#6B7280]">avg kcal / day</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateAndScroll('grocery')}
+                className="text-center rounded-xl py-1 hover:bg-black/5 transition-colors"
+              >
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#15803D]">
+                  ${activeWeekSummary.estCost.toFixed(0)} / ${targets.weeklyBudget}
+                </div>
+                <div className="text-xs text-[#6B7280]">weekly budget</div>
+              </button>
             </div>
-            <div className="text-center border-x border-[#E5E7EB]">
-              <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#111827]">
-                {activeWeekSummary.avgDailyCalories.toLocaleString()}
-              </div>
-              <div className="text-xs text-[#6B7280]">avg kcal / day</div>
-            </div>
-            <div className="text-center">
-              <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#15803D]">
-                ${activeWeekSummary.estCost.toFixed(0)} / ${targets.weeklyBudget}
-              </div>
-              <div className="text-xs text-[#6B7280]">weekly budget</div>
-            </div>
-          </div>
+          </AnimatedContent>
         </div>
       </section>
 
@@ -741,8 +784,8 @@ export default function App() {
         className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 pb-12 space-y-5"
       >
         {/* Workspace Navigation Tabs & Contextual Summary */}
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl overflow-x-auto">
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
             {WORKSPACE_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

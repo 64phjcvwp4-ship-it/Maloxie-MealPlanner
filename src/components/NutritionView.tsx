@@ -4,6 +4,7 @@ import { DayPlan, NutritionTargets, Recipe } from '../types/mealPlanner';
 import { computeDayMacros } from '../utils/groceryUtils';
 import { formatShortDayHeader, formatWeekRangeLabel } from '../utils/dateUtils';
 import { BubbleButton } from './BubbleControls';
+import AnimatedContent from '../../components/AnimatedContent';
 
 interface NutritionViewProps {
   weeksDates: string[][];
@@ -95,7 +96,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
     <div className="space-y-6">
       {/* Week Switcher & Target Controls */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
           {weeksDates.map((dates, idx) => (
             <BubbleButton
               key={idx}
@@ -185,7 +186,16 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
       )}
 
       {/* 4-Column KPI Summary vs Goal */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <AnimatedContent
+        distance={100}
+        direction="vertical"
+        duration={0.8}
+        ease="power3.out"
+        blur={0}
+        stagger={0.08}
+        threshold={0.1}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
         {(
           [
             {
@@ -259,10 +269,19 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
             </div>
           );
         })}
-      </div>
+      </AnimatedContent>
 
       {/* Calorie Overview Chart + Caloric Macro Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <AnimatedContent
+        distance={100}
+        direction="vertical"
+        duration={0.8}
+        ease="power3.out"
+        blur={0}
+        stagger={0.08}
+        threshold={0.1}
+        className="grid grid-cols-1 lg:grid-cols-12 gap-5"
+      >
         <div className="lg:col-span-8 bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -378,7 +397,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
             <span className="font-semibold text-[#111827]">{weeklyTotals.protein}g</span>
           </div>
         </div>
-      </div>
+      </AnimatedContent>
 
       {/* 7-Day Tabular Breakdown */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">

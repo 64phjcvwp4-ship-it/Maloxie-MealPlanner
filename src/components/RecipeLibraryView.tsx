@@ -4,6 +4,8 @@ import {
   Plus,
   Clock,
   SlidersHorizontal,
+  LayoutGrid,
+  Columns3,
 } from 'lucide-react';
 import {
   DietaryTag,
@@ -12,9 +14,13 @@ import {
   Recipe,
 } from '../types/mealPlanner';
 import { MEAL_SLOT_LABELS } from '../utils/groceryUtils';
+import { getRecipeCarouselSrc } from '../utils/recipeCardDataUri';
 import { RecipeImage } from './RecipeImage';
 import { SoapBubbleSearch } from '../../components/soap-bubble';
 import { BubbleButton, BubbleIconButton } from './BubbleControls';
+import AnimatedContent from '../../components/AnimatedContent';
+import FlexCarousel from '../../components/FlexCarousel';
+import Masonry, { type MasonryItem } from '../../components/Masonry';
 
 interface RecipeLibraryViewProps {
   recipes: Recipe[];
@@ -48,6 +54,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   const [dietFilter, setDietFilter] = useState<'All' | DietaryTag>('All');
   const [timeFilter, setTimeFilter] = useState<'all' | '20' | '35'>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | DifficultyLevel>('All');
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [browseLayout, setBrowseLayout] = useState<'masonry' | 'grid'>('masonry');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -79,6 +87,41 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
     [recipes, favoriteIds]
   );
 
+  React.useEffect(() => {
+    setCarouselIndex(0);
+  }, [query, slotTab, dietFilter, timeFilter, difficultyFilter, recipes.length]);
+
+  const carouselItems = useMemo(
+    () =>
+      filtered.map((r) => ({
+        src: getRecipeCarouselSrc(r),
+        alt: r.title,
+        title: r.title,
+        subtitle: `${r.macrosPerServing.calories} kcal · ${r.macrosPerServing.protein}g P · ${
+          r.prepTimeMinutes + r.cookTimeMinutes
+        } min`,
+      })),
+    [filtered]
+  );
+
+  const activeCarouselRecipe = filtered[carouselIndex] || filtered[0] || null;
+
+  const masonryItems: MasonryItem[] = useMemo(() => {
+    const heights = [480, 620, 520, 660, 460, 580];
+    return filtered.map((r, idx) => ({
+      id: r.id,
+      img: getRecipeCarouselSrc(r),
+      alt: r.title,
+      title: r.title,
+      description: `${r.macrosPerServing.calories} kcal · ${r.macrosPerServing.protein}g P · ${
+        r.prepTimeMinutes + r.cookTimeMinutes
+      } min`,
+      width: 640,
+      height: heights[idx % heights.length],
+      span: idx === 0 && r.imageUrl ? 2 : 1,
+    }));
+  }, [filtered]);
+
   return (
     <div className="space-y-6">
       {/* Search & Primary Filter Bar */}
@@ -95,7 +138,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl overflow-x-auto">
+            <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
               {(
                 [
                   { id: 'all', label: 'All' },
@@ -209,7 +252,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                   type="button"
                   onClick={() => onToggleFavorite(recipe.id)}
                   aria-label="Remove from favorites"
-                  className="p-1.5 text-[#DC2626] hover:bg-[#FEF2F2] rounded-md shrink-0"
+                  className="p-1.5 text-[#DC2626] hover:bg-[#FEF2F2] rounded-full shrink-0"
                 >
                   <Heart className="w-4 h-4 fill-[#DC2626]" />
                 </button>
@@ -240,7 +283,167 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
           </BubbleButton>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <>
+          {/* Liquid FlexCarousel Showcase */}
+          <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-[#111827]">
+                  Recipe Showcase ({filtered.length})
+                </h2>
+                <p className="text-xs text-[#6B7280]">
+                  Drag, scroll, or click a card to zoom into focus
+                </p>
+              </div>
+              {activeCarouselRecipe && (
+                <div className="flex items-center gap-2">
+                  <BubbleIconButton
+                    variant="default"
+                    iconSize="sm"
+                    onClick={() => onToggleFavorite(activeCarouselRecipe.id)}
+                    aria-label={
+                      favoriteIds.has(activeCarouselRecipe.id)
+                        ? 'Remove active recipe from favorites'
+                        : 'Save active recipe to favorites'
+                    }
+                  >
+                    <Heart
+                      className={`w-3.5 h-3.5 ${
+                        favoriteIds.has(activeCarouselRecipe.id)
+                          ? 'fill-[#DC2626] text-[#DC2626]'
+                          : 'text-[#4B5563]'
+                      }`}
+                    />
+                  </BubbleIconButton>
+                  <BubbleButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => onSelectRecipe(activeCarouselRecipe)}
+                  >
+                    Open Full Recipe
+                  </BubbleButton>
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{ width: '100%', height: '560px', position: 'relative' }}
+              className="bg-gradient-to-b from-[#FAFAFA] via-[#FFFFFF] to-[#F3F4F6] text-[#111827]"
+            >
+              <FlexCarousel
+                items={carouselItems}
+                preset="liquid"
+                intro="rise"
+                cardHeight={0.5}
+                gap={12}
+                squeeze={0.2}
+                focusOnClick
+                captions
+                fit="natural"
+                radius={0}
+                lensWidth={0.74}
+                lensHeight={1.18}
+                tilt={62}
+                roundness={1}
+                bend={0.34}
+                reach={0.38}
+                curl="twist"
+                dispersion={0.45}
+                liquid={0}
+                followCursor={false}
+                autoplay={false}
+                interval={4}
+                captureWheel
+                onChange={(idx) => setCarouselIndex(idx)}
+              />
+            </div>
+
+            {activeCarouselRecipe && (
+              <div className="px-5 py-3 border-t border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-[#4B5563] min-w-0">
+                  <span className="font-semibold text-[#111827]">
+                    {activeCarouselRecipe.title}
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>{activeCarouselRecipe.dietaryTags.slice(0, 3).join(' · ')}</span>
+                </div>
+                <div className="font-mono tabular-nums text-[#374151] shrink-0">
+                  {activeCarouselRecipe.macrosPerServing.calories} kcal ·{' '}
+                  <span className="text-[#15803D] font-medium">
+                    {activeCarouselRecipe.macrosPerServing.protein}g P
+                  </span>{' '}
+                  · {activeCarouselRecipe.macrosPerServing.carbs}g C ·{' '}
+                  {activeCarouselRecipe.macrosPerServing.fat}g F
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Browse All Recipes: Masonry Board or Card Grid */}
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-[#111827]">
+                  Recipe Collection ({filtered.length})
+                </h2>
+                <p className="text-xs text-[#6B7280]">
+                  {browseLayout === 'masonry'
+                    ? 'Drag tiles to arrange your board or click any dish for full instructions'
+                    : 'Compare cooking times, macros, and dietary tags side by side'}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full">
+                <BubbleButton
+                  variant={browseLayout === 'masonry' ? 'dark' : 'default'}
+                  size="sm"
+                  onClick={() => setBrowseLayout('masonry')}
+                >
+                  <Columns3 className="w-3.5 h-3.5" />
+                  <span>Masonry Board</span>
+                </BubbleButton>
+                <BubbleButton
+                  variant={browseLayout === 'grid' ? 'dark' : 'default'}
+                  size="sm"
+                  onClick={() => setBrowseLayout('grid')}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Card Grid</span>
+                </BubbleButton>
+              </div>
+            </div>
+
+            {browseLayout === 'masonry' ? (
+              <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 sm:p-5">
+                <Masonry
+                  items={masonryItems}
+                  columns="auto"
+                  columnWidth={240}
+                  gap={14}
+                  radius={12}
+                  animateFrom="bottom"
+                  stagger={0.04}
+                  hoverEffect="zoom"
+                  focusOnHover
+                  captions="always"
+                  draggable
+                  lightbox={false}
+                  onItemClick={(item) => {
+                    const match = filtered.find((r) => r.id === String(item.id));
+                    if (match) onSelectRecipe(match);
+                  }}
+                />
+              </div>
+            ) : (
+              <AnimatedContent
+                distance={100}
+                direction="vertical"
+                duration={0.8}
+                ease="power3.out"
+                blur={0}
+                stagger={0.08}
+                threshold={0.1}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              >
           {filtered.map((recipe) => {
             const totalMins = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
             const isFav = favoriteIds.has(recipe.id);
@@ -335,7 +538,10 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
               </article>
             );
           })}
-        </div>
+              </AnimatedContent>
+            )}
+          </section>
+        </>
       )}
     </div>
   );

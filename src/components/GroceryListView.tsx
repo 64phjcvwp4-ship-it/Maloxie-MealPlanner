@@ -23,6 +23,7 @@ import {
   GROCERY_CATEGORY_ORDER,
 } from '../utils/groceryUtils';
 import { BubbleButton, BubbleIconButton } from './BubbleControls';
+import AnimatedContent from '../../components/AnimatedContent';
 
 interface GroceryListViewProps {
   weeksDates: string[][];
@@ -177,7 +178,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl">
+            <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full">
               {(
                 [
                   { id: 'week', label: `Week ${activeWeekIndex + 1}` },
@@ -204,7 +205,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 <Users className="w-3.5 h-3.5 text-[#6B7280]" />
                 Quantity Scale:
               </span>
-              <div className="flex items-center gap-1 p-1 bg-[#F3F4F6] rounded-xl">
+              <div className="flex items-center gap-1 p-1 bg-[#F3F4F6] rounded-full">
                 {[1, 2, 3, 4].map((mult) => (
                   <BubbleButton
                     key={mult}
@@ -371,7 +372,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
       {/* Main Grocery List + Already Have Pantry Split */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        <div className="xl:col-span-8 space-y-4">
+        <div className="xl:col-span-8">
           {groupedToBuy.length === 0 ? (
             <div className="bg-white border border-[#E5E7EB] rounded-xl p-12 text-center space-y-2">
               <p className="text-sm font-medium text-[#111827]">
@@ -382,7 +383,17 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               </p>
             </div>
           ) : (
-            groupedToBuy.map(([category, items]) => (
+            <AnimatedContent
+              distance={100}
+              direction="vertical"
+              duration={0.8}
+              ease="power3.out"
+              blur={0}
+              stagger={0.08}
+              threshold={0.1}
+              className="space-y-4"
+            >
+              {groupedToBuy.map(([category, items]) => (
               <section
                 key={category}
                 className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden"
@@ -410,7 +421,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                             type="button"
                             onClick={() => onToggleChecked(item.key)}
                             aria-label={`Mark ${item.name} as purchased`}
-                            className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                            className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                               isChecked
                                 ? 'bg-[#15803D] border-[#15803D] text-white'
                                 : 'bg-white border-[#D1D5DB] hover:border-[#15803D]'
@@ -477,7 +488,8 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                   })}
                 </ul>
               </section>
-            ))
+            ))}
+            </AnimatedContent>
           )}
         </div>
 

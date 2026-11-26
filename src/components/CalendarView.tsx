@@ -27,7 +27,10 @@ import {
   addDaysISO,
 } from '../utils/dateUtils';
 import { computeDayMacros, MEAL_SLOT_LABELS } from '../utils/groceryUtils';
+import { getRecipeCarouselSrc } from '../utils/recipeCardDataUri';
 import { BubbleButton } from './BubbleControls';
+import AnimatedContent from '../../components/AnimatedContent';
+import Masonry, { type MasonryItem } from '../../components/Masonry';
 
 interface CalendarViewProps {
   weeksDates: string[][];
@@ -102,6 +105,37 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return true;
   });
 
+  const weekMasonryItems: MasonryItem[] = React.useMemo(() => {
+    const seen = new Set<string>();
+    const unique: Recipe[] = [];
+    for (const date of currentWeekDates) {
+      const day = daysMap[date];
+      if (!day) continue;
+      for (const slot of SLOTS) {
+        for (const entry of day.slots[slot]) {
+          if (seen.has(entry.recipeId)) continue;
+          const rec = recipesMap[entry.recipeId];
+          if (rec) {
+            seen.add(entry.recipeId);
+            unique.push(rec);
+          }
+        }
+      }
+    }
+    const heights = [460, 580, 500, 620, 480];
+    return unique.map((r, idx) => ({
+      id: r.id,
+      img: getRecipeCarouselSrc(r),
+      alt: r.title,
+      title: r.title,
+      description: `${r.macrosPerServing.calories} kcal · ${r.macrosPerServing.protein}g P · ${
+        r.prepTimeMinutes + r.cookTimeMinutes
+      }m`,
+      width: 640,
+      height: heights[idx % heights.length],
+    }));
+  }, [currentWeekDates, daysMap, recipesMap]);
+
   const handleDragStartRecipe = (e: React.DragEvent, recipeId: string) => {
     e.dataTransfer.setData(
       'application/json',
@@ -157,7 +191,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       {/* Toolbar: Horizon, Week Tabs, View Switcher, Templates */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl flex-wrap">
+          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-2xl flex-wrap">
             {weeksDates.map((dates, idx) => (
               <BubbleButton
                 key={idx}
@@ -190,7 +224,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl">
+          <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full">
             <BubbleButton
               variant={viewMode === 'week' ? 'dark' : 'default'}
               size="sm"
@@ -238,7 +272,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* Main Content: Either Single-Week Detail Grid (+ Drag Tray) OR Multi-Week Matrix */}
       {viewMode === 'multi' ? (
-        <div className="space-y-6">
+        <AnimatedContent
+          distance={100}
+          direction="vertical"
+          duration={0.8}
+          ease="power3.out"
+          blur={0}
+          stagger={0.08}
+          threshold={0.1}
+          trigger="mount"
+          className="space-y-6"
+        >
           {weeksDates.map((weekDates, wIdx) => (
             <div key={wIdx} className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
               <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-4">
@@ -339,12 +383,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </div>
             </div>
           ))}
-        </div>
+        </AnimatedContent>
       ) : (
         <div className="flex flex-col 2xl:flex-row gap-5 items-start">
           {/* 7-Day Detailed Grid */}
           <div className="flex-1 w-full overflow-x-auto">
-            <div className="min-w-[1060px] grid grid-cols-7 gap-3">
+            <AnimatedContent
+              distance={100}
+              direction="vertical"
+              duration={0.8}
+              ease="power3.out"
+              blur={0}
+              stagger={0.08}
+              threshold={0.1}
+              className="min-w-[1060px] grid grid-cols-7 gap-3"
+            >
               {currentWeekDates.map((date) => {
                 const { weekday, dayNum, monthShort } = formatShortDayHeader(date);
                 const day = daysMap[date];
@@ -432,7 +485,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => onOpenAssignModal(date, slot)}
-                                  className="w-full py-3 border border-dashed border-[#E5E7EB] hover:border-[#15803D]/50 rounded-lg text-[11px] text-[#9CA3AF] hover:text-[#15803D] transition-colors"
+                                  className="w-full py-2.5 border border-dashed border-[#E5E7EB] hover:border-[#15803D]/50 rounded-full text-[11px] text-[#9CA3AF] hover:text-[#15803D] transition-colors"
                                 >
                                   + Assign meal
                                 </button>
@@ -566,7 +619,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </div>
                 );
               })}
-            </div>
+            </AnimatedContent>
           </div>
 
           {/* Quick-Assign Drag Tray */}
@@ -580,7 +633,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   <span className="text-[11px] text-[#6B7280]">Drag to calendar</span>
                 </div>
 
-                <div className="flex items-center gap-1 p-1 bg-[#E5E7EB]/60 rounded-xl">
+                <div className="flex items-center gap-1 p-1 bg-[#E5E7EB]/60 rounded-full">
                   {(['all', 'favorites', 'quick'] as const).map((f) => (
                     <BubbleButton
                       key={f}
@@ -628,6 +681,41 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </aside>
           )}
         </div>
+      )}
+
+      {/* Active Week Visual Menu Moodboard */}
+      {weekMasonryItems.length > 0 && (
+        <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-[#111827]">
+                Week {activeWeekIndex + 1} Menu Moodboard ({weekMasonryItems.length} dishes)
+              </h2>
+              <p className="text-xs text-[#6B7280]">
+                Visual overview of every dish scheduled this week — click any tile to open the recipe
+              </p>
+            </div>
+          </div>
+          <div className="p-4 sm:p-5">
+            <Masonry
+              items={weekMasonryItems}
+              columns="auto"
+              columnWidth={210}
+              gap={12}
+              radius={12}
+              animateFrom="bottom"
+              hoverEffect="zoom"
+              focusOnHover
+              captions="always"
+              draggable
+              lightbox={false}
+              onItemClick={(item) => {
+                const rec = recipesMap[String(item.id)];
+                if (rec) onOpenRecipeDetail(rec);
+              }}
+            />
+          </div>
+        </section>
       )}
     </div>
   );

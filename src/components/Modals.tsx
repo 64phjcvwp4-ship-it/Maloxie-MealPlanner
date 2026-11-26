@@ -103,7 +103,7 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
         </div>
 
         <div className="px-6 py-3 border-b border-[#E5E7EB] bg-[#FAFAFA] flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-[#E5E7EB]/60 rounded-xl">
+          <div className="flex items-center gap-1.5 p-1 bg-[#E5E7EB]/60 rounded-full">
             {(['recommended', 'favorites', 'all'] as const).map((mode) => (
               <BubbleButton
                 key={mode}
@@ -123,7 +123,7 @@ export const AssignMealModal: React.FC<AssignMealModalProps> = ({
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <span className="text-[#4B5563]">Servings:</span>
-              <div className="inline-flex items-center border border-[#E5E7EB] rounded-md bg-white">
+              <div className="inline-flex items-center border border-[#E5E7EB] rounded-full bg-white px-0.5">
                 <button
                   type="button"
                   onClick={() => setServings((s) => Math.max(1, s - 1))}
@@ -363,7 +363,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             <div className="md:col-span-5 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-[#111827]">Ingredients</h3>
-                <div className="inline-flex items-center gap-1 border border-[#E5E7EB] rounded-md px-1.5 py-0.5 text-xs">
+                <div className="inline-flex items-center gap-1 border border-[#E5E7EB] rounded-full px-2 py-0.5 text-xs">
                   <button
                     type="button"
                     onClick={() => setServings((s) => Math.max(1, s - 1))}

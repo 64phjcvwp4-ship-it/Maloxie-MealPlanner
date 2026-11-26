@@ -16,7 +16,10 @@ import {
   GROCERY_CATEGORY_ORDER,
 } from '../utils/groceryUtils';
 import { addDaysISO, formatWeekRangeLabel } from '../utils/dateUtils';
+import { getRecipeCarouselSrc } from '../utils/recipeCardDataUri';
 import { BubbleButton } from './BubbleControls';
+import AnimatedContent from '../../components/AnimatedContent';
+import Masonry, { type MasonryItem } from '../../components/Masonry';
 
 interface PrepGuideViewProps {
   weeksDates: string[][];
@@ -101,6 +104,24 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
       .slice(0, 4);
   }, [recipes]);
 
+  const prepMasonryItems: MasonryItem[] = useMemo(() => {
+    const heights = [480, 580, 520, 620, 460, 540];
+    return recipes
+      .filter((r) => r.dietaryTags.includes('Batch Friendly') || (r.storageDays || 0) >= 3)
+      .slice(0, 8)
+      .map((r, idx) => ({
+        id: r.id,
+        img: getRecipeCarouselSrc(r),
+        alt: r.title,
+        title: r.title,
+        description: `Keeps ${r.storageDays || 4}d · ${r.macrosPerServing.calories} kcal · ${
+          r.macrosPerServing.protein
+        }g P`,
+        width: 640,
+        height: heights[idx % heights.length],
+      }));
+  }, [recipes]);
+
   const totalPrepMins = prepTasks.reduce((s, t) => s + t.estimatedMinutes, 0);
   const completedCount = prepTasks.filter((t) => completedPrepTaskIds.has(t.id)).length;
 
@@ -108,7 +129,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
     <div className="space-y-6">
       {/* Week Header */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[#F3F4F6] rounded-full overflow-x-auto">
           {weeksDates.map((dates, idx) => (
             <BubbleButton
               key={idx}
@@ -135,7 +156,16 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
       </div>
 
       {/* Main Two-Column Studio */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <AnimatedContent
+        distance={100}
+        direction="vertical"
+        duration={0.8}
+        ease="power3.out"
+        blur={0}
+        stagger={0.08}
+        threshold={0.1}
+        className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+      >
         {/* 1. Sunday Meal Prep Guide */}
         <section className="lg:col-span-7 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-3">
@@ -174,7 +204,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                       type="button"
                       onClick={() => onTogglePrepTask(task.id)}
                       aria-label={`Toggle prep task ${task.title}`}
-                      className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                      className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                         done
                           ? 'bg-[#15803D] border-[#15803D] text-white'
                           : 'bg-white border-[#D1D5DB] hover:border-[#15803D]'
@@ -291,7 +321,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
             </div>
           </section>
         </div>
-      </div>
+      </AnimatedContent>
 
       {/* Batch Cooking Suggestions */}
       <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
@@ -309,7 +339,16 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#E5E7EB]">
+        <AnimatedContent
+          distance={100}
+          direction="vertical"
+          duration={0.8}
+          ease="power3.out"
+          blur={0}
+          stagger={0.08}
+          threshold={0.1}
+          className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#E5E7EB]"
+        >
           {batchSuggestions.map((recipe, idx) => {
             const cookDay = weekDates[idx % Math.max(1, weekDates.length - 1)] || weekDates[0];
             const leftoverDay = addDaysISO(cookDay, 1);
@@ -349,8 +388,41 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
               </div>
             );
           })}
-        </div>
+        </AnimatedContent>
       </section>
+
+      {/* Visual Batch & Sunday Prep Dish Board */}
+      {prepMasonryItems.length > 0 && (
+        <section className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <ChefHat className="w-4 h-4 text-[#15803D]" />
+              <div>
+                <h2 className="text-sm font-semibold text-[#111827]">
+                  Batch & Prep Visual Board
+                </h2>
+                <p className="text-xs text-[#6B7280]">
+                  Drag to prioritize your prep order or click any dish to inspect in lightbox
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 sm:p-5">
+            <Masonry
+              items={prepMasonryItems}
+              columns="auto"
+              columnWidth={220}
+              gap={12}
+              radius={12}
+              animateFrom="bottom"
+              hoverEffect="lift"
+              captions="always"
+              draggable
+              lightbox
+            />
+          </div>
+        </section>
+      )}
     </div>
   );
 };

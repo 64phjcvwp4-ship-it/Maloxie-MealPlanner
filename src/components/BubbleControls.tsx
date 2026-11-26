@@ -51,16 +51,16 @@ const VARIANT_CONFIG: Record<
 };
 
 const SIZE_STYLES: Record<BubbleSize, React.CSSProperties> = {
-  xs: { minHeight: 26, padding: '0 9px', fontSize: 11 },
-  sm: { minHeight: 30, padding: '0 12px', fontSize: 12 },
-  md: { minHeight: 36, padding: '0 14px', fontSize: 12 },
-  lg: { minHeight: 40, padding: '0 18px', fontSize: 13 },
+  xs: { minHeight: 26, padding: '0 12px', fontSize: 11 },
+  sm: { minHeight: 30, padding: '0 14px', fontSize: 12 },
+  md: { minHeight: 36, padding: '0 18px', fontSize: 12 },
+  lg: { minHeight: 40, padding: '0 22px', fontSize: 13 },
 };
 
 export const BubbleButton: React.FC<BubbleButtonProps> = ({
   variant = 'default',
   size = 'md',
-  radius = 10,
+  radius = 9999,
   className = '',
   style,
   tint,
