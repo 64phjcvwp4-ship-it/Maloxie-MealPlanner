@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Plus,
   Sparkles,
@@ -33,6 +33,7 @@ import Crosshair from '../components/Crosshair';
 import { SoapBubbleMaterial } from '../components/soap-bubble';
 import { BubbleButton } from './components/BubbleControls';
 import { MaloxieMark } from './components/MaloxieMark';
+import { OpeningIntro } from './components/OpeningIntro';
 import { CalendarView } from './components/CalendarView';
 import { RecipeLibraryView } from './components/RecipeLibraryView';
 import { GroceryListView } from './components/GroceryListView';
@@ -187,38 +188,19 @@ export default function App() {
   const [customMealOpen, setCustomMealOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [introStage, setIntroStage] = useState<'visible' | 'fading' | 'done'>('visible');
+  const [introStage, setIntroStage] = useState<'visible' | 'scattering' | 'done'>('visible');
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
   };
 
-  useEffect(() => {
-    if (introStage === 'done') return;
+  const handleIntroScatterStart = useCallback(() => {
+    setIntroStage((s) => (s === 'visible' ? 'scattering' : s));
+  }, []);
 
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (introStage === 'visible') {
-      const holdMs = prefersReducedMotion ? 250 : 2300;
-      const timer = window.setTimeout(() => setIntroStage('fading'), holdMs);
-      const onKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          setIntroStage('fading');
-        }
-      };
-      window.addEventListener('keydown', onKeyDown);
-      return () => {
-        window.clearTimeout(timer);
-        window.removeEventListener('keydown', onKeyDown);
-      };
-    }
-
-    const fadeMs = prefersReducedMotion ? 150 : 1250;
-    const timer = window.setTimeout(() => setIntroStage('done'), fadeMs);
-    return () => window.clearTimeout(timer);
-  }, [introStage]);
+  const handleIntroComplete = useCallback(() => {
+    setIntroStage('done');
+  }, []);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -630,7 +612,7 @@ export default function App() {
       {/* Global Full-Viewport MoltenMetal Background Visible Across Entire Site */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[#6A6754] transform-gpu">
         <MoltenMetal
-          colors={['#D9D0CB', '#908B6F']}
+          colors={['#D9D0CB', '#908B6F', '#6A6754', '#B86B4B']}
           coreColor="#F4F0ED"
           speed={0.35}
           scale={7.6}
@@ -659,7 +641,9 @@ export default function App() {
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-b from-[#2E2D24]/52 via-[#4A483A]/40 to-[#2E2D24]/55"
+          className={`absolute inset-0 bg-gradient-to-b from-[#2E2D24]/52 via-[#4A483A]/40 to-[#2E2D24]/55 transition-opacity duration-700 ease-out ${
+            introStage === 'visible' ? 'opacity-0' : 'opacity-100'
+          }`}
         />
       </div>
 
@@ -669,8 +653,8 @@ export default function App() {
         maxDpr={1.5}
         iridescence={0.42}
         soapPalette="custom"
-        soapPaletteRed="#D9D0CB"
-        soapPaletteGold="#C7BEB5"
+        soapPaletteRed="#B86B4B"
+        soapPaletteGold="#D69E85"
         soapPaletteGreen="#908B6F"
         soapPaletteCyan="#A8A186"
         soapPaletteBlue="#7C7861"
@@ -697,7 +681,11 @@ export default function App() {
         windowTwin={false}
         bottomShadeColor="#D9D0CB"
       >
-      <div className="relative z-10 flex flex-col flex-1">
+      <div
+        className={`relative z-10 flex flex-col flex-1 transition-opacity duration-700 ease-out ${
+          introStage === 'visible' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
       {/* Top Navigation Bar: Transparent Flat Logo (Without Glass Slab) + Maloxie + Nav + Action */}
       <header data-theme="dark" className="h-16 bg-[#3B392D]/90 border-b border-[#D9D0CB]/25 px-4 sm:px-8 flex items-center justify-between gap-8 sticky top-0 z-40">
         <a
@@ -719,7 +707,7 @@ export default function App() {
               type="button"
               onClick={() => navigateAndScroll(t.id)}
               className={`hover:text-[#FAF8F6] transition-colors whitespace-nowrap shrink-0 ${
-                activeTab === t.id ? 'text-[#FAF8F6] underline underline-offset-8 decoration-[#D9D0CB]' : ''
+                activeTab === t.id ? 'text-[#FAF8F6] underline underline-offset-8 decoration-[#B86B4B]' : ''
               }`}
             >
               {t.navLabel}
@@ -770,7 +758,7 @@ export default function App() {
             <GlassSlabLogo
               logo={MALOXIE_LOGO}
               colorPreset="oil"
-              colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#C2BBA4', '#908B6F']}
+              colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#B86B4B', '#908B6F']}
               lightColor="#FFFFFF"
               exposure={1.7}
               ambient={0.42}
@@ -802,7 +790,7 @@ export default function App() {
           >
             <h1 className="mt-4 font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#FAF8F6] leading-[1.12]">
               Plan meals that{' '}
-              <span className="text-[#D9D0CB]">actually stick</span>
+              <span className="text-[#E4A88E]">actually stick</span>
             </h1>
 
             <p className="mt-3.5 text-sm sm:text-base text-[#F0EAE6] max-w-xl leading-relaxed">
@@ -838,7 +826,7 @@ export default function App() {
                 onClick={() => navigateAndScroll('grocery')}
                 className="text-center rounded-xl py-1 hover:bg-[#D9D0CB]/30 transition-colors"
               >
-                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#6A6754]">
+                <div className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-[#14532D]">
                   ${activeWeekSummary.estCost.toFixed(0)} / ${targets.weeklyBudget}
                 </div>
                 <div className="text-xs text-[#6A6754]">weekly budget</div>
@@ -889,7 +877,7 @@ export default function App() {
             </span>
             {activeTab === 'calendar' && (
               <BubbleButton
-                variant="sage"
+                variant="terracotta"
                 size="sm"
                 onClick={() => setTemplatesModalOpen(true)}
               >
@@ -1054,51 +1042,15 @@ export default function App() {
         </div>
       )}
 
-      {introStage !== 'done' && (
-        <div
-          aria-hidden={introStage === 'fading'}
-          onClick={() => setIntroStage((s) => (s === 'visible' ? 'fading' : s))}
-          className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#2E2D24]/38 px-6 transition-opacity duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
-            introStage === 'fading' ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'
-          }`}
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#2E2D24]/55 via-[#4A483A]/40 to-[#2E2D24]/65"
-          />
-          <div className="relative z-10 flex flex-col items-center text-center">
-            <div className="relative w-[300px] sm:w-[390px] drop-shadow-[0_18px_36px_rgba(46,45,36,0.55)]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-4 inset-y-2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(46,45,36,0.55)_0%,transparent_72%)]"
-              />
-              <GlassSlabLogo
-                logo={MALOXIE_LOGO}
-                colorPreset="oil"
-                colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#C2BBA4', '#908B6F']}
-                lightColor="#FFFFFF"
-                exposure={1.7}
-                ambient={0.42}
-                reflectivity={1.9}
-                ior={1.68}
-                thickness={0.013}
-                depth={0.85}
-                density={0.85}
-                logoScale={0.86}
-                backgroundColor="transparent"
-                maxDpr={2}
-                samples={48}
-                style={{ height: 260 }}
-                aria-label="Maloxie glass slab logo"
-              />
-            </div>
-            <p className="mt-2 font-display text-4xl sm:text-5xl font-bold tracking-[0.06em] text-[#FAF8F6] drop-shadow-[0_4px_18px_rgba(46,45,36,0.5)]">
-              Maloxie
-            </p>
-          </div>
-        </div>
-      )}
       </div>
+
+      {introStage !== 'done' && (
+        <OpeningIntro
+          logoSrc={MALOXIE_LOGO}
+          onScatterStart={handleIntroScatterStart}
+          onComplete={handleIntroComplete}
+        />
+      )}
       </SoapBubbleMaterial>
     </div>
   );

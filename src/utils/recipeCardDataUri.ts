@@ -27,11 +27,11 @@ const SLOT_PALETTE: Record<
     subtle: '#6A6754',
   },
   snacks: {
-    bg1: '#F5F1ED',
-    bg2: '#DFD8CE',
-    accent: '#6A6754',
+    bg1: '#F7ECE6',
+    bg2: '#E7D1C6',
+    accent: '#B86B4B',
     ink: '#2E2D24',
-    subtle: '#5B5847',
+    subtle: '#9E5236',
   },
 };
 

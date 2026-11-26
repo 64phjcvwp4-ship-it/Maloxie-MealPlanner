@@ -148,7 +148,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
           </span>
           <span>
             Est. Cost/Meal:{' '}
-            <strong className="text-[#2E2D24]">
+            <strong className="text-[#14532D]">
               ${totalMealsPlanned > 0 ? (totalWeekSpend / totalMealsPlanned).toFixed(2) : '0.00'}
             </strong>
           </span>
@@ -170,7 +170,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
         <section className="lg:col-span-7 bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
           <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <ChefHat className="w-4 h-4 text-[#6A6754]" />
+              <ChefHat className="w-4 h-4 text-[#B86B4B]" />
               <div>
                 <h2 className="text-sm font-semibold text-[#2E2D24]">
                   Sunday Meal Prep Guide
@@ -228,7 +228,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-[#4A483A] leading-relaxed">{task.detail}</p>
-                      <div className="text-[11px] text-[#6A6754]">
+                      <div className="text-[11px] font-medium text-[#9E5236]">
                         Phase: {task.phase}
                       </div>
                     </div>
@@ -250,11 +250,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                   Weekly Budget Breakdown
                 </h2>
               </div>
-              <span
-                className={`font-mono text-xs font-semibold tabular-nums ${
-                  totalWeekSpend > weeklyBudget ? 'text-[#B43C2E]' : 'text-[#6A6754]'
-                }`}
-              >
+              <span className="font-mono text-xs font-semibold tabular-nums text-[#14532D]">
                 ${totalWeekSpend.toFixed(2)} / ${weeklyBudget}
               </span>
             </div>
@@ -269,8 +265,11 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
                     <div key={cat} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-[#4A483A] font-medium">{cat}</span>
-                        <span className="font-mono tabular-nums text-[#2E2D24]">
-                          ${amount.toFixed(2)} ({pct}%)
+                        <span className="font-mono tabular-nums text-[#6A6754]">
+                          <span className="font-semibold text-[#14532D]">
+                            ${amount.toFixed(2)}
+                          </span>{' '}
+                          ({pct}%)
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-[#EAE4E0] rounded-full overflow-hidden">
@@ -327,7 +326,7 @@ export const PrepGuideView: React.FC<PrepGuideViewProps> = ({
       <section className="bg-[#FAF8F6]/88 border border-[#D9D0CB]/80 rounded-xl overflow-hidden shadow-sm">
         <div className="px-5 py-4 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#6A6754]" />
+            <Layers className="w-4 h-4 text-[#B86B4B]" />
             <div>
               <h2 className="text-sm font-semibold text-[#2E2D24]">
                 Batch Cooking Suggestions

@@ -244,7 +244,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           <BubbleButton
-            variant="sage"
+            variant="terracotta"
             size="sm"
             onClick={onOpenTemplates}
           >
@@ -359,7 +359,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                       {MEAL_SLOT_LABELS[slot][0]}:
                                     </span>
                                     {entry.isLeftover && (
-                                      <span className="text-[#6A6754] font-semibold mr-1">
+                                      <span className="text-[#9E5236] font-semibold mr-1">
                                         [Leftover]
                                       </span>
                                     )}
@@ -506,7 +506,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                         }
                                         className={`p-2 rounded-lg border text-xs group transition-colors ${
                                           entry.isLeftover
-                                            ? 'bg-[#F0ECE4] border-[#908B6F]/55'
+                                            ? 'bg-[#F7ECE6] border-[#B86B4B]/45'
                                             : 'bg-[#F3EFEC] border-[#D9D0CB] hover:border-[#908B6F]'
                                         }`}
                                       >
@@ -522,7 +522,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                         </div>
 
                                         {entry.isLeftover && (
-                                          <div className="mt-1 text-[10px] font-medium text-[#6A6754] flex items-center gap-1">
+                                          <div className="mt-1 text-[10px] font-medium text-[#9E5236] flex items-center gap-1">
                                             <RefreshCw className="w-2.5 h-2.5" />
                                             <span>Leftover · No cook</span>
                                           </div>

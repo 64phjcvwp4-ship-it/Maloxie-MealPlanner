@@ -110,7 +110,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
         </div>
 
         <BubbleButton
-          variant="sage"
+          variant="terracotta"
           size="md"
           onClick={() => setEditingTargets((v) => !v)}
         >
@@ -224,7 +224,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               value: avgDaily.fat,
               target: targets.fat,
               unit: 'g',
-              accent: 'bg-[#C4B9B1]',
+              accent: 'bg-[#B86B4B]',
             },
           ] as const
         ).map((metric) => {
@@ -358,7 +358,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
             <div className="w-full h-4 rounded-full overflow-hidden flex bg-[#EAE4E0]">
               <div style={{ width: `${pctP}%` }} className="bg-[#4A483A]" />
               <div style={{ width: `${pctC}%` }} className="bg-[#908B6F]" />
-              <div style={{ width: `${pctF}%` }} className="bg-[#C4B9B1]" />
+              <div style={{ width: `${pctF}%` }} className="bg-[#B86B4B]" />
             </div>
 
             <div className="space-y-2.5 text-xs">
@@ -382,7 +382,7 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-[#4A483A]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#C4B9B1]" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#B86B4B]" />
                   Fat (9 kcal/g)
                 </span>
                 <span className="font-mono font-medium tabular-nums text-[#2E2D24]">

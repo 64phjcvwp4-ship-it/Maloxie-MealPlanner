@@ -6,7 +6,7 @@ import {
   type SoapBubbleIconButtonProps,
 } from '../../components/soap-bubble';
 
-export type BubbleVariant = 'default' | 'primary' | 'dark' | 'sage' | 'danger';
+export type BubbleVariant = 'default' | 'primary' | 'dark' | 'sage' | 'terracotta' | 'danger';
 export type BubbleSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface BubbleButtonProps extends Omit<SoapBubbleButtonProps, 'size'> {
@@ -32,6 +32,12 @@ const VARIANT_CONFIG: Record<
   },
   sage: {
     tint: 'rgb(106 103 84)',
+    opacity: 0.92,
+    color: '#FAF8F6',
+    extraClass: 'text-[#FAF8F6]',
+  },
+  terracotta: {
+    tint: 'rgb(184 107 75)',
     opacity: 0.92,
     color: '#FAF8F6',
     extraClass: 'text-[#FAF8F6]',

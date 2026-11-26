@@ -132,6 +132,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 4,
     dietaryTags: ['High Protein', 'Low Carb', 'Vegetarian', 'Gluten-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 275, protein: 21, carbs: 5, fat: 19 },
+    imageUrl: '/assets/aistudio/IMG_4301_430d5de4.jpeg',
     batchTip: 'Bake a full 12-cup tray on Sunday; warm 2–3 cups in 30 seconds on busy mornings.',
     storageDays: 5,
     ingredients: [
@@ -159,6 +160,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 1,
     dietaryTags: ['Vegetarian', 'Quick'],
     macrosPerServing: { calories: 465, protein: 19, carbs: 36, fat: 28 },
+    imageUrl: '/assets/aistudio/IMG_4303_a0119713.jpeg',
     storageDays: 1,
     ingredients: [
       { id: 'ing-33', name: 'Country sourdough bread', quantity: 2, unit: 'slices', category: 'Bakery & Grains', estimatedPrice: 1.20 },
@@ -185,6 +187,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 4,
     dietaryTags: ['High Protein', 'Gluten-Free', 'Dairy-Free', 'Budget', 'Batch Friendly'],
     macrosPerServing: { calories: 495, protein: 38, carbs: 46, fat: 16 },
+    imageUrl: '/assets/aistudio/IMG_4304_135f6f90.jpeg',
     batchTip: 'Portion turkey-bean mixture into 4 meal prep containers; pack fresh salsa and lime wedges separately.',
     storageDays: 4,
     ingredients: [
@@ -213,6 +216,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['Vegetarian', 'Gluten-Free', 'Quick'],
     macrosPerServing: { calories: 510, protein: 24, carbs: 38, fat: 29 },
+    imageUrl: '/assets/aistudio/IMG_4305_74cf7aee.jpeg',
     batchTip: 'Keep vinaigrette in a separate jar so greens stay crisp up to 3 days.',
     storageDays: 3,
     ingredients: [
@@ -240,6 +244,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['High Protein', 'Low Carb', 'Gluten-Free', 'Dairy-Free', 'Quick'],
     macrosPerServing: { calories: 335, protein: 37, carbs: 14, fat: 15 },
+    imageUrl: '/assets/aistudio/IMG_4306_e27fff42.jpeg',
     storageDays: 2,
     ingredients: [
       { id: 'ing-50', name: 'Peeled raw shrimp', quantity: 350, unit: 'g', category: 'Meat & Fish', estimatedPrice: 7.50 },
@@ -265,6 +270,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 4,
     dietaryTags: ['High Protein', 'Dairy-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 520, protein: 40, carbs: 42, fat: 20 },
+    imageUrl: '/assets/aistudio/IMG_4307_1673913f.jpeg',
     batchTip: 'Slice beef across the grain and marinate Sunday night for a 10-minute Tuesday cook.',
     storageDays: 4,
     ingredients: [
@@ -293,6 +299,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 4,
     dietaryTags: ['Vegetarian', 'Quick', 'Budget'],
     macrosPerServing: { calories: 510, protein: 21, carbs: 68, fat: 16 },
+    imageUrl: '/assets/aistudio/IMG_4308_4ecf8a9d.jpeg',
     storageDays: 3,
     ingredients: [
       { id: 'ing-61', name: 'Rigatoni pasta', quantity: 360, unit: 'g', category: 'Bakery & Grains', estimatedPrice: 1.80 },
@@ -319,6 +326,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['High Protein', 'Vegetarian', 'Dairy-Free', 'Batch Friendly'],
     macrosPerServing: { calories: 490, protein: 29, carbs: 36, fat: 26 },
+    imageUrl: '/assets/aistudio/IMG_4309_72d63f9c.jpeg',
     batchTip: 'Shredded cabbage holds crunch for 4 days without wilting.',
     storageDays: 4,
     ingredients: [
@@ -346,6 +354,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['High Protein', 'Vegetarian', 'Quick', 'Budget'],
     macrosPerServing: { calories: 385, protein: 28, carbs: 44, fat: 10 },
+    imageUrl: '/assets/aistudio/IMG_4310_ff2e17dd.jpeg',
     storageDays: 3,
     ingredients: [
       { id: 'ing-73', name: 'Low-fat cottage cheese', quantity: 220, unit: 'g', category: 'Dairy & Eggs', estimatedPrice: 2.10 },
@@ -371,6 +380,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 4,
     dietaryTags: ['High Protein', 'Low Carb', 'Gluten-Free', 'Dairy-Free', 'Budget'],
     macrosPerServing: { calories: 390, protein: 29, carbs: 18, fat: 22 },
+    imageUrl: '/assets/aistudio/IMG_4311_708fefcd.jpeg',
     batchTip: 'Zero pots to wash—line sheet pan with parchment for a 1-minute cleanup.',
     storageDays: 4,
     ingredients: [
@@ -396,6 +406,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['High Protein', 'Quick'],
     macrosPerServing: { calories: 445, protein: 39, carbs: 34, fat: 16 },
+    imageUrl: '/assets/aistudio/IMG_4312_14196f08.jpeg',
     storageDays: 2,
     ingredients: [
       { id: 'ing-82', name: 'Chicken breast', quantity: 300, unit: 'g', category: 'Meat & Fish', estimatedPrice: 4.20 },
@@ -421,6 +432,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['Vegetarian', 'Dairy-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 235, protein: 9, carbs: 26, fat: 11 },
+    imageUrl: '/assets/aistudio/IMG_4313_5d27e136.jpeg',
     batchTip: 'Slice carrots and cucumbers into water-filled jars on Sunday to keep snappy for 5 days.',
     storageDays: 5,
     ingredients: [
@@ -445,6 +457,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 2,
     dietaryTags: ['High Protein', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 220, protein: 16, carbs: 11, fat: 13 },
+    imageUrl: '/assets/aistudio/IMG_4314_e8fc2776.jpeg',
     storageDays: 3,
     ingredients: [
       { id: 'ing-91', name: 'Frozen edamame pods', quantity: 220, unit: 'g', category: 'Frozen', estimatedPrice: 2.10 },
@@ -467,6 +480,7 @@ export const INITIAL_RECIPES: Recipe[] = [
     servings: 1,
     dietaryTags: ['High Protein', 'Vegetarian', 'Gluten-Free', 'Quick', 'Budget'],
     macrosPerServing: { calories: 265, protein: 18, carbs: 25, fat: 11 },
+    imageUrl: '/assets/aistudio/IMG_4315_a005fa6c.jpeg',
     storageDays: 1,
     ingredients: [
       { id: 'ing-94', name: 'Nonfat Greek yogurt', quantity: 150, unit: 'g', category: 'Dairy & Eggs', estimatedPrice: 1.25 },

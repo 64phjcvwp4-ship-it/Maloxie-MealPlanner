@@ -969,7 +969,9 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModalProps> = ({
                   <span aria-hidden="true">·</span>
                   <span>~{tmpl.avgDailyProtein}g protein</span>
                   <span aria-hidden="true">·</span>
-                  <span>~${tmpl.estimatedWeeklyCost}/wk</span>
+                  <span className="font-semibold text-[#14532D]">
+                    ~${tmpl.estimatedWeeklyCost}/wk
+                  </span>
                 </div>
               </div>
 

@@ -255,7 +255,9 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               Shopping Budget ({scopeWeeksCount} wk)
             </span>
             <div className="flex items-center gap-1 text-xs">
-              <span className="text-[#6A6754]">Cap: $</span>
+              <span className="text-[#6A6754]">
+                Cap: <span className="font-mono font-semibold text-[#14532D]">$</span>
+              </span>
               <input
                 type="number"
                 min={20}
@@ -263,7 +265,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 value={weeklyBudget}
                 onChange={(e) => onUpdateBudget(Math.max(10, Number(e.target.value)))}
                 aria-label="Weekly budget target"
-                className="w-16 px-1.5 py-0.5 text-xs font-mono font-medium border border-[#D9D0CB] rounded bg-[#F3EFEC] text-[#2E2D24] focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+                className="w-16 px-1.5 py-0.5 text-xs font-mono font-semibold border border-[#D9D0CB] rounded bg-[#F3EFEC] text-[#14532D] focus:outline-none focus:ring-2 focus:ring-[#14532D]"
               />
               <span className="text-[#6A6754]">/wk</span>
             </div>
@@ -271,17 +273,29 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
           <div>
             <div className="flex items-baseline justify-between">
-              <span className="font-mono text-2xl font-semibold tabular-nums text-[#2E2D24]">
+              <span className="font-mono text-2xl font-semibold tabular-nums text-[#14532D]">
                 ${toSpendCost.toFixed(2)}
               </span>
               <span
                 className={`text-xs font-medium ${
-                  overBudget ? 'text-[#B43C2E]' : 'text-[#6A6754]'
+                  overBudget ? 'text-[#B43C2E]' : 'text-[#14532D]'
                 }`}
               >
-                {overBudget
-                  ? `$${(toSpendCost - scopedBudget).toFixed(2)} over budget`
-                  : `$${(scopedBudget - toSpendCost).toFixed(2)} under budget`}
+                {overBudget ? (
+                  <>
+                    <span className="font-mono font-semibold text-[#14532D]">
+                      ${(toSpendCost - scopedBudget).toFixed(2)}
+                    </span>{' '}
+                    over budget
+                  </>
+                ) : (
+                  <>
+                    <span className="font-mono font-semibold">
+                      ${(scopedBudget - toSpendCost).toFixed(2)}
+                    </span>{' '}
+                    under budget
+                  </>
+                )}
               </span>
             </div>
             <div className="w-full h-2 bg-[#EAE4E0] rounded-full overflow-hidden mt-2">
@@ -298,7 +312,12 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
             <span>
               Picked: {checkedCount}/{allToBuyUnfiltered.length} items
             </span>
-            <span>Pantry saved: ${pantrySavedCost.toFixed(2)}</span>
+            <span>
+              Pantry saved:{' '}
+              <span className="font-semibold text-[#14532D]">
+                ${pantrySavedCost.toFixed(2)}
+              </span>
+            </span>
           </div>
         </div>
       </div>
@@ -401,8 +420,10 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 <div className="px-5 py-3 border-b border-[#D9D0CB]/80 bg-[#F3EFEC]/70 flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-[#2E2D24]">{category}</h3>
                   <span className="font-mono text-xs tabular-nums text-[#6A6754]">
-                    {items.length} item{items.length !== 1 ? 's' : ''} · $
-                    {items.reduce((s, i) => s + i.estimatedPrice, 0).toFixed(2)}
+                    {items.length} item{items.length !== 1 ? 's' : ''} ·{' '}
+                    <span className="font-semibold text-[#14532D]">
+                      ${items.reduce((s, i) => s + i.estimatedPrice, 0).toFixed(2)}
+                    </span>
                   </span>
                 </div>
 
@@ -458,7 +479,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                             >
                               {formatQuantity(item.quantity)} {item.unit}
                             </div>
-                            <div className="text-[11px] text-[#6A6754]">
+                            <div className="text-[11px] font-semibold text-[#14532D]">
                               ${item.estimatedPrice.toFixed(2)}
                             </div>
                           </div>
@@ -532,8 +553,10 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                         {item.name}
                       </div>
                       <div className="text-[11px] font-mono tabular-nums text-[#6A6754]">
-                        {formatQuantity(item.quantity)} {item.unit} · saves $
-                        {item.estimatedPrice.toFixed(2)}
+                        {formatQuantity(item.quantity)} {item.unit} · saves{' '}
+                        <span className="font-semibold text-[#14532D]">
+                          ${item.estimatedPrice.toFixed(2)}
+                        </span>
                       </div>
                     </div>
                     <BubbleButton

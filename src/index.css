@@ -4,6 +4,10 @@
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-quill-grey: #D9D0CB;
+  --color-olive-haze: #908B6F;
+  --color-soya-bean: #6A6754;
+  --color-terracotta: #B86B4B;
 }
 
 @layer base {
