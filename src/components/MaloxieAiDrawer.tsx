@@ -169,7 +169,7 @@ export const MaloxieAiDrawer: React.FC<MaloxieAiDrawerProps> = ({
                 rim={1.1}
                 interactive
                 clickPulse={false}
-                maxDevicePixelRatio={1.5}
+                maxDevicePixelRatio={1}
               />
             </div>
             <div className="text-left leading-tight">
@@ -244,7 +244,7 @@ export const MaloxieAiDrawer: React.FC<MaloxieAiDrawerProps> = ({
                   rim={1.15}
                   interactive
                   clickPulse
-                  maxDevicePixelRatio={1.5}
+                  maxDevicePixelRatio={1.25}
                 />
               </button>
 

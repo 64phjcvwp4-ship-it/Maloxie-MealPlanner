@@ -76,6 +76,8 @@ import {
 
 const STORAGE_KEY = 'mise-meal-planner-v1';
 const MALOXIE_LOGO = '/assets/aistudio/IMG_4277_e1118095.jpeg';
+const MOLTEN_COLORS = ['#D9D0CB', '#908B6F', '#6A6754', '#B86B4B'];
+const GLASS_LOGO_COLORS = ['#FFFFFF', '#F5EFEA', '#D9D0CB', '#B86B4B', '#908B6F'];
 
 function buildInitialDaysMap(startMonday: Date): Record<string, DayPlan> {
   const week1 = getWeekDates(startMonday, 0);
@@ -998,7 +1000,7 @@ export default function App() {
       {/* Global Full-Viewport MoltenMetal Background Visible Across Entire Site */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[#6A6754] transform-gpu">
         <MoltenMetal
-          colors={['#D9D0CB', '#908B6F', '#6A6754', '#B86B4B']}
+          colors={MOLTEN_COLORS}
           coreColor="#F4F0ED"
           speed={0.35}
           scale={7.6}
@@ -1021,8 +1023,10 @@ export default function App() {
           drift={0.3}
           intro
           mouseStrength={0.5}
-          paused={false}
-          dpr={2}
+          paused={Boolean(
+            detailRecipe || assignModalTarget || customMealOpen || templatesModalOpen
+          )}
+          dpr={1}
           style={{ width: '100%', height: '100%' }}
         />
         <div
@@ -1036,7 +1040,7 @@ export default function App() {
       <SoapBubbleMaterial
         paused
         seeThrough={0}
-        maxDpr={1.5}
+        maxDpr={1}
         iridescence={0.42}
         soapPalette="custom"
         soapPaletteRed="#B86B4B"
@@ -1212,11 +1216,11 @@ export default function App() {
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-4 inset-y-2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(46,45,36,0.52)_0%,transparent_72%)]"
             />
-            {introStage !== 'visible' ? (
+            {introStage === 'done' ? (
               <GlassSlabLogo
                 logo={MALOXIE_LOGO}
                 colorPreset="oil"
-                colors={['#FFFFFF', '#F5EFEA', '#D9D0CB', '#B86B4B', '#908B6F']}
+                colors={GLASS_LOGO_COLORS}
                 lightColor="#FFFFFF"
                 exposure={1.7}
                 ambient={0.42}
@@ -1227,8 +1231,8 @@ export default function App() {
                 density={0.85}
                 logoScale={0.86}
                 backgroundColor="transparent"
-                maxDpr={2}
-                samples={48}
+                maxDpr={1.25}
+                samples={20}
                 style={{ height: 248 }}
                 aria-label="Maloxie glass slab logo"
               />

@@ -94,8 +94,9 @@ const BEND_PRESETS = {
 };
 
 const FIT_ASPECT = { portrait: 0.75, square: 1, landscape: 4 / 3 };
-const TAPS = 12;
-const PIXEL_BUDGET = 4.5e6;
+const TAPS = 6;
+const PIXEL_BUDGET = 1.1e6;
+const MAX_TEXTURE_DIM = 720;
 const INTRO_DURATION = { rise: 2.1, bloom: 1.6, spin: 2.2, deal: 1.5, fade: 0.35 };
 
 const wrap = (value, size) => ((((value + size / 2) % size) + size) % size) - size / 2;
@@ -380,7 +381,7 @@ const FlexCarousel = forwardRef(({
     if (!container) return undefined;
 
     const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: Math.min(window.devicePixelRatio || 1, 1.25),
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
@@ -458,7 +459,7 @@ const FlexCarousel = forwardRef(({
     });
 
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-    const anisotropy = renderer.getExtension('EXT_texture_filter_anisotropic') ? 8 : 0;
+    const anisotropy = 0;
 
     let slots = [];
     let width = 1;
@@ -530,10 +531,27 @@ const FlexCarousel = forwardRef(({
       image.decoding = 'async';
       image.onload = () => {
         if (!alive || gl.isContextLost() || !slots.includes(slot)) return;
-        texture.image = image;
+        const natW = image.naturalWidth || 1;
+        const natH = image.naturalHeight || 1;
+        const maxSide = Math.max(natW, natH);
+        if (maxSide > MAX_TEXTURE_DIM) {
+          const scale = MAX_TEXTURE_DIM / maxSide;
+          const resized = document.createElement('canvas');
+          resized.width = Math.max(1, Math.round(natW * scale));
+          resized.height = Math.max(1, Math.round(natH * scale));
+          const rctx = resized.getContext('2d');
+          if (rctx) {
+            rctx.drawImage(image, 0, 0, resized.width, resized.height);
+            texture.image = resized;
+          } else {
+            texture.image = image;
+          }
+        } else {
+          texture.image = image;
+        }
         texture.update();
-        slot.image = [image.naturalWidth || 1, image.naturalHeight || 1];
-        slot.aspect = slot.image[0] / slot.image[1];
+        slot.image = [natW, natH];
+        slot.aspect = natW / natH;
         try {
           const probe = document.createElement('canvas');
           probe.width = 8;
@@ -567,7 +585,9 @@ const FlexCarousel = forwardRef(({
       slot.dispose = () => {
         image.onload = null;
         image.onerror = null;
-        gl.deleteTexture(texture.texture);
+        if (!gl.isContextLost() && texture.texture) {
+          gl.deleteTexture(texture.texture);
+        }
       };
       return slot;
     };
@@ -742,7 +762,7 @@ const FlexCarousel = forwardRef(({
       if (gl.isContextLost()) return;
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
+      renderer.dpr = Math.min(window.devicePixelRatio || 1, 1.25, Math.sqrt(PIXEL_BUDGET / (width * height)));
       renderer.setSize(width, height);
       target.setSize(Math.max(2, Math.round(width * renderer.dpr)), Math.max(2, Math.round(height * renderer.dpr)));
       lensUniforms.tScene.value = target.texture;

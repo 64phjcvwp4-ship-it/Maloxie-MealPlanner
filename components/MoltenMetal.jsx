@@ -283,6 +283,7 @@ export default function MoltenMetal({
   };
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
+  const wakeRef = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -296,7 +297,7 @@ export default function MoltenMetal({
       depth: false,
       stencil: false,
       premultipliedAlpha: true,
-      powerPreference: 'high-performance'
+      powerPreference: 'default'
     });
     if (!gl) {
       canvas.remove();
@@ -409,12 +410,14 @@ export default function MoltenMetal({
     let boxWidth = container.clientWidth;
     let boxHeight = container.clientHeight;
 
-    const MAX_PIXELS = 2_000_000;
+    const MAX_PIXELS = 900_000;
+    const MIN_FRAME_MS = 32;
+    let lastRenderAt = 0;
     const resize = () => {
       const s = settingsRef.current;
       const rawRatio = Math.min(window.devicePixelRatio || 1, s.dpr);
       const area = Math.max(1, boxWidth * boxHeight);
-      const ratio = Math.max(0.75, Math.min(rawRatio, Math.sqrt(MAX_PIXELS / area)));
+      const ratio = Math.max(0.5, Math.min(rawRatio, Math.sqrt(MAX_PIXELS / area)));
       const width = Math.max(1, Math.round(boxWidth * ratio));
       const height = Math.max(1, Math.round(boxHeight * ratio));
       if (width === state.width && height === state.height) return;
@@ -530,6 +533,11 @@ export default function MoltenMetal({
         state.last = now;
         return;
       }
+      if (lastRenderAt && now - lastRenderAt < MIN_FRAME_MS) {
+        state.raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastRenderAt = now;
       const s = settingsRef.current;
       const dt = state.last ? Math.min((now - state.last) / 1000, 0.1) : 0;
       state.last = now;
@@ -655,9 +663,14 @@ export default function MoltenMetal({
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('pointerdown', onDown);
     document.documentElement.addEventListener('pointerleave', onLeave);
+    wakeRef.current = () => {
+      state.quiet = 0;
+      startRaf();
+    };
     state.raf = requestAnimationFrame(tick);
 
     return () => {
+      wakeRef.current = null;
       cancelAnimationFrame(state.raf);
       visibility.disconnect();
       sizes.disconnect();
@@ -675,6 +688,12 @@ export default function MoltenMetal({
       canvas.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (!paused) {
+      wakeRef.current?.();
+    }
+  }, [paused]);
 
   return <div ref={containerRef} className={[ROOT, className].filter(Boolean).join(' ')} style={style} />;
 }

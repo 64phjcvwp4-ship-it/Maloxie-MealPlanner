@@ -78,8 +78,8 @@ export const OpeningIntro: React.FC<OpeningIntroProps> = ({
   }, [onComplete]);
 
   const shards = useMemo<ShardSpec[]>(() => {
-    return Array.from({ length: 22 }, (_, i) => {
-      const baseAngle = (i / 22) * 360 + (i % 2 === 0 ? 7 : -9);
+    return Array.from({ length: 12 }, (_, i) => {
+      const baseAngle = (i / 12) * 360 + (i % 2 === 0 ? 7 : -9);
       return {
         id: i,
         angleDeg: baseAngle,
@@ -203,7 +203,6 @@ export const OpeningIntro: React.FC<OpeningIntroProps> = ({
             y: -26,
             rotation: 6,
             opacity: 0,
-            filter: 'blur(12px)',
             duration: 0.65,
             ease: 'power2.in',
           },
@@ -260,7 +259,6 @@ export const OpeningIntro: React.FC<OpeningIntroProps> = ({
             rotateY: cfg.rotY,
             scale: cfg.scale,
             opacity: 0,
-            filter: 'blur(6px)',
             duration: 0.95,
             ease: 'power3.out',
           },
@@ -320,7 +318,7 @@ export const OpeningIntro: React.FC<OpeningIntroProps> = ({
               shardRefs.current[idx] = el;
             }}
             style={{ width: shard.size, height: shard.size * 1.18 }}
-            className={`absolute bg-gradient-to-br ${shard.tintClass} ${shard.clipClass} border backdrop-blur-md shadow-[0_6px_18px_rgba(46,45,36,0.28)]`}
+            className={`absolute bg-gradient-to-br ${shard.tintClass} ${shard.clipClass} border shadow-[0_6px_18px_rgba(46,45,36,0.24)] will-change-transform`}
           />
         ))}
       </div>
@@ -345,8 +343,8 @@ export const OpeningIntro: React.FC<OpeningIntroProps> = ({
             density={0.85}
             logoScale={0.86}
             backgroundColor="transparent"
-            maxDpr={2}
-            samples={48}
+            maxDpr={1.25}
+            samples={20}
             style={{ height: 260 }}
             aria-label="Maloxie glass slab logo"
           />

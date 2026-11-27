@@ -542,9 +542,16 @@ export default function Strands({
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
+    let lastDrawAt = 0;
     const frame = now => {
       st.raf = 0;
       const p = propsRef.current;
+      const activeMotion = p.listening || st.burst >= 0.01 || Math.abs(st.pulse) >= 0.01 || st.hoverTarget > 0.01;
+      if (!activeMotion && lastDrawAt && now - lastDrawAt < 32) {
+        if (st.visible && !document.hidden && !st.lost) st.raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastDrawAt = now;
       const dt = st.last ? clamp((now - st.last) / 1000, 0, 0.05) : 0;
       st.last = now;
       const reduced = !!query?.matches;

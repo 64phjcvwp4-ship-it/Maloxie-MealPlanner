@@ -49,6 +49,8 @@ export const RecipeImage: React.FC<RecipeImageProps> = ({
     <img
       src={src}
       alt={alt}
+      loading="lazy"
+      decoding="async"
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
       className={`object-cover ${className}`}
