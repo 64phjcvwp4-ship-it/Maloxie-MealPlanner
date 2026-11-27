@@ -575,8 +575,14 @@ const FlexCarousel = forwardRef(({
         dirty = true;
         start();
       };
+      let triedFallback = false;
       image.onerror = () => {
         if (!alive) return;
+        if (!triedFallback && item.fallbackSrc && item.fallbackSrc !== image.src) {
+          triedFallback = true;
+          image.src = item.fallbackSrc;
+          return;
+        }
         slot.failed = true;
         dirty = true;
         start();

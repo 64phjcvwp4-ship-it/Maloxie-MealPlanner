@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   X,
   Heart,
@@ -8,6 +8,8 @@ import {
   Trash2,
   RotateCcw,
   Pencil,
+  Link2,
+  Loader2,
 } from 'lucide-react';
 import {
   DietaryTag,
@@ -291,103 +293,110 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2E2D24]/45">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-[#2E2D24]/45"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-detail-title"
-        className="w-full max-w-3xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-3xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[92dvh]"
       >
-        <div className="relative h-56 shrink-0 bg-[#EAE4E0]">
-          <RecipeImage
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            mealTypes={recipe.mealTypes}
-            className="w-full h-full"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2E2D24]/80 via-[#2E2D24]/25 to-transparent" />
-          <BubbleIconButton
-            variant="default"
-            iconSize="md"
-            onClick={onClose}
-            aria-label="Close recipe details"
-            className="!absolute top-4 right-4"
-          >
-            <X className="w-4 h-4" />
-          </BubbleIconButton>
-          <div className="absolute bottom-4 left-6 right-6 text-[#FAF8F6]">
-            <div className="text-xs text-[#E5DFDA] flex flex-wrap items-center gap-2 mb-1">
-              {recipe.cuisine && (
-                <>
-                  <span className="font-medium text-[#FAF8F6]">{recipe.cuisine}</span>
-                  <span aria-hidden="true">·</span>
-                </>
-              )}
-              <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {totalTime} min total ({recipe.prepTimeMinutes}m prep / {recipe.cookTimeMinutes}m cook)
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>{recipe.difficulty}</span>
-            </div>
-            <h2 id="recipe-detail-title" className="font-display text-2xl font-bold leading-tight">
-              {recipe.title}
-            </h2>
-          </div>
-        </div>
+        <BubbleIconButton
+          variant="default"
+          iconSize="md"
+          onClick={onClose}
+          aria-label="Close recipe details"
+          className="!absolute top-3 right-3 z-20 shadow-md"
+        >
+          <X className="w-4 h-4" />
+        </BubbleIconButton>
 
-        <div className="px-6 py-4 border-b border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4 text-xs">
-            <div>
-              <span className="text-[#6A6754] block">Calories</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
-                {recipe.macrosPerServing.calories} kcal
-              </span>
-            </div>
-            <div className="h-6 w-px bg-[#D9D0CB]" />
-            <div>
-              <span className="text-[#6A6754] block">Protein</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#6A6754]">
-                {recipe.macrosPerServing.protein}g
-              </span>
-            </div>
-            <div>
-              <span className="text-[#6A6754] block">Carbs</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
-                {recipe.macrosPerServing.carbs}g
-              </span>
-            </div>
-            <div>
-              <span className="text-[#6A6754] block">Fat</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
-                {recipe.macrosPerServing.fat}g
-              </span>
-            </div>
-            <div className="h-6 w-px bg-[#D9D0CB]" />
-            <div>
-              <span className="text-[#6A6754] block">Yield & Prep</span>
-              <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
-                {recipe.servings} srv · {recipe.prepTimeMinutes}m / {recipe.cookTimeMinutes}m
-              </span>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+          <div className="relative h-44 sm:h-56 bg-[#EAE4E0]">
+            <RecipeImage
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              mealTypes={recipe.mealTypes}
+              className="w-full h-full"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2E2D24]/85 via-[#2E2D24]/25 to-transparent" />
+            <div className="absolute bottom-3.5 left-4 right-14 sm:bottom-4 sm:left-6 sm:right-16 text-[#FAF8F6]">
+              <div className="text-[11px] sm:text-xs text-[#E5DFDA] flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1">
+                {recipe.cuisine && (
+                  <>
+                    <span className="font-medium text-[#FAF8F6]">{recipe.cuisine}</span>
+                    <span aria-hidden="true">·</span>
+                  </>
+                )}
+                <span>{recipe.mealTypes.map((m) => MEAL_SLOT_LABELS[m]).join(' / ')}</span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {totalTime} min total ({recipe.prepTimeMinutes}m prep / {recipe.cookTimeMinutes}m cook)
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>{recipe.difficulty}</span>
+              </div>
+              <h2 id="recipe-detail-title" className="font-display text-xl sm:text-2xl font-bold leading-tight">
+                {recipe.title}
+              </h2>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <BubbleButton
-              variant={isFavorite ? 'danger' : 'default'}
-              size="sm"
-              onClick={() => onToggleFavorite(recipe.id)}
-            >
-              <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-[#B43C2E] text-[#B43C2E]' : ''}`} />
-              <span>{isFavorite ? 'Favorited' : 'Save Favorite'}</span>
-            </BubbleButton>
-          </div>
-        </div>
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs">
+              <div>
+                <span className="text-[#6A6754] block">Calories</span>
+                <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
+                  {recipe.macrosPerServing.calories} kcal
+                </span>
+              </div>
+              <div className="h-6 w-px bg-[#D9D0CB]" />
+              <div>
+                <span className="text-[#6A6754] block">Protein</span>
+                <span className="font-mono font-semibold text-sm tabular-nums text-[#6A6754]">
+                  {recipe.macrosPerServing.protein}g
+                </span>
+              </div>
+              <div>
+                <span className="text-[#6A6754] block">Carbs</span>
+                <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
+                  {recipe.macrosPerServing.carbs}g
+                </span>
+              </div>
+              <div>
+                <span className="text-[#6A6754] block">Fat</span>
+                <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
+                  {recipe.macrosPerServing.fat}g
+                </span>
+              </div>
+              <div className="h-6 w-px bg-[#D9D0CB] hidden sm:block" />
+              <div>
+                <span className="text-[#6A6754] block">Yield & Prep</span>
+                <span className="font-mono font-semibold text-sm tabular-nums text-[#2E2D24]">
+                  {recipe.servings} srv · {recipe.prepTimeMinutes}m / {recipe.cookTimeMinutes}m
+                </span>
+              </div>
+            </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="space-y-2 pb-4 border-b border-[#D9D0CB]">
-            <p className="text-sm text-[#2E2D24] leading-relaxed">{recipe.subtitle}</p>
+            <div className="flex items-center gap-2">
+              <BubbleButton
+                variant={isFavorite ? 'danger' : 'default'}
+                size="sm"
+                onClick={() => onToggleFavorite(recipe.id)}
+              >
+                <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-[#B43C2E] text-[#B43C2E]' : ''}`} />
+                <span>{isFavorite ? 'Favorited' : 'Save Favorite'}</span>
+              </BubbleButton>
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-6 space-y-6">
+            <div className="space-y-2 pb-4 border-b border-[#D9D0CB]">
+              <p className="text-sm text-[#2E2D24] leading-relaxed">{recipe.subtitle}</p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#6A6754]">
               {recipe.flavorProfile && (
                 <span className="font-medium text-[#4A483A]">{recipe.flavorProfile}</span>
@@ -473,7 +482,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
                             <input
                               type="number"
                               min={0}
-                              step={activeCurrency.decimals === 0 ? 50 : 0.25}
+                              step="any"
                               value={draftIngPrice}
                               onChange={(e) => setDraftIngPrice(e.target.value)}
                               onKeyDown={(e) => {
@@ -593,11 +602,12 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               )}
             </div>
           </div>
+          </div>
         </div>
 
-        <div className="px-6 py-3.5 border-t border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-3">
+        <div className="shrink-0 px-4 py-2.5 sm:px-6 sm:py-3.5 border-t border-[#D9D0CB] bg-[#F3EFEC] flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-medium text-[#4A483A]">Schedule meal:</span>
+            <span className="font-medium text-[#4A483A] hidden sm:inline">Schedule meal:</span>
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -646,20 +656,45 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
 
 interface CustomRecipeModalProps {
   open: boolean;
+  initialMode?: 'manual' | 'import';
   pricing: PricingConfig;
   onClose: () => void;
   onSaveRecipe: (recipe: Recipe) => void;
 }
 
+function sanitizeSafeWebImageUrl(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.toString();
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
   open,
+  initialMode = 'manual',
   pricing,
   onClose,
   onSaveRecipe,
 }) => {
   const activeCurrency = getCurrencyOption(pricing.currencyCode);
+  const urlInputRef = useRef<HTMLInputElement>(null);
+
+  const [importUrl, setImportUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
+  const [cuisine, setCuisine] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [mealTypes, setMealTypes] = useState<MealSlotType[]>(['dinner']);
   const [prepTime, setPrepTime] = useState(10);
   const [cookTime, setCookTime] = useState(15);
@@ -685,7 +720,157 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
     'Season protein and prep vegetables.\nCook in skillet over medium-high heat until golden.\nServe warm.'
   );
 
+  useEffect(() => {
+    if (open && initialMode === 'import') {
+      const timer = window.setTimeout(() => {
+        urlInputRef.current?.focus();
+      }, 60);
+      return () => window.clearTimeout(timer);
+    }
+  }, [open, initialMode]);
+
   if (!open) return null;
+
+  const resetForm = () => {
+    setImportUrl('');
+    setImportError(null);
+    setImportSuccess(null);
+    setTitle('');
+    setSubtitle('');
+    setCuisine('');
+    setImageUrl('');
+    setMealTypes(['dinner']);
+    setPrepTime(10);
+    setCookTime(15);
+    setDifficulty('Easy');
+    setServings(2);
+    setDietaryTags(['High Protein']);
+    setCalories(480);
+    setProtein(32);
+    setCarbs(40);
+    setFat(18);
+    setIngredients([
+      {
+        id: `custom-${Date.now()}-1`,
+        name: 'Chicken breast',
+        quantity: 300,
+        unit: 'g',
+        category: 'Meat & Fish',
+        estimatedPrice: 4.5,
+      },
+    ]);
+    setLocalPrices({});
+    setInstructionsText(
+      'Season protein and prep vegetables.\nCook in skillet over medium-high heat until golden.\nServe warm.'
+    );
+  };
+
+  const handleImportUrl = async () => {
+    const trimmed = importUrl.trim();
+    setImportError(null);
+    setImportSuccess(null);
+
+    if (!trimmed) {
+      setImportError('Paste a recipe page URL first (starting with https://).');
+      return;
+    }
+
+    let normalizedUrl: string;
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        setImportError('Only public http:// and https:// web links can be imported.');
+        return;
+      }
+      normalizedUrl = parsed.toString();
+    } catch {
+      setImportError('Please enter a full web link including https://');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const response = await fetch('/api/import-recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: normalizedUrl }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        recipe?: {
+          title?: string;
+          subtitle?: string;
+          cuisine?: string;
+          imageUrl?: string;
+          mealTypes?: MealSlotType[];
+          prepTimeMinutes?: number;
+          cookTimeMinutes?: number;
+          difficulty?: DifficultyLevel;
+          servings?: number;
+          dietaryTags?: DietaryTag[];
+          macrosPerServing?: { calories?: number; protein?: number; carbs?: number; fat?: number };
+          ingredients?: Ingredient[];
+          instructions?: string[];
+          usedFallbackMeta?: boolean;
+        };
+      };
+
+      if (!response.ok || !data.recipe) {
+        setImportError(
+          data.error || 'Could not extract recipe details from that web page.'
+        );
+        return;
+      }
+
+      const r = data.recipe;
+      if (r.title) setTitle(r.title);
+      if (r.subtitle) setSubtitle(r.subtitle);
+      setCuisine(r.cuisine || '');
+      setImageUrl(r.imageUrl ? sanitizeSafeWebImageUrl(r.imageUrl) || '' : '');
+      if (Array.isArray(r.mealTypes) && r.mealTypes.length > 0) setMealTypes(r.mealTypes);
+      if (typeof r.prepTimeMinutes === 'number') setPrepTime(r.prepTimeMinutes);
+      if (typeof r.cookTimeMinutes === 'number') setCookTime(r.cookTimeMinutes);
+      if (r.difficulty) setDifficulty(r.difficulty);
+      if (typeof r.servings === 'number') setServings(r.servings);
+      if (Array.isArray(r.dietaryTags) && r.dietaryTags.length > 0) {
+        setDietaryTags(r.dietaryTags);
+      }
+      if (r.macrosPerServing) {
+        setCalories(r.macrosPerServing.calories ?? 450);
+        setProtein(r.macrosPerServing.protein ?? 24);
+        setCarbs(r.macrosPerServing.carbs ?? 42);
+        setFat(r.macrosPerServing.fat ?? 16);
+      }
+      if (Array.isArray(r.ingredients) && r.ingredients.length > 0) {
+        setIngredients(r.ingredients);
+        setLocalPrices({});
+      } else {
+        setIngredients([
+          {
+            id: `custom-${Date.now()}-0`,
+            name: '',
+            quantity: 1,
+            unit: 'whole',
+            category: 'Produce',
+            estimatedPrice: 1.5,
+          },
+        ]);
+      }
+      if (Array.isArray(r.instructions) && r.instructions.length > 0) {
+        setInstructionsText(r.instructions.join('\n'));
+      }
+
+      setImportSuccess(
+        r.usedFallbackMeta
+          ? 'Imported page summary — add ingredients and steps below before saving.'
+          : `Imported "${r.title}" — review ingredients, local prices, and click Save to Library.`
+      );
+    } catch {
+      setImportError('Network error while fetching that recipe link. Please try again.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const toggleMealType = (slot: MealSlotType) => {
     setMealTypes((prev) =>
@@ -738,10 +923,14 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
         return ing;
       });
 
+    const safeImageUrl = sanitizeSafeWebImageUrl(imageUrl);
+
     const newRecipe: Recipe = {
       id: `custom-${Date.now()}`,
       title: title.trim(),
       subtitle: subtitle.trim() || 'Custom home kitchen recipe',
+      ...(cuisine.trim() ? { cuisine: cuisine.trim() } : {}),
+      ...(safeImageUrl ? { imageUrl: safeImageUrl } : {}),
       mealTypes,
       prepTimeMinutes: Math.max(0, prepTime),
       cookTimeMinutes: Math.max(0, cookTime),
@@ -776,9 +965,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
     };
 
     onSaveRecipe(newRecipe);
-    setTitle('');
-    setSubtitle('');
-    setLocalPrices({});
+    resetForm();
     onClose();
   };
 
@@ -791,9 +978,14 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
         className="w-full max-w-2xl bg-[#FAF8F6] border border-[#D9D0CB] rounded-xl shadow-lg flex flex-col max-h-[90vh]"
       >
         <div className="px-6 py-4 border-b border-[#D9D0CB] flex items-center justify-between">
-          <h2 id="custom-recipe-title" className="text-lg font-semibold text-[#2E2D24]">
-            Quick-Add Custom Meal
-          </h2>
+          <div>
+            <h2 id="custom-recipe-title" className="text-lg font-semibold text-[#2E2D24]">
+              {initialMode === 'import' ? 'Import Recipe or Quick-Add Meal' : 'Quick-Add Custom Meal'}
+            </h2>
+            <p className="text-xs text-[#6A6754] mt-0.5">
+              Paste a recipe link from the web or enter your own dish below.
+            </p>
+          </div>
           <BubbleIconButton
             variant="default"
             iconSize="md"
@@ -805,8 +997,88 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+          {/* Import from Web URL Card */}
+          <div className="p-4 rounded-xl bg-[#F3EFEC] border border-[#D9D0CB] space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#2E2D24]">
+                <Link2 className="w-3.5 h-3.5 text-[#B86B4B]" />
+                <span>Import from Web URL</span>
+              </div>
+              <span className="text-[11px] text-[#6A6754]">Auto-fills ingredients, macros & steps</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                ref={urlInputRef}
+                type="url"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleImportUrl();
+                  }
+                }}
+                placeholder="https://www.example.com/recipes/garlic-herb-salmon"
+                aria-label="Recipe web URL"
+                className="flex-1 px-3 py-2 text-xs bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+              />
+              <BubbleButton
+                variant="terracotta"
+                size="md"
+                disabled={isImporting}
+                onClick={() => void handleImportUrl()}
+                className="shrink-0"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Importing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-3.5 h-3.5" />
+                    <span>Import Recipe</span>
+                  </>
+                )}
+              </BubbleButton>
+            </div>
+
+            {importError && (
+              <p role="alert" className="text-xs text-[#B43C2E] font-medium">
+                {importError}
+              </p>
+            )}
+
+            {importSuccess && (
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <p className="text-xs text-[#14532D] font-medium flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  <span>{importSuccess}</span>
+                </p>
+                {imageUrl && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <img
+                      src={imageUrl}
+                      alt={title || 'Imported dish preview'}
+                      referrerPolicy="no-referrer"
+                      className="w-10 h-10 rounded-md object-cover border border-[#D9D0CB]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl('')}
+                      className="text-[11px] text-[#6A6754] hover:text-[#2E2D24] underline"
+                    >
+                      Remove photo
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-1">
               <label className="block text-xs font-medium text-[#4A483A] mb-1">
                 Meal Title
               </label>
@@ -816,6 +1088,19 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Seared Teriyaki Tofu Rice Bowl"
+                className="w-full px-3 py-2 text-sm bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
+              />
+            </div>
+
+            <div className="sm:col-span-1">
+              <label className="block text-xs font-medium text-[#4A483A] mb-1">
+                Cuisine / Style (optional)
+              </label>
+              <input
+                type="text"
+                value={cuisine}
+                onChange={(e) => setCuisine(e.target.value)}
+                placeholder="e.g. Mediterranean, Japanese"
                 className="w-full px-3 py-2 text-sm bg-[#FAF8F6] text-[#2E2D24] placeholder:text-[#908B6F] border border-[#D9D0CB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6A6754]"
               />
             </div>
@@ -997,7 +1282,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                     />
                     <input
                       type="number"
-                      step="0.25"
+                      step="any"
                       min="0"
                       value={ing.quantity}
                       onChange={(e) => updateIngredient(idx, { quantity: Number(e.target.value) })}
@@ -1033,7 +1318,7 @@ export const CustomRecipeModal: React.FC<CustomRecipeModalProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step={activeCurrency.decimals === 0 ? 50 : 0.25}
+                        step="any"
                         value={priceVal}
                         onChange={(e) =>
                           setLocalPrices((prev) => ({ ...prev, [ing.id]: e.target.value }))

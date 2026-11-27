@@ -8,6 +8,7 @@ import {
   Columns3,
   ChevronLeft,
   ChevronRight,
+  Link2,
 } from 'lucide-react';
 import {
   DietaryTag,
@@ -16,7 +17,7 @@ import {
   Recipe,
 } from '../types/mealPlanner';
 import { MEAL_SLOT_LABELS } from '../utils/groceryUtils';
-import { getRecipeCarouselSrc } from '../utils/recipeCardDataUri';
+import { getRecipeCarouselSrc, getRecipeFallbackSvgSrc } from '../utils/recipeCardDataUri';
 import { RecipeImage } from './RecipeImage';
 import { SoapBubbleSearch } from '../../components/soap-bubble';
 import { BubbleButton, BubbleIconButton } from './BubbleControls';
@@ -30,6 +31,7 @@ interface RecipeLibraryViewProps {
   onToggleFavorite: (id: string) => void;
   onSelectRecipe: (recipe: Recipe) => void;
   onOpenCustomModal: () => void;
+  onOpenImportModal?: () => void;
 }
 
 const DIETARY_FILTERS: Array<'All' | DietaryTag> = [
@@ -50,6 +52,7 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   onToggleFavorite,
   onSelectRecipe,
   onOpenCustomModal,
+  onOpenImportModal,
 }) => {
   const [query, setQuery] = useState('');
   const [slotTab, setSlotTab] = useState<'all' | 'favorites' | MealSlotType>('all');
@@ -99,7 +102,8 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
   const carouselItems = useMemo(
     () =>
       filtered.map((r) => ({
-        src: getRecipeCarouselSrc(r),
+        src: getRecipeCarouselSrc(r, { corsSafeOnly: true }),
+        fallbackSrc: getRecipeFallbackSvgSrc(r),
         alt: r.title,
         title: r.title,
         subtitle: `${r.cuisine ? `${r.cuisine} · ` : ''}${r.macrosPerServing.calories} kcal · ${
@@ -164,6 +168,17 @@ export const RecipeLibraryView: React.FC<RecipeLibraryViewProps> = ({
                 </BubbleButton>
               ))}
             </div>
+
+            {onOpenImportModal && (
+              <BubbleButton
+                variant="terracotta"
+                size="md"
+                onClick={onOpenImportModal}
+              >
+                <Link2 className="w-3.5 h-3.5" />
+                <span>Import URL</span>
+              </BubbleButton>
+            )}
 
             <BubbleButton
               variant="primary"

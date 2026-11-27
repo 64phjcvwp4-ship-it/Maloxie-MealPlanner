@@ -219,6 +219,7 @@ export default function App() {
   } | null>(null);
   const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null);
   const [customMealOpen, setCustomMealOpen] = useState(false);
+  const [customMealMode, setCustomMealMode] = useState<'manual' | 'import'>('manual');
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [introStage, setIntroStage] = useState<'visible' | 'scattering' | 'done'>('visible');
@@ -1180,7 +1181,10 @@ export default function App() {
           <BubbleButton
             variant="primary"
             size="md"
-            onClick={() => setCustomMealOpen(true)}
+            onClick={() => {
+              setCustomMealMode('manual');
+              setCustomMealOpen(true);
+            }}
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Quick-Add Meal</span>
@@ -1386,7 +1390,14 @@ export default function App() {
               favoriteIds={favoriteIds}
               onToggleFavorite={handleToggleFavorite}
               onSelectRecipe={(recipe) => setDetailRecipe(recipe)}
-              onOpenCustomModal={() => setCustomMealOpen(true)}
+              onOpenCustomModal={() => {
+                setCustomMealMode('manual');
+                setCustomMealOpen(true);
+              }}
+              onOpenImportModal={() => {
+                setCustomMealMode('import');
+                setCustomMealOpen(true);
+              }}
             />
           )}
 
@@ -1496,6 +1507,7 @@ export default function App() {
 
       <CustomRecipeModal
         open={customMealOpen}
+        initialMode={customMealMode}
         pricing={pricing}
         onClose={() => setCustomMealOpen(false)}
         onSaveRecipe={handleSaveCustomRecipe}

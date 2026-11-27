@@ -59,8 +59,25 @@ const wrapTitle = (title: string, maxChars = 24): string[] => {
   return lines.slice(0, 3);
 };
 
-export function getRecipeCarouselSrc(recipe: Recipe): string {
-  if (recipe.imageUrl) return recipe.imageUrl;
+export function getRecipeCarouselSrc(
+  recipe: Recipe,
+  options?: { corsSafeOnly?: boolean }
+): string {
+  if (recipe.imageUrl) {
+    const isLocalOrData =
+      recipe.imageUrl.startsWith('/') || recipe.imageUrl.startsWith('data:');
+    if (!options?.corsSafeOnly || isLocalOrData) {
+      return recipe.imageUrl;
+    }
+    if (recipe.imageUrl.startsWith('http://') || recipe.imageUrl.startsWith('https://')) {
+      return `/api/recipe-image?url=${encodeURIComponent(recipe.imageUrl)}`;
+    }
+  }
+
+  return getRecipeFallbackSvgSrc(recipe);
+}
+
+export function getRecipeFallbackSvgSrc(recipe: Recipe): string {
 
   const slot = recipe.mealTypes[0] || 'dinner';
   const pal = SLOT_PALETTE[slot] || SLOT_PALETTE.dinner;
